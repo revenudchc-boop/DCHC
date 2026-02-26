@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+<meta charset="UTF-8">
+<title>الفواتير النهائية</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+<style>
+  body { padding: 20px; background: #f8f9fa; }
+  .invoice { background: #fff; padding: 20px; border-radius: 8px; margin-bottom: 20px; }
+  th, td { text-align: center; font-size: 0.85rem; }
+  .nav-buttons { margin-bottom: 15px; }
+  .invoice-header p { margin-bottom: 5px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h2 class="mb-4">📄 عرض الفواتير النهائية</h2>
+
+  <div class="mb-3">
+    <input type="file" id="xmlFileInput" class="form-control" accept=".xml">
+  </div>
+
+  <div class="nav-buttons mb-3">
+    <button class="btn btn-secondary" onclick="prevInvoice()">السابق</button>
+    <button class="btn btn-secondary" onclick="nextInvoice()">التالي</button>
+    <button class="btn btn-primary" onclick="printInvoice()">طباعة الفاتورة الحالية</button>
+  </div>
+
+  <div id="invoiceDiv"></div>
+</div>
+
+<script>
+let invoices = [];
+let currentIndex = 0;
+
+document.getElementById('xmlFileInput').addEventListener('change', function(e){
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(event) {
+    parseXML(event.target.result);
+  };
+  reader.readAsText(file);
+});
+
+function parseXML(xmlText) {
+  const parser = new DOMParser();
+  const xml = parser.parseFromString(xmlText, "application/xml");
+  invoices = Array.from(xml.getElementsByTagName("invoice"));
+  currentIndex = 0;
+  renderInvoice(currentIndex);
+}
+
+function renderInvoice(index) {
+  if (invoices.length === 0) {
+    document.getElementById("invoiceDiv").innerHTML = "<p>لا توجد فواتير للعرض</p>";
+    return;
+  }
+
+  const inv = invoices[index];
+  const finalNumber = inv.getAttribute("final-number") || '';
+  const draftNumber = inv.getAttribute("draft-number") || '';
+  const date = inv.getAttribute("finalized-date")?.split("T")[0] || '';
+  const customer = inv.getAttribute("payee-customer-id") || '';
+  const currency = inv.getAttribute("currency") || '';
+  
+  const charges = Array.from(inv.getElementsByTagName("charge"));
+  const firstCharge = charges[0];
+  const exchangeRate = firstCharge ? parseFloat(firstCharge.getAttribute("exchange-rate") || 1) : 1;
+
+  // حساب الإجمالي دولار
+  let sumAmountConverted = 0;
+  charges.forEach(ch => {
+    sumAmountConverted += parseFloat(ch.getAttribute("amount") || 0) / exchangeRate;
+  });
+  sumAmountConverted = sumAmountConverted.toFixed(2);
+
+  // صافي الفاتورة مقيم
+  const netInvoiceLocal = (sumAmountConverted * exchangeRate).toFixed(2);
+
+  // حساب الضريبة الكلية
+  let totalTax = 0;
+  charges.forEach(ch => {
+    const taxEl = ch.getElementsByTagName("tax")[0];
+    if (taxEl) totalTax += parseFloat(taxEl.getAttribute("amount") || 0);
+  });
+  totalTax = totalTax.toFixed(2);
+
+  // جمع المعلمات
+  const params = {};
+  Array.from(inv.getElementsByTagName("parameter")).forEach(p => {
+    const key = p.getAttribute("reportable-field") || p.getAttribute("metafield-id");
+    params[key] = p.getAttribute("value");
+  });
+
+  let html = `<div class="invoice">`;
+  html += `<div class="invoice-header">
+    <h4>فاتورة رقم: ${finalNumber} (مسودة: ${draftNumber})</h4>
+    <p>العميل: ${customer} | التاريخ: ${date} | رقم البوليصة: ${params["BL Number"] || params["رقم البوليصه"] || ''} | العملة: ${currency} | معدل الصرف: ${exchangeRate}</p>
+  </div>`;
+
+  html += `<table class="table table-bordered table-sm">
+    <thead>
+      <tr>
+        <th>الوصف</th>
+        <th>الكمية</th>
+        <th>عدد الأيام</th>
+        <th>تاريخ الصرف</th>
+        <th>نوع الخدمة</th>
+        <th>المبلغ بعد تحويل العملة</th>
+      </tr>
+    </thead>
+    <tbody>`;
+
+  charges.forEach(ch => {
+    const desc = ch.getAttribute("description") || '';
+    const type = ch.getAttribute("event-type-id") || '';
+    const qty = parseFloat(ch.getAttribute("quantity") || 0);
+    const amount = (parseFloat(ch.getAttribute("amount") || 0) / exchangeRate).toFixed(2);
+
+    let days = '';
+    const from = ch.getAttribute("event-performed-from");
+    const to = ch.getAttribute("event-performed-to");
+    if (from && to) {
+      const dFrom = new Date(from);
+      const dTo = new Date(to);
+      days = Math.ceil((dTo - dFrom)/(1000*60*60*24)) + 1;
+    }
+
+    const paidThru = ch.getAttribute("paid-thru-day")?.split("T")[0] || '';
+
+    html += `<tr>
+      <td>${desc}</td>
+      <td>${qty}</td>
+      <td>${days}</td>
+      <td>${paidThru}</td>
+      <td>${type}</td>
+      <td>${amount}</td>
+    </tr>`;
+  });
+
+  html += `</tbody></table>`;
+
+  // عرض المبالغ النهائية بعد التعديل
+  html += `<h5>الإجمالي دولار: ${sumAmountConverted} ${currency}</h5>`;
+  html += `<h5>صافي الفاتورة مقيم: ${netInvoiceLocal} ${currency}</h5>`;
+  html += `<h5>الضريبة الكلية: ${totalTax} ${currency}</h5>`;
+  html += `<h5>صافي الفاتورة + الضريبة الكلية: ${(parseFloat(netInvoiceLocal) + parseFloat(totalTax)).toFixed(2)} ${currency}</h5>`;
+  
+  html += `</div>`;
+
+  document.getElementById("invoiceDiv").innerHTML = html;
+}
+
+function prevInvoice() { if (currentIndex > 0) { currentIndex--; renderInvoice(currentIndex); } }
+function nextInvoice() { if (currentIndex < invoices.length - 1) { currentIndex++; renderInvoice(currentIndex); } }
+function printInvoice() { 
+  const printWindow = window.open('', '', 'height=600,width=1200');
+  printWindow.document.write('<html><head><title>فاتورة</title></head><body>');
+  printWindow.document.write(document.getElementById("invoiceDiv").innerHTML);
+  printWindow.document.write('</body></html>');
+  printWindow.print();
+}
+</script>
+</body>
+</html>
