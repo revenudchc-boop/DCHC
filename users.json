@@ -1,0 +1,63 @@
+[
+  {
+    "id": "user_admin",
+    "username": "admin",
+    "email": "admin@dchc-egdam.com",
+    "taxNumber": "ADMIN001",
+    "contractCustomerId": "ADMIN001",
+    "userType": "admin",
+    "password": "admin123",
+    "status": "active",
+    "createdAt": "2023-01-01T00:00:00.000Z",
+    "lastLogin": null
+  },
+  {
+    "id": "user_accountant",
+    "username": "accountant",
+    "email": "accountant@dchc-egdam.com",
+    "taxNumber": "ACC001",
+    "contractCustomerId": "ACC001",
+    "userType": "accountant",
+    "password": "acc123",
+    "status": "active",
+    "createdAt": "2023-01-01T00:00:00.000Z",
+    "lastLogin": null
+  },
+  {
+    "id": "msc",
+    "username": "msc",
+    "email": "customer@example.com",
+    "taxNumber": "202487288",
+    "contractCustomerId": "MSC",
+    "userType": "customer",
+    "password": "msc123",
+    "status": "active",
+    "createdAt": "2023-01-01T00:00:00.000Z",
+    "lastLogin": null
+  },
+  
+  {
+    "id": "one",
+    "username": "one",
+    "email": "accountant@dchc-egdam.com",
+    "taxNumber": "374380139",
+    "contractCustomerId": "ONE",
+    "userType": "accountant",
+    "password": "one123",
+    "status": "active",
+    "createdAt": "2023-01-01T00:00:00.000Z",
+    "lastLogin": null
+  },
+  {
+    "id": "zim",
+    "username": "zim",
+    "email": "zim@gmail.com",
+    "taxNumber": "123456789",
+    "contractCustomerId": "zim",
+    "userType": "customer",
+    "password": "zim123",
+    "status": "active",
+    "createdAt": "2023-01-01T00:00:00.000Z",
+    "lastLogin": null
+  }
+]
