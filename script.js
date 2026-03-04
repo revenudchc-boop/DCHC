@@ -1,5 +1,5 @@
 // ============================================
-// نظام الفواتير المتقدم - النسخة النهائية مع تحسينات الصلاحيات
+// نظام الفواتير المتقدم - النسخة النهائية مع تصحيح البحث المتقدم
 // جميع الحقوق محفوظة لشركة دمياط لتداول الحاويات و البضائع
 // ============================================
 
@@ -859,7 +859,6 @@ window.handleGuestLogin = async function() {
     } else if (taxNumber) {
         message += `تبحث عن فواتير نقدية برقم ضريبي ${taxNumber}`;
     } else if (blNumber) {
-      // أكمل دالة handleGuestLogin
         message += `تبحث عن فاتورة برقم بوليصة ${blNumber}`;
     }
     showNotification(message, 'info');
@@ -907,7 +906,6 @@ function updateUserInterface() {
     const fileInputLabel = document.querySelector('label[for="fileInput"]');
     const updateDriveBtn = document.querySelector('.btn-drive');
     const dbControls = document.getElementById('dbControls');
-    const saveDataBtn = document.querySelector('.btn-save');
     
     if (currentUser.isGuest) {
         // إخفاء كل شيء للزائر
@@ -1421,7 +1419,7 @@ function parseInvoiceNode(invoice) {
 }
 
 // ============================================
-// دوال البحث المتقدم
+// دوال البحث المتقدم (معدلة لتراعي صلاحيات المستخدم)
 // ============================================
 window.applyAdvancedSearch = function() {
     if (!invoicesData.length) {
@@ -1430,6 +1428,7 @@ window.applyAdvancedSearch = function() {
         return;
     }
     
+    // قراءة قيم البحث
     const final = document.getElementById('searchFinalNumber')?.value.toLowerCase().trim() || '';
     const draft = document.getElementById('searchDraftNumber')?.value.toLowerCase().trim() || '';
     const cust = document.getElementById('searchCustomer')?.value.toLowerCase().trim() || '';
@@ -1441,8 +1440,10 @@ window.applyAdvancedSearch = function() {
     const to = document.getElementById('searchDateTo')?.value || '';
     const invType = document.getElementById('searchInvoiceType')?.value || '';
 
+    // نبدأ من جميع الفواتير
     let tempInvoices = [...invoicesData];
-    
+
+    // تطبيق صلاحيات المستخدم أولاً (نفس منطق filterInvoicesByUser و filterInvoicesByGuest)
     if (currentUser?.isGuest) {
         const taxNumber = currentUser.taxNumber;
         const blNumber = currentUser.blNumber;
@@ -1451,9 +1452,8 @@ window.applyAdvancedSearch = function() {
             if (taxNumber) {
                 const num = inv['final-number'] || '';
                 const isPostponed = num.startsWith('P') || num.startsWith('p');
-                
                 if (isPostponed) {
-                    return false;
+                    return false; // الزائر لا يرى الآجلة
                 } else {
                     const payeeMatch = (inv['payee-customer-id'] || '').toLowerCase().includes(taxNumber.toLowerCase());
                     const contractMatch = (inv['contract-customer-id'] || '').toLowerCase().includes(taxNumber.toLowerCase());
@@ -1466,9 +1466,29 @@ window.applyAdvancedSearch = function() {
             }
             return match;
         });
+    } else if (currentUser && currentUser.userType !== 'admin' && !currentUser.isGuest) {
+        // مستخدم عادي (عميل أو محاسب) له صلاحيات
+        const tax = currentUser.taxNumber || '';
+        const contractId = currentUser.contractCustomerId || '';
+        
+        tempInvoices = tempInvoices.filter(inv => {
+            const num = inv['final-number'] || '';
+            const isPostponed = num.startsWith('P') || num.startsWith('p');
+            
+            if (isPostponed) {
+                if (!contractId) return false;
+                const invContractId = inv['contract-customer-id'] || '';
+                return invContractId.trim().toLowerCase() === contractId.trim().toLowerCase();
+            } else {
+                return (inv['payee-customer-id'] || '').toLowerCase().includes(tax.toLowerCase()) || 
+                       (inv['contract-customer-id'] || '').toLowerCase().includes(tax.toLowerCase());
+            }
+        });
     }
+    // المدير لا يحتاج تصفية (يرى الكل)
 
-    filteredInvoices = tempInvoices.filter(inv => {
+    // الآن تطبيق شروط البحث المتقدم على النتائج المصفاة حسب الصلاحيات
+    let searched = tempInvoices.filter(inv => {
         if (final && !(inv['final-number'] || '').toLowerCase().includes(final)) return false;
         if (draft && !(inv['draft-number'] || '').toLowerCase().includes(draft)) return false;
         if (cust && !(inv['payee-customer-id'] || '').toLowerCase().includes(cust)) return false;
@@ -1492,7 +1512,8 @@ window.applyAdvancedSearch = function() {
         }
         return true;
     });
-    
+
+    filteredInvoices = searched;
     currentPage = 1;
     renderData();
     showNotification(`تم العثور على ${filteredInvoices.length} فاتورة`, filteredInvoices.length ? 'success' : 'info');
