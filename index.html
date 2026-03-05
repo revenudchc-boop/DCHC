@@ -292,7 +292,7 @@
                 </div>
             </div>
 
-            <!-- بطاقات الملخص -->
+            <!-- بطاقات الملخص (معاد ترتيبها وتصغير الخط) -->
             <div class="summary-cards">
                 <div class="summary-card gradient-blue">
                     <div class="card-icon"><i class="fas fa-file-invoice"></i></div>
@@ -304,22 +304,36 @@
                 <div class="summary-card gradient-green">
                     <div class="card-icon"><i class="fas fa-coins"></i></div>
                     <div class="card-content">
-                        <h3>إجمالي المبالغ</h3>
+                        <h3>إجمالي المبالغ (EGP)</h3>
                         <p id="totalSum">0.00 <small>جنيه</small></p>
                     </div>
                 </div>
                 <div class="summary-card gradient-orange">
                     <div class="card-icon"><i class="fas fa-percent"></i></div>
                     <div class="card-content">
-                        <h3>إجمالي الضرائب</h3>
+                        <h3>إجمالي الضرائب (EGP)</h3>
                         <p id="taxSum">0.00 <small>جنيه</small></p>
                     </div>
                 </div>
-                <div class="summary-card gradient-red">
-                    <div class="card-icon"><i class="fas fa-credit-card"></i></div>
+                <div class="summary-card gradient-teal">
+                    <div class="card-icon"><i class="fas fa-file-invoice-dollar"></i></div>
                     <div class="card-content">
-                        <h3>المتبقي</h3>
-                        <p id="owedSum">0.00 <small>جنيه</small></p>
+                        <h3>إجمالي بدون ضريبة (EGP)</h3>
+                        <p id="totalEGPWithoutTax">0.00 <small>جنيه</small></p>
+                    </div>
+                </div>
+                <div class="summary-card gradient-purple">
+                    <div class="card-icon"><i class="fas fa-dollar-sign"></i></div>
+                    <div class="card-content">
+                        <h3>إجمالي الدولار</h3>
+                        <p id="totalUSD">0.00 <small>دولار</small></p>
+                    </div>
+                </div>
+                <div class="summary-card gradient-martyr">
+                    <div class="card-icon"><i class="fas fa-stamp"></i></div>
+                    <div class="card-content">
+                        <h3>طابع الشهيد</h3>
+                        <p id="totalMartyr">0.00 <small>جنيه</small></p>
                     </div>
                 </div>
             </div>

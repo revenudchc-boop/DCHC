@@ -1656,12 +1656,30 @@ function renderData() {
     renderPagination(totalPages);
 }
 
+// ============================================
+// دالة عرض الجدول (معدلة)
+// ============================================
 function renderTableView(data) {
-    let html = '<div class="table-container"><table class="data-table"><thead><tr><th>الرقم النهائي</th><th>رقم المسودة</th><th>العميل</th><th>السفينة</th><th>رقم البوليصة</th><th>تاريخ الرحله</th><th>الإجمالي</th><th>المتبقي</th></tr></thead><tbody>';
+    let html = '<div class="table-container"><table class="data-table"><thead><tr><th>الرقم النهائي</th><th>رقم المسودة</th><th>العميل</th><th>السفينة</th><th>رقم البوليصة</th><th>تاريخ الرحله</th><th>الإجمالي (EGP)</th><th>المبلغ بالعملة</th><th>المتبقي</th></tr></thead><tbody>';
     data.forEach(inv => {
         const idx = invoicesData.indexOf(inv);
         const finalNum = inv['final-number'] || '';
         const invoiceTypeDisplay = finalNum.startsWith('P') || finalNum.startsWith('p') ? 'أجل' : 'نقدي';
+        
+        // معلومات العملة وسعر الصرف
+        const currency = inv['currency'] || 'EGP';
+        const exRate = inv['flex-string-06'] || 48.0215;
+        const totalOriginal = inv['total-total'] || 0;
+        
+        // حساب المبلغ المعروض حسب العملة
+        let displayAmount, displayCurrency;
+        if (currency === 'USAD') {
+            displayAmount = (totalOriginal / exRate).toFixed(2);
+            displayCurrency = 'USAD';
+        } else {
+            displayAmount = totalOriginal.toFixed(2);
+            displayCurrency = 'EGP';
+        }
         
         html += `<tr onclick="showInvoiceDetails(${idx})" style="cursor: pointer;">
             <td>${inv['final-number'] || '-'} (${invoiceTypeDisplay})</td>
@@ -1670,7 +1688,8 @@ function renderTableView(data) {
             <td>${inv['key-word1'] || '-'}</td>
             <td>${inv['key-word2'] || '-'}</td>
             <td>${inv['flex-date-02'] ? new Date(inv['flex-date-02']).toLocaleDateString('ar-EG') : '-'}</td>
-            <td>${(inv['total-total'] || 0).toFixed(2)}</td>
+            <td>${totalOriginal.toFixed(2)}</td>
+            <td>${displayAmount} ${displayCurrency}</td>
             <td>${(inv['total-owed'] || 0).toFixed(2)}</td>
         </tr>`;
     });
@@ -1678,6 +1697,10 @@ function renderTableView(data) {
     document.getElementById('dataViewContainer').innerHTML = html;
 }
 
+
+// ============================================
+// دالة عرض البطاقات (معدلة)
+// ============================================
 function renderCardsView(data) {
     let html = '<div class="cards-container">';
     data.forEach(inv => {
@@ -1686,10 +1709,25 @@ function renderCardsView(data) {
         const finalNum = inv['final-number'] || '';
         const invoiceTypeDisplay = finalNum.startsWith('P') || finalNum.startsWith('p') ? 'أجل' : 'نقدي';
         
+        // معلومات العملة وسعر الصرف
+        const currency = inv['currency'] || 'EGP';
+        const exRate = inv['flex-string-06'] || 48.0215;
+        const totalOriginal = inv['total-total'] || 0;
+        
+        // حساب المبلغ المعروض حسب العملة
+        let displayAmount, displayCurrency;
+        if (currency === 'USAD') {
+            displayAmount = (totalOriginal / exRate).toFixed(2);
+            displayCurrency = 'USAD';
+        } else {
+            displayAmount = totalOriginal.toFixed(2);
+            displayCurrency = 'EGP';
+        }
+        
         html += `
             <div class="invoice-card" onclick="showInvoiceDetails(${idx})" style="cursor: pointer;">
                 <div class="card-header">
-                    <h3>${inv['final-number'] || '-'}</h3>
+                    <h3>${inv['final-number'] || '-'} <span style="font-size:0.7em; background:rgba(255,255,255,0.2); padding:2px 6px; border-radius:4px;">${currency}</span></h3>
                     <span class="card-badge">${invoiceTypeDisplay}</span>
                 </div>
                 <div class="card-body">
@@ -1700,9 +1738,13 @@ function renderCardsView(data) {
                         <div class="vessel-info-row"><span>تاريخ الرحله:</span><span class="voyage-date">${voyageDate}</span></div>
                     </div>
                     <div class="card-row"><span class="card-label">المسودة:</span><span class="card-value">${inv['draft-number'] || '-'}</span></div>
-                    <div class="card-row"><span class="card-label">سعر الصرف:</span><span class="card-value">${(inv['flex-string-06'] || 48.0215).toFixed(4)}</span></div>
+                    <div class="card-row"><span class="card-label">العملة:</span><span class="card-value">${currency}</span></div>
+                    <div class="card-row"><span class="card-label">سعر الصرف:</span><span class="card-value">${exRate.toFixed(4)}</span></div>
                 </div>
-                <div class="card-footer"><span>الإجمالي:</span><span class="card-total">${(inv['total-total'] || 0).toFixed(2)} جنيه</span></div>
+                <div class="card-footer">
+                    <span>الإجمالي:</span>
+                    <span class="card-total">${displayAmount} ${displayCurrency}</span>
+                </div>
             </div>`;
     });
     html += '</div>';
@@ -1750,15 +1792,50 @@ window.toggleAdvancedSearch = function() {
     }
 };
 
+// ============================================
+// دالة تحديث بطاقات الملخص (معدلة لإضافة البطاقتين الجديدتين)
+// ============================================
 function updateSummary() {
     const count = filteredInvoices.length;
-    const total = filteredInvoices.reduce((s, i) => s + (i['total-total'] || 0), 0);
-    const taxes = filteredInvoices.reduce((s, i) => s + (i['total-taxes'] || 0), 0);
-    const owed = filteredInvoices.reduce((s, i) => s + (i['total-owed'] || 0), 0);
+    
+    // حساب المبالغ حسب العملة
+    let totalEGP = 0;
+    let taxEGP = 0;
+    let totalUSD = 0;
+    let totalEGPWithoutTax = 0;
+    let totalMartyr = 0;
+    
+    filteredInvoices.forEach(inv => {
+        const currency = inv['currency'] || 'EGP';
+        const total = inv['total-total'] || 0;
+        const taxes = inv['total-taxes'] || 0;
+        const exRate = inv['flex-string-06'] || 48.0215;
+        
+        // تحديد ما إذا كانت الفاتورة تنطبق عليها طابع الشهيد (أي ليست آجلة بعملة USAD)
+        const finalNum = inv['final-number'] || '';
+        const isPostponed = finalNum.startsWith('P') || finalNum.startsWith('p');
+        const applyMartyr = !(isPostponed && currency === 'USAD');
+        if (applyMartyr) {
+            totalMartyr += 5; // طابع الشهيد ثابت 5 جنيه لكل فاتورة تنطبق عليها الشروط
+        }
+        
+        if (currency === 'USAD') {
+            totalUSD += total / exRate;
+        } else {
+            totalEGP += total;
+            taxEGP += taxes;
+            totalEGPWithoutTax += (total - taxes); // إجمالي المبالغ بالجنيه بدون الضريبة
+        }
+    });
+    
     document.getElementById('invoiceCount').textContent = count;
-    document.getElementById('totalSum').textContent = total.toFixed(2);
-    document.getElementById('taxSum').textContent = taxes.toFixed(2);
-    document.getElementById('owedSum').textContent = owed.toFixed(2);
+    document.getElementById('totalSum').textContent = totalEGP.toFixed(2);
+    document.getElementById('taxSum').textContent = taxEGP.toFixed(2);
+    document.getElementById('totalUSD').textContent = totalUSD.toFixed(2);
+    document.getElementById('totalEGPWithoutTax').textContent = totalEGPWithoutTax.toFixed(2);
+    document.getElementById('totalMartyr').textContent = totalMartyr.toFixed(2);
+    
+    // تحديث إحصائيات الرأس
     document.getElementById('totalInvoicesHeader').textContent = count;
     const customers = new Set(filteredInvoices.map(i => i['payee-customer-id'])).size;
     const vessels = new Set(filteredInvoices.map(i => i['key-word1']).filter(v => v)).size;
