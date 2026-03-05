@@ -1,5 +1,5 @@
 // ============================================
-// نظام الفواتير المتقدم - النسخة النهائية مع تصحيح البحث المتقدم
+// نظام الفواتير المتقدم - النسخة النهائية
 // جميع الحقوق محفوظة لشركة دمياط لتداول الحاويات و البضائع
 // ============================================
 
@@ -68,6 +68,7 @@ function showProgress(message, percentage) {
         container = document.createElement('div');
         container.id = 'progressBarContainer';
         container.className = 'progress-bar-container';
+        
         bar = document.createElement('div');
         bar.id = 'progressBar';
         bar.className = 'progress-bar';
@@ -238,6 +239,7 @@ async function loadUsersFromDrive(force = false) {
         }
         
         let fileContent = await response.text();
+        
         // محاولة إصلاح JSON إذا كان هناك خطأ بسيط (فاصلة زائدة)
         try {
             JSON.parse(fileContent);
@@ -357,13 +359,37 @@ function loadDefaultUsers() {
             lastLogin: null 
         },
         { 
-            id: 'user_customer', 
-            username: 'customer', 
+            id: 'msc', 
+            username: 'msc', 
             email: 'customer@example.com', 
             taxNumber: '202487288', 
-            contractCustomerId: 'CUST001',
+            contractCustomerId: 'MSC',
             userType: 'customer', 
-            password: 'cust123', 
+            password: 'msc123', 
+            status: 'active', 
+            createdAt: new Date().toISOString(), 
+            lastLogin: null 
+        },
+        { 
+            id: 'one', 
+            username: 'one', 
+            email: 'accountant@dchc-egdam.com', 
+            taxNumber: '374380139', 
+            contractCustomerId: 'ONE',
+            userType: 'accountant', 
+            password: 'one123', 
+            status: 'active', 
+            createdAt: new Date().toISOString(), 
+            lastLogin: null 
+        },
+        { 
+            id: 'zim', 
+            username: 'zim', 
+            email: 'zim@gmail.com', 
+            taxNumber: '123456789', 
+            contractCustomerId: 'zim',
+            userType: 'customer', 
+            password: 'zim123', 
             status: 'active', 
             createdAt: new Date().toISOString(), 
             lastLogin: null 
@@ -924,7 +950,7 @@ function updateUserInterface() {
         if (updateDriveBtn) updateDriveBtn.style.display = 'none';
         if (dbControls) dbControls.style.display = 'none';
     } else if (currentUser.userType === 'accountant') {
-        // المحاسب: يرى تغيير كلمة المرور فقط (لا يرى إعدادات Drive ولا أزرار الحفظ)
+        // المحاسب: يرى تغيير كلمة المرور فقط
         if (driveSettingsBtn) driveSettingsBtn.style.display = 'none';
         if (changePasswordBtn) changePasswordBtn.style.display = 'flex';
         if (adminPanelBtn) adminPanelBtn.style.display = 'none';
@@ -1443,7 +1469,7 @@ window.applyAdvancedSearch = function() {
     // نبدأ من جميع الفواتير
     let tempInvoices = [...invoicesData];
 
-    // تطبيق صلاحيات المستخدم أولاً (نفس منطق filterInvoicesByUser و filterInvoicesByGuest)
+    // تطبيق صلاحيات المستخدم أولاً
     if (currentUser?.isGuest) {
         const taxNumber = currentUser.taxNumber;
         const blNumber = currentUser.blNumber;
@@ -1453,7 +1479,7 @@ window.applyAdvancedSearch = function() {
                 const num = inv['final-number'] || '';
                 const isPostponed = num.startsWith('P') || num.startsWith('p');
                 if (isPostponed) {
-                    return false; // الزائر لا يرى الآجلة
+                    return false;
                 } else {
                     const payeeMatch = (inv['payee-customer-id'] || '').toLowerCase().includes(taxNumber.toLowerCase());
                     const contractMatch = (inv['contract-customer-id'] || '').toLowerCase().includes(taxNumber.toLowerCase());
@@ -1467,7 +1493,6 @@ window.applyAdvancedSearch = function() {
             return match;
         });
     } else if (currentUser && currentUser.userType !== 'admin' && !currentUser.isGuest) {
-        // مستخدم عادي (عميل أو محاسب) له صلاحيات
         const tax = currentUser.taxNumber || '';
         const contractId = currentUser.contractCustomerId || '';
         
@@ -1485,9 +1510,7 @@ window.applyAdvancedSearch = function() {
             }
         });
     }
-    // المدير لا يحتاج تصفية (يرى الكل)
 
-    // الآن تطبيق شروط البحث المتقدم على النتائج المصفاة حسب الصلاحيات
     let searched = tempInvoices.filter(inv => {
         if (final && !(inv['final-number'] || '').toLowerCase().includes(final)) return false;
         if (draft && !(inv['draft-number'] || '').toLowerCase().includes(draft)) return false;
@@ -1540,7 +1563,7 @@ window.resetAdvancedSearch = function() {
 };
 
 // ============================================
-// دوال عرض البيانات (المعدلة لحل مشكلة الفواتير الآجلة)
+// دوال عرض البيانات
 // ============================================
 function filterInvoicesByUser() {
     if (!invoicesData.length) {
@@ -1555,7 +1578,6 @@ function filterInvoicesByUser() {
         return filterInvoicesByGuest(currentUser.taxNumber, currentUser.blNumber);
     }
 
-    // تطبيق التصفية على المستخدمين الذين لديهم بيانات تعريف (رقم ضريبي أو رقم عقد) وليسوا مديرين
     if (currentUser && currentUser.userType !== 'admin' && !currentUser.isGuest) {
         const tax = currentUser.taxNumber || '';
         const contractId = currentUser.contractCustomerId || '';
@@ -1565,19 +1587,16 @@ function filterInvoicesByUser() {
             const isPostponed = num.startsWith('P') || num.startsWith('p');
             
             if (isPostponed) {
-                // الفواتير الآجلة: يجب أن يكون للمستخدم رقم عقد ويطابق contract-customer-id تماماً
                 if (!contractId) return false;
                 const invContractId = inv['contract-customer-id'] || '';
                 return invContractId.trim().toLowerCase() === contractId.trim().toLowerCase();
             } else {
-                // الفواتير النقدية: نبحث في كلا الحقلين عن الرقم الضريبي
                 return (inv['payee-customer-id'] || '').toLowerCase().includes(tax.toLowerCase()) || 
                        (inv['contract-customer-id'] || '').toLowerCase().includes(tax.toLowerCase());
             }
         });
     }
 
-    // تصفية حسب نوع الفاتورة (نقدي/آجل) المحدد في التبويب
     temp = temp.filter(inv => {
         const num = inv['final-number'] || '';
         if (currentInvoiceType === INVOICE_TYPES.CASH) {
@@ -1656,9 +1675,6 @@ function renderData() {
     renderPagination(totalPages);
 }
 
-// ============================================
-// دالة عرض الجدول (معدلة)
-// ============================================
 function renderTableView(data) {
     let html = '<div class="table-container"><table class="data-table"><thead><tr><th>الرقم النهائي</th><th>رقم المسودة</th><th>العميل</th><th>السفينة</th><th>رقم البوليصة</th><th>تاريخ الرحله</th><th>الإجمالي (EGP)</th><th>المبلغ بالعملة</th><th>المتبقي</th></tr></thead><tbody>';
     data.forEach(inv => {
@@ -1666,12 +1682,10 @@ function renderTableView(data) {
         const finalNum = inv['final-number'] || '';
         const invoiceTypeDisplay = finalNum.startsWith('P') || finalNum.startsWith('p') ? 'أجل' : 'نقدي';
         
-        // معلومات العملة وسعر الصرف
         const currency = inv['currency'] || 'EGP';
         const exRate = inv['flex-string-06'] || 48.0215;
         const totalOriginal = inv['total-total'] || 0;
         
-        // حساب المبلغ المعروض حسب العملة
         let displayAmount, displayCurrency;
         if (currency === 'USAD') {
             displayAmount = (totalOriginal / exRate).toFixed(2);
@@ -1697,10 +1711,6 @@ function renderTableView(data) {
     document.getElementById('dataViewContainer').innerHTML = html;
 }
 
-
-// ============================================
-// دالة عرض البطاقات (معدلة)
-// ============================================
 function renderCardsView(data) {
     let html = '<div class="cards-container">';
     data.forEach(inv => {
@@ -1709,12 +1719,10 @@ function renderCardsView(data) {
         const finalNum = inv['final-number'] || '';
         const invoiceTypeDisplay = finalNum.startsWith('P') || finalNum.startsWith('p') ? 'أجل' : 'نقدي';
         
-        // معلومات العملة وسعر الصرف
         const currency = inv['currency'] || 'EGP';
         const exRate = inv['flex-string-06'] || 48.0215;
         const totalOriginal = inv['total-total'] || 0;
         
-        // حساب المبلغ المعروض حسب العملة
         let displayAmount, displayCurrency;
         if (currency === 'USAD') {
             displayAmount = (totalOriginal / exRate).toFixed(2);
@@ -1792,13 +1800,9 @@ window.toggleAdvancedSearch = function() {
     }
 };
 
-// ============================================
-// دالة تحديث بطاقات الملخص (معدلة لإضافة البطاقتين الجديدتين)
-// ============================================
 function updateSummary() {
     const count = filteredInvoices.length;
     
-    // حساب المبالغ حسب العملة
     let totalEGP = 0;
     let taxEGP = 0;
     let totalUSD = 0;
@@ -1811,12 +1815,11 @@ function updateSummary() {
         const taxes = inv['total-taxes'] || 0;
         const exRate = inv['flex-string-06'] || 48.0215;
         
-        // تحديد ما إذا كانت الفاتورة تنطبق عليها طابع الشهيد (أي ليست آجلة بعملة USAD)
         const finalNum = inv['final-number'] || '';
         const isPostponed = finalNum.startsWith('P') || finalNum.startsWith('p');
         const applyMartyr = !(isPostponed && currency === 'USAD');
         if (applyMartyr) {
-            totalMartyr += 5; // طابع الشهيد ثابت 5 جنيه لكل فاتورة تنطبق عليها الشروط
+            totalMartyr += 5;
         }
         
         if (currency === 'USAD') {
@@ -1824,7 +1827,7 @@ function updateSummary() {
         } else {
             totalEGP += total;
             taxEGP += taxes;
-            totalEGPWithoutTax += (total - taxes); // إجمالي المبالغ بالجنيه بدون الضريبة
+            totalEGPWithoutTax += (total - taxes);
         }
     });
     
@@ -1835,7 +1838,6 @@ function updateSummary() {
     document.getElementById('totalEGPWithoutTax').textContent = totalEGPWithoutTax.toFixed(2);
     document.getElementById('totalMartyr').textContent = totalMartyr.toFixed(2);
     
-    // تحديث إحصائيات الرأس
     document.getElementById('totalInvoicesHeader').textContent = count;
     const customers = new Set(filteredInvoices.map(i => i['payee-customer-id'])).size;
     const vessels = new Set(filteredInvoices.map(i => i['key-word1']).filter(v => v)).size;
@@ -1877,32 +1879,43 @@ window.changePage = function(page) {
 };
 
 // ============================================
-// دوال تجميع المصاريف المتشابهة
+// دوال تجميع المصاريف للفواتير النقدية
 // ============================================
-function groupSimilarCharges(charges) {
+function groupCashCharges(charges) {
+    // أولاً: فرز البنود حسب نوع الخدمة
+    const sortedCharges = [...charges].sort((a, b) => {
+        const typeA = a['event-type-id'] || '';
+        const typeB = b['event-type-id'] || '';
+        return typeA.localeCompare(typeB);
+    });
+    
     const grouped = [];
     const map = new Map();
     
-    charges.forEach(c => {
-        const date = c['paid-thru-day'] ? new Date(c['paid-thru-day']).toLocaleDateString('ar-EG') : '';
-        const storageKey = c['storage-days'] || 1;
-        const key = `${c.description}-${date}-${storageKey}`;
+    sortedCharges.forEach(c => {
+        // مفتاح التجميع: الوصف + النوع + أيام التخزين
+        const key = `${c.description || ''}-${c['event-type-id'] || ''}-${c['storage-days'] || 1}`;
+        const storageDays = c['storage-days'] || 1;
         
         if (map.has(key)) {
             const ex = map.get(key);
-            ex.amount += c.amount;
             ex.quantity += 1;
-            
-            if (!ex.dates) ex.dates = [];
-            ex.dates.push({
-                from: c['event-performed-from'] || '-',
-                to: c['event-performed-to'] || '-',
-                days: c['storage-days'] || 1
-            });
+            // لا يتم جمع أيام التخزين - نحتفظ بالقيمة الأصلية
+            ex.amount += (c.amount || 0);
             
             if (c.containerNumbers?.length) {
                 c.containerNumbers.forEach(cont => {
-                    if (!ex.containerNumbers.includes(cont)) ex.containerNumbers.push(cont);
+                    if (!ex.containerNumbers.includes(cont)) {
+                        ex.containerNumbers.push(cont);
+                    }
+                });
+            }
+            
+            if (c['event-performed-from'] || c['event-performed-to']) {
+                ex.dates.push({
+                    from: c['event-performed-from'] || '-',
+                    to: c['event-performed-to'] || '-',
+                    days: storageDays
                 });
             }
         } else {
@@ -1910,12 +1923,18 @@ function groupSimilarCharges(charges) {
                 ...c, 
                 quantity: 1, 
                 containerNumbers: [...(c.containerNumbers || [])],
-                dates: [{
+                totalStorageDays: storageDays,
+                dates: []
+            };
+            
+            if (c['event-performed-from'] || c['event-performed-to']) {
+                newC.dates.push({
                     from: c['event-performed-from'] || '-',
                     to: c['event-performed-to'] || '-',
-                    days: c['storage-days'] || 1
-                }]
-            };
+                    days: storageDays
+                });
+            }
+            
             map.set(key, newC);
             grouped.push(newC);
         }
@@ -1925,13 +1944,81 @@ function groupSimilarCharges(charges) {
 }
 
 // ============================================
-// دوال تصدير تفاصيل الحاويات بصيغة Excel حقيقية
+// دوال تجميع المصاريف للفواتير الآجلة
+// ============================================
+function groupPostponedCharges(charges) {
+    // أولاً: فرز البنود حسب نوع الخدمة
+    const sortedCharges = [...charges].sort((a, b) => {
+        const typeA = a['event-type-id'] || '';
+        const typeB = b['event-type-id'] || '';
+        return typeA.localeCompare(typeB);
+    });
+    
+    const grouped = [];
+    const map = new Map();
+    
+    sortedCharges.forEach(c => {
+        // مفتاح التجميع: الوصف + النوع فقط
+        const key = `${c.description || ''}-${c['event-type-id'] || ''}`;
+        const storageDays = c['storage-days'] || 1;
+        
+        if (map.has(key)) {
+            const ex = map.get(key);
+            ex.quantity += 1;
+            ex.totalStorageDays += storageDays; // جمع أيام التخزين
+            ex.amount += (c.amount || 0);
+            
+            if (c.containerNumbers?.length) {
+                c.containerNumbers.forEach(cont => {
+                    if (!ex.containerNumbers.includes(cont)) {
+                        ex.containerNumbers.push(cont);
+                    }
+                });
+            }
+            
+            if (c['event-performed-from'] || c['event-performed-to']) {
+                ex.dates.push({
+                    from: c['event-performed-from'] || '-',
+                    to: c['event-performed-to'] || '-',
+                    days: storageDays
+                });
+            }
+        } else {
+            const newC = { 
+                ...c, 
+                quantity: 1, 
+                containerNumbers: [...(c.containerNumbers || [])],
+                totalStorageDays: storageDays,
+                dates: []
+            };
+            
+            if (c['event-performed-from'] || c['event-performed-to']) {
+                newC.dates.push({
+                    from: c['event-performed-from'] || '-',
+                    to: c['event-performed-to'] || '-',
+                    days: storageDays
+                });
+            }
+            
+            map.set(key, newC);
+            grouped.push(newC);
+        }
+    });
+    
+    return grouped;
+}
+
+// ============================================
+// دوال تصدير تفاصيل الحاويات بصيغة Excel
 // ============================================
 window.exportContainerDetails = async function(groupIndex) {
     const inv = invoicesData[selectedInvoiceIndex];
     if (!inv) return;
     
-    const grouped = groupSimilarCharges(inv.charges);
+    const finalNum = inv['final-number'] || '';
+    const isPostponed = finalNum.startsWith('P') || finalNum.startsWith('p');
+    
+    const grouped = isPostponed ? groupPostponedCharges(inv.charges) : groupCashCharges(inv.charges);
     const charge = grouped[groupIndex];
     
     if (!charge || !charge.containerNumbers?.length) return;
@@ -1939,8 +2026,6 @@ window.exportContainerDetails = async function(groupIndex) {
     showProgress('جاري تجهيز بيانات التصدير...', 30);
     
     const exRate = inv['flex-string-06'] || 48.0215;
-    const finalNum = inv['final-number'] || '';
-    const isPostponed = finalNum.startsWith('P') || finalNum.startsWith('p');
     const currency = inv['currency'] || 'EGP';
     
     const exportData = [];
@@ -2055,7 +2140,7 @@ window.exportContainerDetails = async function(groupIndex) {
 };
 
 // ============================================
-// دوال الفاتورة والنموذج الفرعي (مع إضافة invoice-type-id)
+// دوال الفاتورة والنموذج الفرعي
 // ============================================
 window.closeModal = function() {
     document.getElementById('invoiceModal').style.display = 'none';
@@ -2073,7 +2158,8 @@ window.showInvoiceDetails = function(index) {
     document.getElementById('modalInvoiceNumber').textContent = inv['final-number'] || 'غير محدد';
     const voyageDate = inv['flex-date-02'] ? new Date(inv['flex-date-02']).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : 'غير محدد';
     
-    const grouped = groupSimilarCharges(inv.charges);
+    // اختيار دالة التجميع المناسبة حسب نوع الفاتورة
+    const grouped = isPostponed ? groupPostponedCharges(inv.charges) : groupCashCharges(inv.charges);
     
     const invoiceTypeText = isPostponed ? 'آجل' : 'نقدي';
     
@@ -2110,12 +2196,26 @@ window.showInvoiceDetails = function(index) {
         const containerCount = charge.containerNumbers?.length || 0;
         const qtyDisplay = charge.quantity > 1 ? ` (${charge.quantity})` : '';
 
+        // تحديد أيام التخزين المعروضة حسب نوع الفاتورة
+        let displayStorageDays;
+        if (isPostponed) {
+            // الفواتير الآجلة: REEFER/STORAGE تعرض القيمة المجمعة، والباقي 1
+            if (charge['event-type-id'] === 'REEFER' || charge['event-type-id'] === 'STORAGE') {
+                displayStorageDays = charge.totalStorageDays;
+            } else {
+                displayStorageDays = 1;
+            }
+        } else {
+            // الفواتير النقدية: تعرض القيمة الأصلية (غير المجمعة)
+            displayStorageDays = charge.totalStorageDays;
+        }
+
         if (isPostponed) {
             chargesRows += `<tr onclick="toggleContainers(${idx})" style="cursor: pointer;">
                 <td>${charge.description || '-'}${qtyDisplay}</td>
                 <td>${charge['event-type-id'] || '-'}</td>
                 <td>${charge.quantity || 1}</td>
-                <td>${charge['storage-days'] || 1}</td>
+                <td>${displayStorageDays}</td>
                 <td>${(charge['rate-billed'] || 0).toFixed(2)}</td>
                 <td><strong>${amountDisplay}</strong></td>
                 <td>${containerCount > 0 ? `<i id="icon-${idx}" class="fas fa-chevron-down"></i> <span style="font-size:0.8em;">${containerCount}</span>` : ''}</td>
@@ -2128,7 +2228,7 @@ window.showInvoiceDetails = function(index) {
                 <td>${charge.description || '-'}${qtyDisplay}</td>
                 <td>${charge['event-type-id'] || '-'}</td>
                 <td>${charge.quantity || 1}</td>
-                <td>${charge['storage-days'] || 1}</td>
+                <td>${displayStorageDays}</td>
                 <td>${(charge['rate-billed'] || 0).toFixed(2)}</td>
                 <td><strong>${amountDisplay}</strong></td>
                 <td>${formattedDate}</td>
@@ -3351,29 +3451,14 @@ function startPeriodicUserUpdate() {
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('بدء تشغيل النظام...');
     
-    // تحميل الإعدادات المحفوظة أولاً
     loadDriveSettings();
-    
-    // البحث التلقائي عن ملفات Drive وتحديث الإعدادات
     await autoConfigureDrive();
-    
-    // تحميل المستخدمين
     await loadUsers();
-    
-    // تهيئة قاعدة البيانات
     await initDatabase();
-    
-    // التحقق من الجلسة
     checkSession();
-    
-    // إعداد المستمعات
     setupEventListeners();
     setupModalListeners();
-    
-    // تحميل البيانات المحفوظة
     await loadSavedData();
-    
-    // تحديث مصدر البيانات
     updateDataSource();
 });
 
