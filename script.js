@@ -1,5 +1,5 @@
 // ============================================
-// نظام الفواتير المتقدم - النسخة النهائية مع استعادة دوال التجميع الأصلية
+// نظام الفواتير المتقدم - النسخة النهائية مع إصلاح PDF وإخفاء تفاصيل الحاويات
 // جميع الحقوق محفوظة لشركة دمياط لتداول الحاويات و البضائع
 // ============================================
 
@@ -7,7 +7,7 @@
 const COMPANY_INFO = {
     name: 'شركة دمياط لتداول الحاويات و البضائع',
     nameEn: 'Damietta Container & Cargo Handling Company',
-    address: 'دمياط - المنطقة الحرة - ميناء دمياط',
+    address: 'دمياط - المنطقة الحرة - ماء دمياط',
     phone: '0572290103',
     email: 'revenue@dchc-egdam.com',
     taxNumber: '100/221/823',
@@ -54,7 +54,7 @@ let driveConfig = {
 // متغيرات التقارير
 let currentReportType = 'daily';
 
-// متغير لتخبين قائمة الملفات من Drive
+// متغير لتخزين قائمة الملفات من Drive
 window.driveFilesList = [];
 
 // متغير لتخزين الفواتير المحددة
@@ -640,7 +640,7 @@ window.parseXMLContent = async function(xmlString, source) {
 };
 
 // ============================================
-// دوال تحليل عقدة الفاتورة - كما في الملف الأصلي
+// دوال تحليل عقدة الفاتورة
 // ============================================
 function parseInvoiceNode(invoice) {
     try {
@@ -735,7 +735,7 @@ function parseInvoiceNode(invoice) {
 }
 
 // ============================================
-// دوال البحث المتقدم - كما في الملف الأصلي
+// دوال البحث المتقدم
 // ============================================
 window.applyAdvancedSearch = function() {
     if (!invoicesData.length) { filteredInvoices = []; renderData(); return; }
@@ -1153,7 +1153,7 @@ function groupPostponedCharges(charges) {
 }
 
 // ============================================
-// دوال تصدير تفاصيل الحاويات - كما في الملف الأصلي
+// دوال تصدير تفاصيل الحاويات
 // ============================================
 window.exportContainerDetails = async function(groupIndex) {
     const inv = invoicesData[selectedInvoiceIndex];
@@ -1215,7 +1215,7 @@ window.exportContainerDetails = async function(groupIndex) {
 };
 
 // ============================================
-// دوال تصدير Excel للفواتير المحددة - كما في الملف الأصلي
+// دوال تصدير Excel للفواتير المحددة
 // ============================================
 window.exportSelectedInvoicesExcel = async function() {
     if (selectedInvoices.size === 0) {
@@ -1295,7 +1295,7 @@ window.exportSelectedInvoicesExcel = async function() {
 };
 
 // ============================================
-// دوال تصدير PDF للفواتير المحددة - كما في الملف الأصلي
+// دوال تصدير PDF للفواتير المحددة
 // ============================================
 window.exportSelectedInvoices = async function() {
     if (selectedInvoices.size === 0) {
@@ -1463,7 +1463,7 @@ window.exportInvoicePDF = function() {
 };
 
 // ============================================
-// دوال الفاتورة والنموذج الفرعي - مع إضافة QR Code (بدون تغيير في التجميع)
+// دوال الفاتورة والنموذج الفرعي - مع إضافة QR Code
 // ============================================
 window.showInvoiceDetails = function(index) {
     if (index < 0 || index >= invoicesData.length) return;
@@ -1477,7 +1477,6 @@ window.showInvoiceDetails = function(index) {
     document.getElementById('modalInvoiceNumber').textContent = inv['final-number'] || 'غير محدد';
     const voyageDate = inv['flex-date-02'] ? new Date(inv['flex-date-02']).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : 'غير محدد';
     
-    // استخدام دوال التجميع الأصلية
     const grouped = isPostponed ? groupPostponedCharges(inv.charges) : groupCashCharges(inv.charges);
     
     const invoiceTypeText = isPostponed ? 'آجل' : 'نقدي';
@@ -1743,7 +1742,6 @@ window.showInvoiceDetails = function(index) {
                     </div>
                 </div>
                 
-                <!-- منطقة QR Code -->
                 <div id="qrcode-container-${inv['final-number']}" style="background: white; padding: 5px; border-radius: 8px; min-width: 110px; text-align: center;"></div>
             </div>
             
@@ -2350,7 +2348,7 @@ window.updateFromDrive = async function() {
 };
 
 // ============================================
-// نظام QR Code المستقل - مع استخدام دوال التجميع الأصلية
+// نظام QR Code المستقل - مع إخفاء تفاصيل الحاويات
 // ============================================
 
 let qrContainer = null;
@@ -2416,7 +2414,7 @@ function generateQRCode(invoiceNumber, draftNumber, containerId, size = 100) {
 }
 
 /**
- * إنشاء HTML للفاتورة في نظام QR Code (باستخدام دوال التجميع الأصلية)
+ * إنشاء HTML مبسط للفاتورة في نظام QR Code (بدون تفاصيل الحاويات)
  */
 function createQRCodeInvoiceHTML(invoice) {
     const finalNum = invoice['final-number'] || '';
@@ -2425,7 +2423,7 @@ function createQRCodeInvoiceHTML(invoice) {
     const exRate = invoice['flex-string-06'] || 48.0215;
     const voyageDate = invoice['flex-date-02'] ? new Date(invoice['flex-date-02']).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : 'غير محدد';
     
-    // استخدام دوال التجميع الأصلية حسب نوع الفاتورة
+    // استخدام دوال التجميع الأصلية
     const grouped = isPostponed ? groupPostponedCharges(invoice.charges) : groupCashCharges(invoice.charges);
     
     const invoiceTypeText = isPostponed ? 'آجل' : 'نقدي';
@@ -2449,13 +2447,12 @@ function createQRCodeInvoiceHTML(invoice) {
         displayTotal = adjustedTotal.toFixed(2);
     }
 
-    // إنشاء صفوف المصاريف بنفس تنسيق الفاتورة الأصلية
+    // إنشاء صفوف المصاريف - بدون تفاصيل الحاويات
     let chargesRows = '';
     
     grouped.forEach((charge, idx) => {
         const amount = charge.amount;
         let amountDisplay = (amount / exRate).toFixed(2);
-        const containerCount = charge.containerNumbers?.length || 0;
         const qtyDisplay = charge.quantity > 1 ? ` (${charge.quantity})` : '';
 
         let displayStorageDays;
@@ -2476,8 +2473,7 @@ function createQRCodeInvoiceHTML(invoice) {
                 <td>${charge.quantity || 1}</td>
                 <td>${displayStorageDays}</td>
                 <td>${(charge['rate-billed'] || 0).toFixed(2)}</td>
-                <td><strong>${amountDisplay}</strong></td>
-                <td>${containerCount > 0 ? `📦 ${containerCount}` : ''}</td>
+                <td>${amountDisplay}</td>
             </tr>`;
         } else {
             const chargeDate = charge['paid-thru-day'] || charge['created'] || '';
@@ -2489,56 +2485,8 @@ function createQRCodeInvoiceHTML(invoice) {
                 <td>${charge.quantity || 1}</td>
                 <td>${displayStorageDays}</td>
                 <td>${(charge['rate-billed'] || 0).toFixed(2)}</td>
-                <td><strong>${amountDisplay}</strong></td>
+                <td>${amountDisplay}</td>
                 <td>${formattedDate}</td>
-                <td>${containerCount > 0 ? `📦 ${containerCount}` : ''}</td>
-            </tr>`;
-        }
-
-        // إضافة تفاصيل الحاويات إذا وجدت
-        if (containerCount > 0) {
-            const containerDetails = charge.containerNumbers.map((container, idx) => {
-                const dateInfo = charge.dates && charge.dates[idx] ? charge.dates[idx] : {
-                    from: charge['event-performed-from'] || '-',
-                    to: charge['event-performed-to'] || '-',
-                    days: charge['storage-days'] || 1
-                };
-                return {
-                    containerNumber: container,
-                    eventFrom: dateInfo.from,
-                    eventTo: dateInfo.to,
-                    days: dateInfo.days
-                };
-            });
-            
-            chargesRows += `<tr style="background:#f8f9fa;">
-                <td colspan="${isPostponed ? '7' : '8'}" style="padding:10px;">
-                    <div style="background:white; border-radius:8px; padding:10px; border-right:3px solid #4cc9f0;">
-                        <h4 style="color:#4cc9f0; margin:0 0 8px; font-size:0.9em;">
-                            <i class="fas fa-container-storage"></i> تفاصيل الحاويات
-                        </h4>
-                        <table style="width:100%; border-collapse:collapse; font-size:0.8em;">
-                            <thead>
-                                <tr style="background:#e9ecef;">
-                                    <th>رقم الحاوية</th>
-                                    <th>التاريخ من</th>
-                                    <th>التاريخ إلى</th>
-                                    <th>الأيام</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                ${containerDetails.map(detail => `
-                                    <tr>
-                                        <td style="padding:5px; border-bottom:1px solid #dee2e6;">📦 ${detail.containerNumber}</td>
-                                        <td style="padding:5px; border-bottom:1px solid #dee2e6;">${detail.eventFrom}</td>
-                                        <td style="padding:5px; border-bottom:1px solid #dee2e6;">${detail.eventTo}</td>
-                                        <td style="padding:5px; border-bottom:1px solid #dee2e6;">${detail.days}</td>
-                                    </tr>
-                                `).join('')}
-                            </tbody>
-                        </table>
-                    </div>
-                </td>
             </tr>`;
         }
     });
@@ -2611,8 +2559,8 @@ function createQRCodeInvoiceHTML(invoice) {
                 <thead>
                     <tr>
                         ${isPostponed ? 
-                            '<th>الوصف</th><th>النوع</th><th>العدد</th><th>أيام التخزين</th><th>سعر الوحدة</th><th>المبلغ</th><th>الحاويات</th>' :
-                            '<th>الوصف</th><th>النوع</th><th>العدد</th><th>أيام التخزين</th><th>سعر الوحدة</th><th>المبلغ</th><th>تاريخ الصرف</th><th>الحاويات</th>'
+                            '<th>الوصف</th><th>النوع</th><th>العدد</th><th>أيام التخزين</th><th>سعر الوحدة</th><th>المبلغ</th>' :
+                            '<th>الوصف</th><th>النوع</th><th>العدد</th><th>أيام التخزين</th><th>سعر الوحدة</th><th>المبلغ</th><th>تاريخ الصرف</th>'
                         }
                     </tr>
                 </thead>
@@ -2662,6 +2610,7 @@ async function generateQRCodePDF(element, fileName) {
                 throw new Error('مكتبات PDF غير متوفرة');
             }
             
+            // التأكد من أن العنصر جاهز
             await new Promise(resolve => setTimeout(resolve, 500));
             
             const canvas = await html2canvas(element, {
