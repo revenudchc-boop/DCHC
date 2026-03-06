@@ -15,6 +15,9 @@
     <!-- Excel Library -->
     <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
     
+    <!-- QR Code Library -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
+    
     <!-- CSS File -->
     <link rel="stylesheet" href="style.css">
 </head>
@@ -84,7 +87,6 @@
                 <span class="user-tax" id="userTaxDisplay"></span>
             </div>
             <div class="user-actions">
-                <!-- زر إعدادات Drive متاح لجميع المستخدمين المسجلين (غير الزوار) -->
                 <button class="user-btn drive-settings-btn" id="driveSettingsBtn" onclick="openDriveSettings()" title="إعدادات Google Drive">
                     <i class="fab fa-google-drive"></i>
                 </button>
@@ -150,7 +152,6 @@
                     </button>
                 </div>
 
-                <!-- أزرار التحكم في قاعدة البيانات -->
                 <div class="db-controls" id="dbControls"></div>
 
                 <div class="file-status" id="fileStatus">
@@ -292,7 +293,7 @@
                 </div>
             </div>
 
-            <!-- بطاقات الملخص (معاد ترتيبها وتصغير الخط) -->
+            <!-- بطاقات الملخص -->
             <div class="summary-cards">
                 <div class="summary-card gradient-blue">
                     <div class="card-icon"><i class="fas fa-file-invoice"></i></div>
@@ -392,7 +393,7 @@
         </div>
     </div>
 
-    <!-- نافذة إدارة المستخدمين (كاملة مع إضافة رقم العقد) -->
+    <!-- نافذة إدارة المستخدمين -->
     <div id="userManagementModal" class="modal">
         <div class="modal-content" style="max-width: 1100px;">
             <div class="modal-header">
@@ -470,7 +471,7 @@
         </div>
     </div>
 
-    <!-- نافذة إعدادات Google Drive (متاحة لجميع المستخدمين) -->
+    <!-- نافذة إعدادات Google Drive -->
     <div id="driveSettingsModal" class="modal">
         <div class="modal-content" style="max-width: 650px;">
             <div class="modal-header">
