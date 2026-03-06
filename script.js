@@ -1,5 +1,5 @@
 // ============================================
-// نظام الفواتير المتقدم - النسخة النهائية مع نظام QR Code المستقل
+// نظام الفواتير المتقدم - النسخة النهائية مع QR Code في جميع شاشات الفاتورة
 // جميع الحقوق محفوظة لشركة دمياط لتداول الحاويات و البضائع
 // ============================================
 
@@ -72,6 +72,58 @@ let qrContainer = null;
  */
 function getInvoiceLink(invoiceNumber) {
     return `${COMPANY_INFO.baseUrl}?invoice=${encodeURIComponent(invoiceNumber)}`;
+}
+
+/**
+ * إنشاء QR Code للفاتورة وعرضه (لجميع الشاشات)
+ */
+function generateQRCode(invoiceNumber, containerId, size = 100) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    // مسح المحتوى السابق
+    container.innerHTML = '';
+    
+    // إنشاء عنصر canvas للـ QR Code
+    const canvas = document.createElement('canvas');
+    canvas.id = `qrcode-${invoiceNumber}`;
+    canvas.style.width = '100%';
+    canvas.style.height = 'auto';
+    canvas.style.maxWidth = size + 'px';
+    container.appendChild(canvas);
+    
+    try {
+        // إنشاء QR Code مع الرابط الكامل
+        QRCode.toCanvas(canvas, getInvoiceLink(invoiceNumber), {
+            width: size,
+            margin: 1,
+            color: {
+                dark: '#000000',
+                light: '#ffffff'
+            },
+            errorCorrectionLevel: 'H'
+        }, function(error) {
+            if (error) {
+                console.error('❌ خطأ في إنشاء QR Code:', error);
+                canvas.remove();
+                container.innerHTML = `<div style="color:red; font-size:0.8em;">خطأ</div>`;
+            } else {
+                console.log(`✅ تم إنشاء QR Code للفاتورة: ${invoiceNumber}`);
+                
+                // إضافة نص صغير تحت QR Code
+                const caption = document.createElement('div');
+                caption.style.fontSize = '0.6em';
+                caption.style.marginTop = '2px';
+                caption.style.color = '#666';
+                caption.textContent = 'امسح للوصول';
+                container.appendChild(caption);
+            }
+        });
+    } catch (error) {
+        console.error('❌ خطأ في إنشاء QR Code:', error);
+        canvas.remove();
+        container.innerHTML = `<div style="color:red; font-size:0.8em;">خطأ</div>`;
+    }
 }
 
 /**
@@ -1905,7 +1957,7 @@ window.exportInvoicePDF = function() {
 };
 
 // ============================================
-// دوال الفاتورة والنموذج الفرعي الأصلية (بدون تعديل)
+// دوال الفاتورة والنموذج الفرعي - مع إضافة QR Code في الجانب الأيسر
 // ============================================
 window.showInvoiceDetails = function(index) {
     if (index < 0 || index >= invoicesData.length) return;
@@ -2165,59 +2217,66 @@ window.showInvoiceDetails = function(index) {
         </style>
     `;
 
-    // هيكل HTML الرئيسي للفاتورة (بدون إضافة QR Code هنا لأن هذا هو النظام الرئيسي)
+    // هيكل HTML الرئيسي للفاتورة مع إضافة QR Code في الجانب الأيسر
     let html = `
         <div class="invoice-container" id="invoicePrint" style="max-width: 1100px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
             ${printStyles}
             
-            <div class="invoice-company-header" style="display: flex; align-items: center; gap: 20px; background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
-                <div class="invoice-company-logo" style="width: 70px; height: 70px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2em; border: 2px solid #ffd700;">
-                    <i class="fas fa-ship"></i>
-                </div>
-                <div class="invoice-company-details">
-                    <h2 style="color: #ffd700; margin: 0 0 5px; font-size: 1.3em;">${COMPANY_INFO.name}</h2>
-                    <p style="margin-bottom: 8px; opacity: 0.9; font-style: italic; font-size: 0.9em;">${COMPANY_INFO.nameEn}</p>
-                    <div class="invoice-company-meta" style="display: flex; flex-wrap: wrap; gap: 15px; font-size: 0.85em;">
-                        <span><i class="fas fa-map-marker-alt" style="color: #ffd700; margin-left: 5px;"></i> ${COMPANY_INFO.address}</span>
-                        <span><i class="fas fa-phone" style="color: #ffd700; margin-left: 5px;"></i> ${COMPANY_INFO.phone}</span>
-                        <span><i class="fas fa-envelope" style="color: #ffd700; margin-left: 5px;"></i> ${COMPANY_INFO.email}</span>
-                        <span><i class="fas fa-building" style="color: #ffd700; margin-left: 5px;"></i> الرقم الضريبي: ${COMPANY_INFO.taxNumber}</span>
+            <!-- رأس الفاتورة مع إضافة QR Code في الجانب الأيسر -->
+            <div class="invoice-company-header" style="display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; padding: 15px 20px; border-radius: 10px; margin-bottom: 15px;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div class="invoice-company-logo" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2em; border: 2px solid #ffd700;">
+                        <i class="fas fa-ship"></i>
+                    </div>
+                    <div>
+                        <h2 style="color: #ffd700; margin: 0 0 3px; font-size: 1.2em;">${COMPANY_INFO.name}</h2>
+                        <p style="margin: 0 0 5px; opacity: 0.9; font-size: 0.8em;">${COMPANY_INFO.nameEn}</p>
+                        <div style="display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.7em;">
+                            <span><i class="fas fa-map-marker-alt" style="color: #ffd700;"></i> ${COMPANY_INFO.address}</span>
+                            <span><i class="fas fa-phone" style="color: #ffd700;"></i> ${COMPANY_INFO.phone}</span>
+                            <span><i class="fas fa-envelope" style="color: #ffd700;"></i> ${COMPANY_INFO.email}</span>
+                        </div>
                     </div>
                 </div>
+                
+                <!-- منطقة QR Code في الجانب الأيسر -->
+                <div id="qrcode-container-${inv['final-number']}" style="background: white; padding: 5px; border-radius: 8px; min-width: 110px; text-align: center;">
+                    <!-- سيتم إضافة QR Code هنا عبر JavaScript -->
+                </div>
             </div>
             
-            <div class="invoice-header" style="background: linear-gradient(135deg, #4361ee, #3f37c9); color: white; padding: 15px; text-align: center; border-radius: 10px; margin-bottom: 20px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
-                <h2 style="font-size: 1.2em; margin-bottom: 5px;"><i class="fas fa-file-invoice"></i> فاتورة رسمية - ${invoiceTypeText}</h2>
-                <p style="font-size: 0.9em; margin-top: 5px; color: #f0f0f0;"><i class="fas fa-tag"></i> ${inv['invoice-type-id'] || 'غير محدد'}</p>
-                <p style="margin-top: 5px; font-size: 0.85em;">رقم: ${inv['final-number'] || 'غير محدد'} | تاريخ: ${inv['created'] ? new Date(inv['created']).toLocaleDateString('ar-EG') : '-'}</p>
+            <div class="invoice-header" style="background: linear-gradient(135deg, #4361ee, #3f37c9); color: white; padding: 12px; text-align: center; border-radius: 8px; margin-bottom: 15px;">
+                <h2 style="font-size: 1.1em; margin-bottom: 3px;"><i class="fas fa-file-invoice"></i> فاتورة رسمية - ${invoiceTypeText}</h2>
+                <p style="font-size: 0.8em; margin-top: 3px; color: #f0f0f0;"><i class="fas fa-tag"></i> ${inv['invoice-type-id'] || 'غير محدد'}</p>
+                <p style="margin-top: 3px; font-size: 0.8em;">رقم: ${inv['final-number'] || 'غير محدد'} | تاريخ: ${inv['created'] ? new Date(inv['created']).toLocaleDateString('ar-EG') : '-'}</p>
             </div>
             
-            <div class="invoice-info-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
-                <div class="info-box" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-right: 4px solid #4361ee;">
-                    <h4 style="color: #4361ee; margin-bottom: 10px; font-size: 1em; display: flex; align-items: center; gap: 5px;"><i class="fas fa-building"></i> بيانات العميل</h4>
-                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #dee2e6;"><span>الاسم:</span><span>${inv['payee-customer-id'] || '-'}</span></div>
-                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #dee2e6;"><span>الدور:</span><span>${inv['payee-customer-role'] || '-'}</span></div>
-                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #dee2e6;"><span>رقم العقد:</span><span>${inv['contract-customer-id'] || '-'}</span></div>
+            <div class="invoice-info-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 15px;">
+                <div class="info-box" style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-right: 4px solid #4361ee;">
+                    <h4 style="color: #4361ee; margin-bottom: 8px; font-size: 0.95em; display: flex; align-items: center; gap: 5px;"><i class="fas fa-building"></i> بيانات العميل</h4>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;"><span>الاسم:</span><span>${inv['payee-customer-id'] || '-'}</span></div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;"><span>الدور:</span><span>${inv['payee-customer-role'] || '-'}</span></div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;"><span>رقم العقد:</span><span>${inv['contract-customer-id'] || '-'}</span></div>
                 </div>
-                <div class="info-box" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-right: 4px solid #4361ee;">
-                    <h4 style="color: #4361ee; margin-bottom: 10px; font-size: 1em; display: flex; align-items: center; gap: 5px;"><i class="fas fa-ship"></i> بيانات الشحنة</h4>
-                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #dee2e6;"><span>السفينة:</span><span>${inv['key-word1'] || '-'}</span></div>
-                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #dee2e6;"><span>رقم البوليصة:</span><span>${inv['key-word2'] || '-'}</span></div>
-                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #dee2e6;"><span>الخط الملاحي:</span><span>${inv['key-word3'] || '-'}</span></div>
-                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #dee2e6;"><span>تاريخ الرحلة:</span><span><strong>${voyageDate}</strong></span></div>
+                <div class="info-box" style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-right: 4px solid #4361ee;">
+                    <h4 style="color: #4361ee; margin-bottom: 8px; font-size: 0.95em; display: flex; align-items: center; gap: 5px;"><i class="fas fa-ship"></i> بيانات الشحنة</h4>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;"><span>السفينة:</span><span>${inv['key-word1'] || '-'}</span></div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;"><span>رقم البوليصة:</span><span>${inv['key-word2'] || '-'}</span></div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;"><span>الخط الملاحي:</span><span>${inv['key-word3'] || '-'}</span></div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;"><span>تاريخ الرحلة:</span><span><strong>${voyageDate}</strong></span></div>
                 </div>
-                <div class="info-box" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-right: 4px solid #4361ee;">
-                    <h4 style="color: #4361ee; margin-bottom: 10px; font-size: 1em; display: flex; align-items: center; gap: 5px;"><i class="fas fa-info-circle"></i> معلومات إضافية</h4>
-                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #dee2e6;"><span>الحالة:</span><span>${inv['status'] || '-'}</span></div>
-                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #dee2e6;"><span>العملة:</span><span>${inv['currency'] || '-'}</span></div>
-                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #dee2e6;"><span>المنشأة:</span><span>${facilityDisplay}</span></div>
+                <div class="info-box" style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-right: 4px solid #4361ee;">
+                    <h4 style="color: #4361ee; margin-bottom: 8px; font-size: 0.95em; display: flex; align-items: center; gap: 5px;"><i class="fas fa-info-circle"></i> معلومات إضافية</h4>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;"><span>الحالة:</span><span>${inv['status'] || '-'}</span></div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;"><span>العملة:</span><span>${inv['currency'] || '-'}</span></div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;"><span>المنشأة:</span><span>${facilityDisplay}</span></div>
                     ${exchangeRateRow}
                 </div>
             </div>
             
             <div class="charges-section" style="margin-bottom: 15px;">
-                <h3 style="color: #212529; margin-bottom: 10px; font-size: 1.1em; display: flex; align-items: center; gap: 8px;"><i class="fas fa-list"></i> تفاصيل المصاريف</h3>
-                <table class="charges-table" style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                <h3 style="color: #212529; margin-bottom: 8px; font-size: 1em; display: flex; align-items: center; gap: 5px;"><i class="fas fa-list"></i> تفاصيل المصاريف</h3>
+                <table class="charges-table" style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
                     <thead style="background: #4361ee; color: white; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                         ${tableHeaders}
                     </thead>
@@ -2227,30 +2286,30 @@ window.showInvoiceDetails = function(index) {
                 </table>
             </div>
             
-            <div class="invoice-summary" style="display: flex; justify-content: flex-end; margin-top: 10px;">
+            <div class="invoice-summary" style="display: flex; justify-content: flex-end; margin-top: 5px;">
                 ${summaryHtml}
             </div>
             
-            <div class="signature-section" style="display: flex; justify-content: space-around; margin: 20px 0 15px; padding: 10px 0; border-top: 2px dashed #dee2e6;">
-                <div class="signature-box" style="text-align: center; width: 150px;">
-                    <div class="signature-title" style="color: #4361ee; font-weight: bold; margin-bottom: 5px; font-size: 0.9em;">معد الفاتورة</div>
-                    <div class="signature-name" style="font-size: 0.9em; margin-bottom: 5px; color: #212529; font-weight: 600;">${preparer}</div>
-                    <div class="signature-line" style="height: 2px; background: #4361ee; width: 100%; margin: 5px 0;"></div>
-                    <div class="signature-date" style="font-size: 0.8em; color: #666;">${new Date().toLocaleDateString('ar-EG')}</div>
+            <div class="signature-section" style="display: flex; justify-content: space-around; margin: 15px 0 10px; padding: 8px 0; border-top: 2px dashed #dee2e6;">
+                <div class="signature-box" style="text-align: center; width: 130px;">
+                    <div class="signature-title" style="color: #4361ee; font-weight: bold; margin-bottom: 5px; font-size: 0.85em;">معد الفاتورة</div>
+                    <div class="signature-name" style="font-size: 0.85em; margin-bottom: 3px; color: #212529; font-weight: 600;">${preparer}</div>
+                    <div class="signature-line" style="height: 2px; background: #4361ee; width: 100%; margin: 3px 0;"></div>
+                    <div class="signature-date" style="font-size: 0.7em; color: #666;">${new Date().toLocaleDateString('ar-EG')}</div>
                 </div>
-                <div class="signature-box" style="text-align: center; width: 150px;">
-                    <div class="signature-title" style="color: #4361ee; font-weight: bold; margin-bottom: 5px; font-size: 0.9em;">المراجع</div>
-                    <div class="signature-name" style="font-size: 0.9em; margin-bottom: 5px; color: #212529; font-weight: 600;">${reviewer}</div>
-                    <div class="signature-line" style="height: 2px; background: #4361ee; width: 100%; margin: 5px 0;"></div>
-                    <div class="signature-date" style="font-size: 0.8em; color: #666;">${new Date().toLocaleDateString('ar-EG')}</div>
+                <div class="signature-box" style="text-align: center; width: 130px;">
+                    <div class="signature-title" style="color: #4361ee; font-weight: bold; margin-bottom: 5px; font-size: 0.85em;">المراجع</div>
+                    <div class="signature-name" style="font-size: 0.85em; margin-bottom: 3px; color: #212529; font-weight: 600;">${reviewer}</div>
+                    <div class="signature-line" style="height: 2px; background: #4361ee; width: 100%; margin: 3px 0;"></div>
+                    <div class="signature-date" style="font-size: 0.7em; color: #666;">${new Date().toLocaleDateString('ar-EG')}</div>
                 </div>
-                <div class="signature-box" style="text-align: center; width: 150px;">
-                    <div class="signature-title" style="color: #4361ee; font-weight: bold; margin-bottom: 5px; font-size: 0.9em;">الختم</div>
-                    <div class="signature-stamp" style="font-size: 2.2em; color: #e63946; opacity: 0.5; transform: rotate(-15deg);"><i class="fas fa-certificate"></i></div>
+                <div class="signature-box" style="text-align: center; width: 130px;">
+                    <div class="signature-title" style="color: #4361ee; font-weight: bold; margin-bottom: 5px; font-size: 0.85em;">الختم</div>
+                    <div class="signature-stamp" style="font-size: 2em; color: #e63946; opacity: 0.5; transform: rotate(-15deg);"><i class="fas fa-certificate"></i></div>
                 </div>
             </div>
             
-            <div class="invoice-footer" style="text-align: center; padding: 10px; border-top: 2px solid #e9ecef; color: #6c757d; font-size: 0.8em;">
+            <div class="invoice-footer" style="text-align: center; padding: 8px; border-top: 2px solid #e9ecef; color: #6c757d; font-size: 0.7em;">
                 <p style="margin: 2px 0;">شكراً لتعاملكم مع ${COMPANY_INFO.name}</p>
                 <p style="margin: 2px 0;">تم إنشاء هذه الفاتورة إلكترونياً</p>
                 <p style="margin: 2px 0;">تاريخ الطباعة: ${new Date().toLocaleDateString('ar-EG')}</p>
@@ -2260,6 +2319,11 @@ window.showInvoiceDetails = function(index) {
 
     document.getElementById('modalBody').innerHTML = html;
     document.getElementById('invoiceModal').style.display = 'block';
+    
+    // إنشاء QR Code بعد ظهور العنصر في DOM
+    setTimeout(() => {
+        generateQRCode(inv['final-number'], `qrcode-container-${inv['final-number']}`, 100);
+    }, 100);
     
     // إعادة ربط أزرار التنقل والإغلاق بعد تحميل المحتوى
     setTimeout(() => {
