@@ -1,5 +1,5 @@
 // ============================================
-// نظام الفواتير المتقدم - النسخة النهائية
+// نظام الفواتير المتقدم - النسخة النهائية مع جميع الإصلاحات
 // جميع الحقوق محفوظة لشركة دمياط لتداول الحاويات و البضائع
 // ============================================
 
@@ -40,7 +40,7 @@ let users = [];
 let currentUser = null;
 let currentEditingUserId = null;
 
-// إعدادات Google Drive - المعرفات الصحيحة (سيتم تحديثها تلقائياً)
+// إعدادات Google Drive
 let driveConfig = {
     apiKey: 'AIzaSyBy4WRI3zkUwlCvbrXpB8o9ZbFMuH4AdGA',
     folderId: '1FlBXLupfXCICs6xt7xxEE02wr_cjAapC',
@@ -55,6 +55,9 @@ let currentReportType = 'daily';
 
 // متغير لتخزين قائمة الملفات من Drive
 window.driveFilesList = [];
+
+// متغير لتخزين الفواتير المحددة
+let selectedInvoices = new Set();
 
 // ============================================
 // دوال شريط التقدم
@@ -102,385 +105,162 @@ function hideProgress() {
 }
 
 // ============================================
-// دوال إصلاح JSON (للمساعدة في حال وجود أخطاء في الملف)
+// دوال إصلاح JSON
 // ============================================
 function repairJSON(jsonString) {
-    // إزالة الفواصل الزائدة قبل إغلاق المصفوفة أو الكائن
-    jsonString = jsonString.replace(/,(\s*[\]}])/g, '$1');
-    return jsonString;
+    return jsonString.replace(/,(\s*[\]}])/g, '$1');
 }
 
 // ============================================
 // دوال البحث التلقائي عن ملفات Drive
 // ============================================
 async function findDataFileIdAuto() {
-    if (!driveConfig.apiKey || !driveConfig.folderId) {
-        console.log('⚠️ إعدادات Drive غير مكتملة للبحث عن ملف البيانات');
-        return false;
-    }
-
+    if (!driveConfig.apiKey || !driveConfig.folderId) return false;
     const fileName = driveConfig.fileName || 'datatxt.txt';
-
     try {
-        console.log('🔄 جاري البحث التلقائي عن ملف البيانات...');
-        const query = `'${driveConfig.folderId}' in parents and name='${fileName}' and trashed=false`;
-        const encodedQuery = encodeURIComponent(query);
-        const url = `https://www.googleapis.com/drive/v3/files?q=${encodedQuery}&key=${driveConfig.apiKey}&fields=files(id,name)`;
-        
-        const response = await fetch(url);
-        
-        if (!response.ok) {
-            console.warn('⚠️ فشل البحث عن ملف البيانات:', response.status);
-            return false;
-        }
-        
-        const data = await response.json();
-        const files = data.files || [];
-        
-        if (files.length > 0) {
-            const fileId = files[0].id;
-            driveConfig.fileId = fileId;
-            console.log(`✅ تم العثور تلقائياً على ملف البيانات: ${fileName} (المعرف: ${fileId})`);
+        const query = encodeURIComponent(`'${driveConfig.folderId}' in parents and name='${fileName}' and trashed=false`);
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&key=${driveConfig.apiKey}&fields=files(id,name)`);
+        if (!res.ok) return false;
+        const data = await res.json();
+        if (data.files?.length) {
+            driveConfig.fileId = data.files[0].id;
             return true;
-        } else {
-            console.warn(`⚠️ لم يتم العثور على ملف بيانات باسم "${fileName}" في المجلد`);
-            return false;
         }
-    } catch (error) {
-        console.error('خطأ في البحث التلقائي عن ملف البيانات:', error);
         return false;
-    }
+    } catch { return false; }
 }
 
 async function findUsersFileIdAuto() {
-    if (!driveConfig.apiKey || !driveConfig.folderId) {
-        console.log('⚠️ إعدادات Drive غير مكتملة للبحث عن ملف المستخدمين');
-        return false;
-    }
-
+    if (!driveConfig.apiKey || !driveConfig.folderId) return false;
     const fileName = driveConfig.usersFileName || 'users.json';
-
     try {
-        console.log('🔄 جاري البحث التلقائي عن ملف المستخدمين...');
-        const query = `'${driveConfig.folderId}' in parents and name='${fileName}' and trashed=false`;
-        const encodedQuery = encodeURIComponent(query);
-        const url = `https://www.googleapis.com/drive/v3/files?q=${encodedQuery}&key=${driveConfig.apiKey}&fields=files(id,name)`;
-        
-        const response = await fetch(url);
-        
-        if (!response.ok) {
-            console.warn('⚠️ فشل البحث عن ملف المستخدمين:', response.status);
-            return false;
-        }
-        
-        const data = await response.json();
-        const files = data.files || [];
-        
-        if (files.length > 0) {
-            const fileId = files[0].id;
-            driveConfig.usersFileId = fileId;
-            console.log(`✅ تم العثور تلقائياً على ملف المستخدمين: ${fileName} (المعرف: ${fileId})`);
+        const query = encodeURIComponent(`'${driveConfig.folderId}' in parents and name='${fileName}' and trashed=false`);
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&key=${driveConfig.apiKey}&fields=files(id,name)`);
+        if (!res.ok) return false;
+        const data = await res.json();
+        if (data.files?.length) {
+            driveConfig.usersFileId = data.files[0].id;
             return true;
-        } else {
-            console.warn(`⚠️ لم يتم العثور على ملف مستخدمين باسم "${fileName}" في المجلد`);
-            return false;
         }
-    } catch (error) {
-        console.error('خطأ في البحث التلقائي عن ملف المستخدمين:', error);
         return false;
-    }
+    } catch { return false; }
 }
 
-// دالة لتحديث جميع إعدادات Drive تلقائياً
 async function autoConfigureDrive() {
-    console.log('🚀 بدء الإعداد التلقائي لـ Google Drive...');
-    showProgress('جاري إعداد Google Drive تلقائياً...', 20);
-    
+    console.log('بدء الإعداد التلقائي لـ Drive...');
+    showProgress('جاري إعداد Google Drive...', 20);
     const dataFound = await findDataFileIdAuto();
     const usersFound = await findUsersFileIdAuto();
-    
-    if (dataFound || usersFound) {
-        saveDriveSettingsToStorage();
-        showProgress('تم إعداد Drive بنجاح', 100);
-        console.log('✅ تم حفظ إعدادات Drive بعد الإعداد التلقائي');
-    } else {
-        showProgress('لم يتم العثور على الملفات، استخدم الإعدادات الافتراضية', 100);
-        console.log('⚠️ لم يتم العثور على الملفات، سيتم استخدام المعرفات الافتراضية');
-    }
-    
+    if (dataFound || usersFound) saveDriveSettingsToStorage();
+    showProgress(dataFound || usersFound ? 'تم إعداد Drive' : 'استخدم الإعدادات الافتراضية', 100);
     setTimeout(hideProgress, 1500);
 }
 
 // ============================================
-// تحميل المستخدمين من Google Drive
+// دوال المستخدمين
 // ============================================
-async function loadUsersFromDrive(force = false) {
-    if (!driveConfig.apiKey || !driveConfig.folderId) {
-        console.log('⚠️ إعدادات Drive غير مكتملة');
-        return false;
-    }
-
-    const fileId = driveConfig.usersFileId;
-    if (!fileId) {
-        console.log('⚠️ لا يوجد معرف لملف المستخدمين');
-        return false;
-    }
-
+async function loadUsersFromDrive() {
+    if (!driveConfig.apiKey || !driveConfig.folderId || !driveConfig.usersFileId) return false;
     try {
-        showProgress('جاري تحميل المستخدمين من Drive...', 30);
-        const downloadUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${driveConfig.apiKey}`;
-        const response = await fetch(downloadUrl);
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            console.error('❌ فشل التحميل من Drive:', response.status, errorText);
-            showNotification(`خطأ ${response.status}: ${response.statusText}`, 'error');
-            return false;
-        }
-        
-        let fileContent = await response.text();
-        
-        // محاولة إصلاح JSON إذا كان هناك خطأ بسيط (فاصلة زائدة)
-        try {
-            JSON.parse(fileContent);
-        } catch (e) {
-            console.warn('⚠️ خطأ في JSON، محاولة الإصلاح...');
-            fileContent = repairJSON(fileContent);
-        }
-        
-        const parsed = JSON.parse(fileContent);
-        if (Array.isArray(parsed)) {
-            users = parsed;
-            showProgress('تم تحميل المستخدمين', 100);
-            localStorage.setItem('backupUsers', JSON.stringify(users));
-            console.log(`✅ تم تحميل ${users.length} مستخدم من Drive وتحديث الذاكرة`);
-            return true;
-        } else {
-            console.error('الملف لا يحتوي على مصفوفة مستخدمين');
-            return false;
-        }
-    } catch (error) {
-        console.error('خطأ في التحميل:', error);
-        showNotification('فشل تحميل المستخدمين من Drive: ' + error.message, 'error');
-        return false;
-    } finally {
-        setTimeout(hideProgress, 1500);
-    }
-}
-
-// حفظ المستخدمين إلى Google Drive
-async function saveUsersToDrive() {
-    if (!driveConfig.apiKey || !driveConfig.folderId || !driveConfig.usersFileId) {
-        showNotification('❌ إعدادات Drive للمستخدمين غير مكتملة', 'error');
-        return false;
-    }
-
-    const fileContent = JSON.stringify(users, null, 2);
-    showProgress('جاري حفظ المستخدمين في Drive...', 30);
-
-    try {
-        const metadata = {
-            name: driveConfig.usersFileName,
-            mimeType: 'application/json'
-        };
-
-        const form = new FormData();
-        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-        form.append('file', new Blob([fileContent], { type: 'application/json' }));
-
-        const updateUrl = `https://www.googleapis.com/upload/drive/v3/files/${driveConfig.usersFileId}?uploadType=multipart&key=${driveConfig.apiKey}`;
-        
-        showProgress('جاري رفع الملف...', 60);
-        
-        const response = await fetch(updateUrl, {
-            method: 'PATCH',
-            body: form
-        });
-
-        if (!response.ok) throw new Error('فشل تحديث الملف');
-        
-        showProgress('تم الحفظ بنجاح!', 100);
-        showNotification('✅ تم حفظ المستخدمين في Drive', 'success');
+        showProgress('جاري تحميل المستخدمين...', 30);
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${driveConfig.usersFileId}?alt=media&key=${driveConfig.apiKey}`);
+        if (!res.ok) throw new Error('فشل التحميل');
+        let content = await res.text();
+        try { JSON.parse(content); } catch { content = repairJSON(content); }
+        users = JSON.parse(content);
+        if (!Array.isArray(users)) throw new Error('ملف غير صالح');
+        localStorage.setItem('backupUsers', JSON.stringify(users));
         return true;
     } catch (error) {
-        console.error('خطأ في حفظ المستخدمين:', error);
-        showProgress('خطأ في الحفظ!', 100);
-        showNotification(`❌ خطأ: ${error.message}`, 'error');
+        console.error(error);
+        showNotification('فشل تحميل المستخدمين', 'error');
         return false;
-    } finally {
-        setTimeout(hideProgress, 1500);
-    }
+    } finally { setTimeout(hideProgress, 1500); }
 }
 
-// تحميل المستخدمين من النسخ الاحتياطي (localStorage)
+async function saveUsersToDrive() {
+    if (!driveConfig.apiKey || !driveConfig.folderId || !driveConfig.usersFileId) return false;
+    try {
+        showProgress('جاري حفظ المستخدمين...', 30);
+        const metadata = { name: driveConfig.usersFileName, mimeType: 'application/json' };
+        const form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+        form.append('file', new Blob([JSON.stringify(users, null, 2)], { type: 'application/json' }));
+        const res = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveConfig.usersFileId}?uploadType=multipart&key=${driveConfig.apiKey}`, { method: 'PATCH', body: form });
+        if (!res.ok) throw new Error('فشل الحفظ');
+        showNotification('✅ تم حفظ المستخدمين', 'success');
+        return true;
+    } catch (error) {
+        showNotification(`❌ خطأ: ${error.message}`, 'error');
+        return false;
+    } finally { setTimeout(hideProgress, 1500); }
+}
+
 function loadUsersFromBackup() {
     const backup = localStorage.getItem('backupUsers');
-    if (backup) {
-        try {
-            const parsed = JSON.parse(backup);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-                users = parsed;
-                console.log(`✅ تم تحميل ${users.length} مستخدم من النسخ الاحتياطي`);
-                showNotification('تم تحميل المستخدمين من النسخ الاحتياطي', 'info');
-                return true;
-            }
-        } catch (e) {
-            console.error('خطأ في تحميل النسخ الاحتياطي:', e);
-        }
-    }
+    if (backup) try { users = JSON.parse(backup); return true; } catch { return false; }
     return false;
 }
 
-// تحميل المستخدمين الافتراضيين
 function loadDefaultUsers() {
     users = [
-        { 
-            id: 'user_admin', 
-            username: 'admin', 
-            email: 'admin@dchc-egdam.com', 
-            taxNumber: 'ADMIN001', 
-            contractCustomerId: 'ADMIN001',
-            userType: 'admin', 
-            password: 'admin123', 
-            status: 'active', 
-            createdAt: new Date().toISOString(), 
-            lastLogin: null 
-        },
-        { 
-            id: 'user_accountant', 
-            username: 'accountant', 
-            email: 'accountant@dchc-egdam.com', 
-            taxNumber: 'ACC001', 
-            contractCustomerId: 'ACC001',
-            userType: 'accountant', 
-            password: 'acc123', 
-            status: 'active', 
-            createdAt: new Date().toISOString(), 
-            lastLogin: null 
-        },
-        { 
-            id: 'msc', 
-            username: 'msc', 
-            email: 'customer@example.com', 
-            taxNumber: '202487288', 
-            contractCustomerId: 'MSC',
-            userType: 'customer', 
-            password: 'msc123', 
-            status: 'active', 
-            createdAt: new Date().toISOString(), 
-            lastLogin: null 
-        },
-        { 
-            id: 'one', 
-            username: 'one', 
-            email: 'accountant@dchc-egdam.com', 
-            taxNumber: '374380139', 
-            contractCustomerId: 'ONE',
-            userType: 'accountant', 
-            password: 'one123', 
-            status: 'active', 
-            createdAt: new Date().toISOString(), 
-            lastLogin: null 
-        },
-        { 
-            id: 'zim', 
-            username: 'zim', 
-            email: 'zim@gmail.com', 
-            taxNumber: '123456789', 
-            contractCustomerId: 'zim',
-            userType: 'customer', 
-            password: 'zim123', 
-            status: 'active', 
-            createdAt: new Date().toISOString(), 
-            lastLogin: null 
-        }
+        { id: 'user_admin', username: 'admin', email: 'admin@dchc-egdam.com', taxNumber: 'ADMIN001', contractCustomerId: 'ADMIN001', userType: 'admin', password: 'admin123', status: 'active', createdAt: new Date().toISOString(), lastLogin: null },
+        { id: 'user_accountant', username: 'accountant', email: 'accountant@dchc-egdam.com', taxNumber: 'ACC001', contractCustomerId: 'ACC001', userType: 'accountant', password: 'acc123', status: 'active', createdAt: new Date().toISOString(), lastLogin: null },
+        { id: 'msc', username: 'msc', email: 'customer@example.com', taxNumber: '202487288', contractCustomerId: 'MSC', userType: 'customer', password: 'msc123', status: 'active', createdAt: new Date().toISOString(), lastLogin: null },
+        { id: 'one', username: 'one', email: 'accountant@dchc-egdam.com', taxNumber: '374380139', contractCustomerId: 'ONE', userType: 'accountant', password: 'one123', status: 'active', createdAt: new Date().toISOString(), lastLogin: null },
+        { id: 'zim', username: 'zim', email: 'zim@gmail.com', taxNumber: '123456789', contractCustomerId: 'zim', userType: 'customer', password: 'zim123', status: 'active', createdAt: new Date().toISOString(), lastLogin: null }
     ];
-    showNotification('تم استخدام مستخدمين افتراضيين (تعذر الاتصال بـ Drive)', 'warning');
+    showNotification('تم استخدام المستخدمين الافتراضيين', 'warning');
 }
 
-// تحميل المستخدمين مع fallback
 async function loadUsers(forceRefresh = false) {
     if (forceRefresh) {
-        const driveSuccess = await loadUsersFromDrive(true);
-        if (driveSuccess) {
-            showNotification('تم تحديث المستخدمين من Drive', 'success');
-        } else {
-            const backupLoaded = loadUsersFromBackup();
-            if (!backupLoaded) {
-                loadDefaultUsers();
-            }
-        }
-        return;
-    }
-    
-    const driveSuccess = await loadUsersFromDrive();
-    
-    if (!driveSuccess) {
-        const backupLoaded = loadUsersFromBackup();
-        if (!backupLoaded) {
-            loadDefaultUsers();
+        if (await loadUsersFromDrive()) showNotification('تم تحديث المستخدمين', 'success');
+        else if (!loadUsersFromBackup()) loadDefaultUsers();
+    } else {
+        if (!await loadUsersFromDrive()) {
+            if (!loadUsersFromBackup()) loadDefaultUsers();
         }
     }
 }
 
-// تحديث المستخدمين من Drive (للمدير فقط)
 window.refreshUsersFromDrive = async function() {
     if (!currentUser || currentUser.userType !== 'admin') {
         showNotification('غير مصرح لك بتحديث المستخدمين', 'error');
         return;
     }
-    
-    const success = await loadUsersFromDrive(true);
+    const success = await loadUsersFromDrive();
     if (success) {
         renderUsersTable();
-        showNotification('تم تحديث المستخدمين من Drive', 'success');
+        showNotification('تم تحديث المستخدمين', 'success');
     } else {
-        const backupLoaded = loadUsersFromBackup();
-        if (backupLoaded) {
-            renderUsersTable();
-        } else {
-            showNotification('فشل التحديث، تحقق من الإعدادات', 'error');
-        }
+        if (loadUsersFromBackup()) renderUsersTable();
+        else showNotification('فشل التحديث', 'error');
     }
 };
 
 // ============================================
-// دوال إدارة المستخدمين (CRUD كاملة) - للمدير فقط
+// دوال إدارة المستخدمين
 // ============================================
 function renderUsersTable() {
     const tbody = document.getElementById('usersTableBody');
     if (!tbody) return;
-    let html = '';
-    users.forEach(user => {
-        const statusClass = user.status === 'active' ? 'active' : 'inactive';
-        const statusText = user.status === 'active' ? 'نشط' : 'غير نشط';
-        const typeText = { 'admin': 'مدير', 'accountant': 'محاسب', 'customer': 'عميل' }[user.userType] || user.userType;
-        const lastLogin = user.lastLogin ? new Date(user.lastLogin).toLocaleString('ar-EG') : 'لم يسجل';
-        html += `<tr>
-            <td>${user.username}</td>
-            <td>${user.email}</td>
-            <td>${user.taxNumber || '-'}</td>
-            <td>${user.contractCustomerId || '-'}</td>
-            <td>${typeText}</td>
-            <td><span class="status-badge ${statusClass}">${statusText}</span></td>
-            <td>${lastLogin}</td>
-            <td>
-                <button class="action-btn edit" onclick="editUser('${user.id}')"><i class="fas fa-edit"></i></button>
-                <button class="action-btn reset" onclick="resetUserPassword('${user.id}')"><i class="fas fa-key"></i></button>
-                <button class="action-btn delete" onclick="deleteUser('${user.id}')"><i class="fas fa-trash"></i></button>
-            </td>
-        </tr>`;
-    });
-    tbody.innerHTML = html;
+    tbody.innerHTML = users.map(u => `<tr>
+        <td>${u.username}</td><td>${u.email}</td><td>${u.taxNumber || '-'}</td><td>${u.contractCustomerId || '-'}</td>
+        <td>${{ admin: 'مدير', accountant: 'محاسب', customer: 'عميل' }[u.userType] || u.userType}</td>
+        <td><span class="status-badge ${u.status}">${u.status === 'active' ? 'نشط' : 'غير نشط'}</span></td>
+        <td>${u.lastLogin ? new Date(u.lastLogin).toLocaleString('ar-EG') : 'لم يسجل'}</td>
+        <td>
+            <button class="action-btn edit" onclick="editUser('${u.id}')"><i class="fas fa-edit"></i></button>
+            <button class="action-btn reset" onclick="resetUserPassword('${u.id}')"><i class="fas fa-key"></i></button>
+            <button class="action-btn delete" onclick="deleteUser('${u.id}')"><i class="fas fa-trash"></i></button>
+        </td>
+    </tr>`).join('');
 }
 
 window.showUserManagement = async function() {
-    if (!currentUser || currentUser.userType !== 'admin') {
-        alert('هذه الصفحة مخصصة للمدير فقط');
-        return;
-    }
-    
-    await loadUsersFromDrive(true);
+    if (!currentUser || currentUser.userType !== 'admin') return alert('غير مصرح');
+    await loadUsersFromDrive();
     renderUsersTable();
     document.getElementById('userManagementModal').style.display = 'block';
 };
@@ -491,27 +271,17 @@ window.closeUserManagementModal = function() {
 };
 
 window.showAddUserForm = function() {
-    if (!currentUser || currentUser.userType !== 'admin') {
-        alert('غير مصرح لك بهذا الإجراء');
-        return;
-    }
+    if (!currentUser || currentUser.userType !== 'admin') return alert('غير مصرح');
     currentEditingUserId = null;
     document.getElementById('userFormTitle').textContent = 'إضافة مستخدم جديد';
-    document.getElementById('editUsername').value = '';
-    document.getElementById('editEmail').value = '';
-    document.getElementById('editTaxNumber').value = '';
-    document.getElementById('editContractCustomerId').value = '';
+    ['editUsername', 'editEmail', 'editTaxNumber', 'editContractCustomerId', 'editPassword'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('editUserType').value = 'customer';
-    document.getElementById('editPassword').value = '';
     document.getElementById('editStatus').value = 'active';
     document.getElementById('userForm').style.display = 'block';
 };
 
 window.editUser = function(userId) {
-    if (!currentUser || currentUser.userType !== 'admin') {
-        alert('غير مصرح لك بهذا الإجراء');
-        return;
-    }
+    if (!currentUser || currentUser.userType !== 'admin') return alert('غير مصرح');
     const user = users.find(u => u.id === userId);
     if (!user) return;
     currentEditingUserId = userId;
@@ -526,17 +296,13 @@ window.editUser = function(userId) {
     document.getElementById('userForm').style.display = 'block';
 };
 
-window.cancelUserForm = function() {
+function cancelUserForm() {
     document.getElementById('userForm').style.display = 'none';
     currentEditingUserId = null;
-};
+}
 
 window.saveUserFromForm = async function() {
-    if (!currentUser || currentUser.userType !== 'admin') {
-        alert('غير مصرح لك بهذا الإجراء');
-        return;
-    }
-    
+    if (!currentUser || currentUser.userType !== 'admin') return alert('غير مصرح');
     const username = document.getElementById('editUsername').value.trim();
     const email = document.getElementById('editEmail').value.trim();
     const taxNumber = document.getElementById('editTaxNumber').value.trim();
@@ -545,534 +311,190 @@ window.saveUserFromForm = async function() {
     const password = document.getElementById('editPassword').value;
     const status = document.getElementById('editStatus').value;
 
-    if (!username || !email) {
-        alert('الرجاء إدخال اسم المستخدم والبريد الإلكتروني');
-        return;
-    }
-
-    if (!currentEditingUserId && !password) {
-        alert('الرجاء إدخال كلمة مرور للمستخدم الجديد');
-        return;
-    }
+    if (!username || !email) return alert('الرجاء إدخال اسم المستخدم والبريد الإلكتروني');
+    if (!currentEditingUserId && !password) return alert('الرجاء إدخال كلمة مرور');
 
     if (currentEditingUserId) {
-        const user = users.find(u => u.id === currentEditingUserId);
-        if (user) {
-            user.username = username;
-            user.email = email;
-            user.taxNumber = taxNumber;
-            user.contractCustomerId = contractCustomerId;
-            user.userType = userType;
-            if (password) user.password = password;
-            user.status = status;
-        }
-    } else {
-        const newId = 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        const newUser = {
-            id: newId,
-            username,
-            email,
-            taxNumber,
-            contractCustomerId,
-            userType,
-            password: password,
-            status,
-            createdAt: new Date().toISOString(),
-            lastLogin: null
-        };
-        users.push(newUser);
-    }
+        const u = users.find(u => u.id === currentEditingUserId);
+        if (u) { u.username = username; u.email = email; u.taxNumber = taxNumber; u.contractCustomerId = contractCustomerId; u.userType = userType; if (password) u.password = password; u.status = status; }
+    } else users.push({ id: 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9), username, email, taxNumber, contractCustomerId, userType, password, status, createdAt: new Date().toISOString(), lastLogin: null });
 
-    const driveSaved = await saveUsersToDrive();
+    const saved = await saveUsersToDrive();
     localStorage.setItem('backupUsers', JSON.stringify(users));
-    
-    if (driveSaved) {
-        showNotification('تم حفظ المستخدم بنجاح في Drive', 'success');
-    } else {
-        showNotification('تم حفظ المستخدم محلياً (تعذر الاتصال بـ Drive)', 'warning');
-    }
-    
+    showNotification(saved ? 'تم الحفظ في Drive' : 'تم الحفظ محلياً', saved ? 'success' : 'warning');
     renderUsersTable();
     cancelUserForm();
 };
 
 window.resetUserPassword = async function(userId) {
-    if (!currentUser || currentUser.userType !== 'admin') {
-        alert('غير مصرح لك بهذا الإجراء');
-        return;
-    }
-    
-    const newPassword = prompt('أدخل كلمة المرور الجديدة للمستخدم');
-    if (!newPassword) return;
-    const user = users.find(u => u.id === userId);
-    if (user) {
-        user.password = newPassword;
-        
-        const driveSaved = await saveUsersToDrive();
-        localStorage.setItem('backupUsers', JSON.stringify(users));
-        
-        if (driveSaved) {
-            showNotification('تم إعادة تعيين كلمة المرور وحفظها في Drive', 'success');
-        } else {
-            showNotification('تم إعادة تعيين كلمة المرور محلياً', 'warning');
-        }
-        
-        renderUsersTable();
-    }
+    if (!currentUser || currentUser.userType !== 'admin') return alert('غير مصرح');
+    const newPass = prompt('أدخل كلمة المرور الجديدة');
+    if (!newPass) return;
+    const u = users.find(u => u.id === userId);
+    if (u) { u.password = newPass; await saveUsersToDrive(); localStorage.setItem('backupUsers', JSON.stringify(users)); renderUsersTable(); showNotification('تم تغيير كلمة المرور', 'success'); }
 };
 
 window.deleteUser = async function(userId) {
-    if (!currentUser || currentUser.userType !== 'admin') {
-        alert('غير مصرح لك بهذا الإجراء');
-        return;
-    }
-    
-    if (userId === currentUser?.id) {
-        alert('لا يمكنك حذف نفسك');
-        return;
-    }
-    if (!confirm('هل أنت متأكد من حذف هذا المستخدم؟')) return;
+    if (!currentUser || currentUser.userType !== 'admin') return alert('غير مصرح');
+    if (userId === currentUser?.id) return alert('لا يمكنك حذف نفسك');
+    if (!confirm('هل أنت متأكد؟')) return;
     users = users.filter(u => u.id !== userId);
-    
-    const driveSaved = await saveUsersToDrive();
+    await saveUsersToDrive();
     localStorage.setItem('backupUsers', JSON.stringify(users));
-    
-    if (driveSaved) {
-        showNotification('تم حذف المستخدم وحفظ التغييرات في Drive', 'success');
-    } else {
-        showNotification('تم حذف المستخدم محلياً', 'warning');
-    }
-    
     renderUsersTable();
+    showNotification('تم الحذف', 'success');
 };
 
 window.saveUsersManually = async function() {
-    if (!currentUser || currentUser.userType !== 'admin') {
-        showNotification('غير مصرح لك بهذا الإجراء', 'error');
-        return;
-    }
+    if (!currentUser || currentUser.userType !== 'admin') return showNotification('غير مصرح', 'error');
     await saveUsersToDrive();
 };
 
 // ============================================
-// دالة تحميل البيانات من Drive (لجميع المستخدمين المسجلين)
-// ============================================
-async function loadInvoicesFromDrive() {
-    if (!driveConfig.apiKey || !driveConfig.folderId) {
-        console.log('⚠️ إعدادات Drive غير مكتملة');
-        return false;
-    }
-
-    let fileId = driveConfig.fileId;
-    
-    if (!fileId && driveConfig.fileName) {
-        try {
-            const query = `'${driveConfig.folderId}' in parents and name='${driveConfig.fileName}'`;
-            const encodedQuery = encodeURIComponent(query);
-            const url = `https://www.googleapis.com/drive/v3/files?q=${encodedQuery}&key=${driveConfig.apiKey}&fields=files(id,name)`;
-            
-            const response = await fetch(url);
-            
-            if (!response.ok) throw new Error('فشل البحث عن الملف');
-            
-            const data = await response.json();
-            if (data.files && data.files.length > 0) {
-                fileId = data.files[0].id;
-                driveConfig.fileId = fileId;
-                if (currentUser?.userType === 'admin') {
-                    saveDriveSettingsToStorage();
-                }
-            } else {
-                return false;
-            }
-        } catch (error) {
-            console.error('خطأ في البحث عن الملف:', error);
-            return false;
-        }
-    } else if (!fileId) {
-        return false;
-    }
-
-    try {
-        showProgress('جاري تحميل البيانات من Drive...', 30);
-        
-        const downloadUrl = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${driveConfig.apiKey}`;
-        const fileResponse = await fetch(downloadUrl);
-        
-        if (!fileResponse.ok) throw new Error('فشل تحميل الملف');
-        
-        const fileContent = await fileResponse.text();
-        
-        showProgress('جاري تحليل البيانات...', 60);
-        
-        // تحليل XML
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(fileContent, "text/xml");
-        const parseError = xmlDoc.querySelector('parsererror');
-        
-        let newInvoices = [];
-        
-        if (parseError) {
-            const invoiceMatches = fileContent.match(/<invoice[\s\S]*?<\/invoice>/g);
-            if (invoiceMatches && invoiceMatches.length > 0) {
-                const wrappedXml = `<root>${invoiceMatches.join('')}</root>`;
-                const wrappedDoc = parser.parseFromString(wrappedXml, "text/xml");
-                const invoiceNodes = wrappedDoc.querySelectorAll('invoice');
-                
-                for (let i = 0; i < invoiceNodes.length; i++) {
-                    const inv = parseInvoiceNode(invoiceNodes[i]);
-                    if (inv) newInvoices.push(inv);
-                }
-            } else {
-                throw new Error('لم يتم العثور على بيانات فواتير صالحة');
-            }
-        } else {
-            const invoiceNodes = xmlDoc.getElementsByTagName('invoice');
-            for (let i = 0; i < invoiceNodes.length; i++) {
-                const inv = parseInvoiceNode(invoiceNodes[i]);
-                if (inv) newInvoices.push(inv);
-            }
-        }
-
-        if (newInvoices.length === 0) throw new Error('لا توجد فواتير');
-
-        invoicesData = newInvoices;
-        
-        showProgress('تم تحميل البيانات بنجاح', 100);
-        
-        // تطبيق التصفية حسب المستخدم
-        if (currentUser?.isGuest) {
-            filterInvoicesByGuest(currentUser.taxNumber, currentUser.blNumber);
-        } else {
-            filterInvoicesByUser();
-        }
-        
-        document.getElementById('fileStatus').innerHTML = `<i class="fas fa-check-circle"></i> ✅ تم تحميل ${invoicesData.length} فاتورة من Drive`;
-        updateDataSource();
-        
-        return true;
-        
-    } catch (error) {
-        console.error('خطأ في تحميل البيانات:', error);
-        showNotification(`❌ خطأ في التحميل: ${error.message}`, 'error');
-        return false;
-    } finally {
-        setTimeout(hideProgress, 1500);
-    }
-}
-
-// ============================================
-// نظام تسجيل الدخول
+// دوال تسجيل الدخول
 // ============================================
 function checkSession() {
     const saved = sessionStorage.getItem('currentUser');
-    if (saved) {
-        try {
-            currentUser = JSON.parse(saved);
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('mainApp').style.display = 'block';
-            updateUserInterface();
-            addDatabaseControls();
-            
-            // تحميل البيانات من Drive تلقائياً بعد تسجيل الدخول
-            setTimeout(() => {
-                loadInvoicesFromDrive();
-            }, 500);
-            
-            if (currentUser.userType === 'admin') {
-                startPeriodicUserUpdate();
-            }
-        } catch (e) {
-            sessionStorage.removeItem('currentUser');
-        }
-    }
+    if (saved) try {
+        currentUser = JSON.parse(saved);
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('mainApp').style.display = 'block';
+        updateUserInterface();
+        addDatabaseControls();
+        setTimeout(() => loadInvoicesFromDrive(), 500);
+        if (currentUser.userType === 'admin') setInterval(async () => { if (currentUser?.userType === 'admin') await loadUsersFromDrive(); }, 5 * 60 * 1000);
+    } catch { sessionStorage.removeItem('currentUser'); }
 }
 
 window.switchLoginTab = function(tab) {
-    document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-    document.querySelectorAll('.login-form').forEach(form => form.classList.remove('active'));
-    
-    if (tab === 'login') {
-        document.querySelectorAll('.tab-btn')[0].classList.add('active');
-        document.getElementById('loginForm').classList.add('active');
-    } else if (tab === 'guest') {
-        document.querySelectorAll('.tab-btn')[1].classList.add('active');
-        document.getElementById('guestForm').classList.add('active');
-    }
-    
+    document.querySelectorAll('.tab-btn, .login-form').forEach(el => el.classList.remove('active'));
+    if (tab === 'login') { document.querySelectorAll('.tab-btn')[0].classList.add('active'); document.getElementById('loginForm').classList.add('active'); }
+    else { document.querySelectorAll('.tab-btn')[1].classList.add('active'); document.getElementById('guestForm').classList.add('active'); }
     document.getElementById('loginMessage').style.display = 'none';
 };
 
 function showLoginMessage(msg, type) {
-    const div = document.getElementById('loginMessage');
-    div.textContent = msg;
-    div.className = `login-message ${type}`;
-    div.style.display = 'block';
+    const d = document.getElementById('loginMessage');
+    d.textContent = msg; d.className = `login-message ${type}`; d.style.display = 'block';
 }
 
 window.handleLogin = async function() {
     const username = document.getElementById('loginUsername').value.trim();
     const password = document.getElementById('loginPassword').value;
-    
-    if (!username || !password) return showLoginMessage('الرجاء إدخال اسم المستخدم وكلمة المرور', 'error');
-    
-    try {
-        await loadUsersFromDrive(true);
-    } catch (e) {
-        console.log('لا يمكن تحديث المستخدمين من Drive، استخدام المخزون محلياً');
-    }
-    
+    if (!username || !password) return showLoginMessage('الرجاء إدخال البيانات', 'error');
+    await loadUsers(true);
     const user = users.find(u => (u.username === username || u.email === username) && u.status === 'active' && u.password === password);
-    if (!user) return showLoginMessage('اسم المستخدم أو كلمة المرور غير صحيحة', 'error');
-    
+    if (!user) return showLoginMessage('بيانات غير صحيحة', 'error');
     user.lastLogin = new Date().toISOString();
     currentUser = { ...user };
     sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
-    
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
     updateUserInterface();
     addDatabaseControls();
-    
-    // تحميل البيانات من Drive تلقائياً بعد تسجيل الدخول
-    setTimeout(() => {
-        loadInvoicesFromDrive();
-    }, 500);
+    setTimeout(() => loadInvoicesFromDrive(), 500);
 };
 
 window.handleGuestLogin = async function() {
     const taxNumber = document.getElementById('guestTaxNumber').value.trim();
     const blNumber = document.getElementById('guestBlNumber').value.trim();
-    
-    if (!taxNumber && !blNumber) {
-        showLoginMessage('الرجاء إدخال الرقم الضريبي أو رقم البوليصة على الأقل', 'error');
-        return;
-    }
-    
-    const guestUser = {
-        id: 'guest_' + Date.now(),
-        username: 'زائر',
-        email: 'guest@temp.com',
-        taxNumber: taxNumber || null,
-        blNumber: blNumber || null,
-        userType: 'customer',
-        password: null,
-        status: 'active',
-        isGuest: true,
-        createdAt: new Date().toISOString(),
-        lastLogin: new Date().toISOString()
-    };
-    
-    currentUser = guestUser;
+    if (!taxNumber && !blNumber) return showLoginMessage('أدخل الرقم الضريبي أو البوليصة', 'error');
+    currentUser = { id: 'guest_' + Date.now(), username: 'زائر', email: 'guest@temp.com', taxNumber: taxNumber || null, blNumber: blNumber || null, userType: 'customer', isGuest: true, lastLogin: new Date().toISOString() };
     sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
-    
     document.getElementById('loginScreen').style.display = 'none';
     document.getElementById('mainApp').style.display = 'block';
-    
     updateUserInterface();
     addDatabaseControls();
-    
-    // تحميل البيانات من Drive للزائر
-    setTimeout(() => {
-        loadInvoicesFromDrive().then(() => {
-            filterInvoicesByGuest(taxNumber, blNumber);
-        });
-    }, 500);
-    
-    let message = 'مرحباً بك! أنت الآن في وضع الزائر. ';
-    if (taxNumber && blNumber) {
-        message += `تبحث عن فواتير نقدية برقم ضريبي ${taxNumber} ورقم بوليصة ${blNumber}`;
-    } else if (taxNumber) {
-        message += `تبحث عن فواتير نقدية برقم ضريبي ${taxNumber}`;
-    } else if (blNumber) {
-        message += `تبحث عن فاتورة برقم بوليصة ${blNumber}`;
-    }
-    showNotification(message, 'info');
+    setTimeout(() => loadInvoicesFromDrive().then(() => filterInvoicesByGuest(taxNumber, blNumber)), 500);
+    let msg = 'مرحباً بك في وضع الزائر';
+    if (taxNumber && blNumber) msg += ` - بحث عن: ضريبي ${taxNumber} وبوليصة ${blNumber}`;
+    else if (taxNumber) msg += ` - بحث عن: ضريبي ${taxNumber}`;
+    else if (blNumber) msg += ` - بحث عن: بوليصة ${blNumber}`;
+    showNotification(msg, 'info');
 };
 
-window.logout = function() {
-    currentUser = null;
-    sessionStorage.removeItem('currentUser');
-    location.reload();
-};
+window.logout = function() { currentUser = null; sessionStorage.removeItem('currentUser'); location.reload(); };
 
 function updateUserInterface() {
     if (!currentUser) return;
-    
-    let displayName = currentUser.username;
-    let taxDisplay = '';
-    let badgeClass = '';
-    let badgeText = '';
-    
+    let displayName = currentUser.username, taxDisplay = '', badgeClass = '', badgeText = '';
     if (currentUser.isGuest) {
         displayName = 'زائر';
-        taxDisplay = currentUser.taxNumber ? `ضريبي: ${currentUser.taxNumber}` : '';
-        if (currentUser.blNumber) taxDisplay += (taxDisplay ? ' | ' : '') + `بوليصة: ${currentUser.blNumber}`;
-        badgeClass = 'guest';
-        badgeText = 'زائر';
+        taxDisplay = [currentUser.taxNumber ? `ضريبي: ${currentUser.taxNumber}` : '', currentUser.blNumber ? `بوليصة: ${currentUser.blNumber}` : ''].filter(Boolean).join(' | ');
+        badgeClass = 'guest'; badgeText = 'زائر';
     } else {
         taxDisplay = `الرقم الضريبي: ${currentUser.taxNumber || 'غير محدد'}`;
-        if (currentUser.contractCustomerId) {
-            taxDisplay += ` | رقم العقد: ${currentUser.contractCustomerId}`;
-        }
+        if (currentUser.contractCustomerId) taxDisplay += ` | رقم العقد: ${currentUser.contractCustomerId}`;
         badgeClass = currentUser.userType;
         badgeText = { admin: 'مدير', accountant: 'محاسب', customer: 'عميل' }[currentUser.userType] || currentUser.userType;
     }
-    
     document.getElementById('currentUserDisplay').textContent = displayName;
     document.getElementById('userTaxDisplay').textContent = taxDisplay;
-    
     const badge = document.getElementById('userTypeBadge');
-    badge.textContent = badgeText;
-    badge.className = `user-badge ${badgeClass}`;
-    
-    const driveSettingsBtn = document.getElementById('driveSettingsBtn');
-    const changePasswordBtn = document.querySelector('[onclick="showChangePassword()"]');
-    const adminPanelBtn = document.getElementById('adminPanelBtn');
-    const fileInputLabel = document.querySelector('label[for="fileInput"]');
-    const updateDriveBtn = document.querySelector('.btn-drive');
-    const dbControls = document.getElementById('dbControls');
-    
-    if (currentUser.isGuest) {
-        // إخفاء كل شيء للزائر
-        if (driveSettingsBtn) driveSettingsBtn.style.display = 'none';
-        if (changePasswordBtn) changePasswordBtn.style.display = 'none';
-        if (adminPanelBtn) adminPanelBtn.style.display = 'none';
-        if (fileInputLabel) fileInputLabel.style.display = 'none';
-        if (updateDriveBtn) updateDriveBtn.style.display = 'none';
-        if (dbControls) dbControls.style.display = 'none';
-    } else if (currentUser.userType === 'customer') {
-        // العميل: يرى فقط تغيير كلمة المرور
-        if (driveSettingsBtn) driveSettingsBtn.style.display = 'none';
-        if (changePasswordBtn) changePasswordBtn.style.display = 'flex';
-        if (adminPanelBtn) adminPanelBtn.style.display = 'none';
-        if (fileInputLabel) fileInputLabel.style.display = 'none';
-        if (updateDriveBtn) updateDriveBtn.style.display = 'none';
-        if (dbControls) dbControls.style.display = 'none';
-    } else if (currentUser.userType === 'accountant') {
-        // المحاسب: يرى تغيير كلمة المرور فقط
-        if (driveSettingsBtn) driveSettingsBtn.style.display = 'none';
-        if (changePasswordBtn) changePasswordBtn.style.display = 'flex';
-        if (adminPanelBtn) adminPanelBtn.style.display = 'none';
-        if (fileInputLabel) fileInputLabel.style.display = 'none';
-        if (updateDriveBtn) updateDriveBtn.style.display = 'none';
-        if (dbControls) dbControls.style.display = 'none';
-    } else if (currentUser.userType === 'admin') {
-        // المدير: يرى كل شيء
-        if (driveSettingsBtn) driveSettingsBtn.style.display = 'flex';
-        if (changePasswordBtn) changePasswordBtn.style.display = 'flex';
-        if (adminPanelBtn) adminPanelBtn.style.display = 'flex';
-        if (fileInputLabel) fileInputLabel.style.display = 'inline-flex';
-        if (updateDriveBtn) updateDriveBtn.style.display = 'inline-flex';
-        if (dbControls) dbControls.style.display = 'flex';
-    }
+    badge.textContent = badgeText; badge.className = `user-badge ${badgeClass}`;
+
+    const isAdmin = currentUser.userType === 'admin';
+    const isGuest = currentUser.isGuest;
+
+    document.getElementById('driveSettingsBtn').style.display = isAdmin ? 'flex' : 'none';
+    document.querySelector('[onclick="showChangePassword()"]').style.display = isGuest ? 'none' : 'flex';
+    document.getElementById('adminPanelBtn').style.display = isAdmin ? 'flex' : 'none';
+    document.querySelector('label[for="fileInput"]').style.display = isAdmin ? 'inline-flex' : 'none';
+    document.querySelector('.btn-drive').style.display = isAdmin ? 'inline-flex' : 'none';
+    document.getElementById('dbControls').style.display = isAdmin ? 'flex' : 'none';
 }
 
-window.showChangePassword = async function() {
-    document.getElementById('currentPassword').value = '';
-    document.getElementById('newPassword').value = '';
-    document.getElementById('confirmNewPassword').value = '';
+window.showChangePassword = function() {
+    ['currentPassword', 'newPassword', 'confirmNewPassword'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('changePasswordMessage').style.display = 'none';
     document.getElementById('changePasswordModal').style.display = 'block';
 };
 
-window.closeChangePasswordModal = function() {
-    document.getElementById('changePasswordModal').style.display = 'none';
-};
+window.closeChangePasswordModal = function() { document.getElementById('changePasswordModal').style.display = 'none'; };
 
 window.updatePassword = async function() {
-    if (!currentUser || currentUser.isGuest) {
-        alert('غير مسموح للزائر بتغيير كلمة المرور');
-        closeChangePasswordModal();
-        return;
-    }
-    const current = document.getElementById('currentPassword').value;
-    const newPass = document.getElementById('newPassword').value;
-    const confirm = document.getElementById('confirmNewPassword').value;
-
-    if (!current || !newPass || !confirm) {
-        document.getElementById('changePasswordMessage').textContent = 'الرجاء إدخال جميع الحقول';
-        document.getElementById('changePasswordMessage').style.display = 'block';
-        return;
-    }
-
-    if (newPass !== confirm) {
-        document.getElementById('changePasswordMessage').textContent = 'كلمة المرور الجديدة غير متطابقة';
-        document.getElementById('changePasswordMessage').style.display = 'block';
-        return;
-    }
-
+    if (!currentUser || currentUser.isGuest) { alert('غير مسموح'); closeChangePasswordModal(); return; }
+    const [current, newPass, confirm] = ['currentPassword', 'newPassword', 'confirmNewPassword'].map(id => document.getElementById(id).value);
+    if (!current || !newPass || !confirm) return document.getElementById('changePasswordMessage').textContent = 'أدخل جميع الحقول' + (document.getElementById('changePasswordMessage').style.display = 'block');
+    if (newPass !== confirm) return document.getElementById('changePasswordMessage').textContent = 'كلمة المرور غير متطابقة' + (document.getElementById('changePasswordMessage').style.display = 'block');
     const user = users.find(u => u.id === currentUser.id);
-    if (!user || current !== user.password) {
-        document.getElementById('changePasswordMessage').textContent = 'كلمة المرور الحالية غير صحيحة';
-        document.getElementById('changePasswordMessage').style.display = 'block';
-        return;
-    }
-
+    if (!user || current !== user.password) return document.getElementById('changePasswordMessage').textContent = 'كلمة المرور الحالية غير صحيحة' + (document.getElementById('changePasswordMessage').style.display = 'block');
     user.password = newPass;
     await saveUsersToDrive();
-    showNotification('تم تغيير كلمة المرور بنجاح', 'success');
+    showNotification('تم تغيير كلمة المرور', 'success');
     closeChangePasswordModal();
 };
 
 // ============================================
-// دوال قاعدة البيانات IndexedDB (للمدير فقط)
+// دوال قاعدة البيانات
 // ============================================
 function initDatabase() {
-    return new Promise((resolve) => {
+    return new Promise(resolve => {
         try {
-            const request = indexedDB.open('InvoiceDB', 2);
-            request.onerror = () => {
-                useLocalStorageFallback();
-                resolve();
-            };
-            request.onsuccess = (event) => {
-                db = event.target.result;
-                console.log('✅ تم فتح قاعدة البيانات');
-                resolve();
-            };
-            request.onupgradeneeded = (event) => {
-                const db = event.target.result;
+            const req = indexedDB.open('InvoiceDB', 2);
+            req.onerror = () => { useLocalStorageFallback(); resolve(); };
+            req.onsuccess = e => { db = e.target.result; console.log('✅ تم فتح قاعدة البيانات'); resolve(); };
+            req.onupgradeneeded = e => {
+                const db = e.target.result;
                 if (db.objectStoreNames.contains('invoices')) db.deleteObjectStore('invoices');
                 if (db.objectStoreNames.contains('settings')) db.deleteObjectStore('settings');
                 const store = db.createObjectStore('invoices', { keyPath: 'id', autoIncrement: true });
-                store.createIndex('final-number', 'final-number', { unique: false });
-                store.createIndex('draft-number', 'draft-number', { unique: false });
-                store.createIndex('payee-customer-id', 'payee-customer-id', { unique: false });
-                store.createIndex('contract-customer-id', 'contract-customer-id', { unique: false });
-                store.createIndex('created', 'created', { unique: false });
+                ['final-number', 'draft-number', 'payee-customer-id', 'contract-customer-id', 'created'].forEach(idx => store.createIndex(idx, idx, { unique: false }));
                 db.createObjectStore('settings', { keyPath: 'key' });
-                console.log('✅ تم إنشاء هيكل قاعدة البيانات');
             };
-        } catch (error) {
-            console.error('خطأ في IndexedDB:', error);
-            useLocalStorageFallback();
-            resolve();
-        }
+        } catch { useLocalStorageFallback(); resolve(); }
     });
 }
 
 function useLocalStorageFallback() {
-    console.log('استخدام localStorage كبديل');
     try {
         const saved = localStorage.getItem('invoiceData');
-        if (saved) {
-            invoicesData = JSON.parse(saved);
-            filterInvoicesByUser();
-            document.getElementById('fileStatus').innerHTML = `<i class="fas fa-database"></i> ✅ تم تحميل ${invoicesData.length} فاتورة من التخزين المحلي`;
-        }
-    } catch (error) {
-        console.error('خطأ في localStorage:', error);
-    }
+        if (saved) { invoicesData = JSON.parse(saved); filterInvoicesByUser(); }
+    } catch { }
 }
 
-async function saveData(showMessage = false) {
-    // فقط المدير يمكنه حفظ البيانات
-    if (!currentUser || currentUser.userType !== 'admin') {
-        showNotification('غير مصرح لك بحفظ البيانات', 'error');
-        return;
-    }
-    
+async function saveData(showMsg = false) {
+    if (!currentUser || currentUser.userType !== 'admin') return showNotification('غير مصرح', 'error');
     try {
         if (db) {
             const tx = db.transaction(['invoices'], 'readwrite');
@@ -1081,138 +503,71 @@ async function saveData(showMessage = false) {
             for (const inv of invoicesData) await store.add(inv);
             await saveSetting('lastUpdate', new Date().toISOString());
             await saveSetting('invoiceCount', invoicesData.length);
-            console.log('✅ تم حفظ', invoicesData.length, 'فاتورة في IndexedDB');
         } else {
             localStorage.setItem('invoiceData', JSON.stringify(invoicesData));
             localStorage.setItem('lastUpdate', new Date().toISOString());
-            console.log('✅ تم حفظ', invoicesData.length, 'فاتورة في localStorage');
         }
-        
         updateDataSource();
-        
-        if (showMessage) showNotification('تم حفظ البيانات بنجاح', 'success');
-    } catch (error) {
-        console.error('خطأ في حفظ البيانات:', error);
-        if (showMessage) showNotification('خطأ في حفظ البيانات', 'error');
-    }
+        if (showMsg) showNotification('تم حفظ البيانات', 'success');
+    } catch { if (showMsg) showNotification('خطأ في الحفظ', 'error'); }
 }
 
 async function loadSavedData() {
     try {
         let loaded = false;
-        
         if (db) {
-            const tx = db.transaction(['invoices'], 'readonly');
-            const store = tx.objectStore('invoices');
-            const data = await store.getAll();
-            if (data && data.length > 0) {
-                invoicesData = data;
-                loaded = true;
-                const lastUpdate = await getSetting('lastUpdate');
-                document.getElementById('fileStatus').innerHTML = `<i class="fas fa-database"></i> ✅ تم تحميل ${invoicesData.length} فاتورة من قاعدة البيانات ${lastUpdate ? '(آخر تحديث: ' + new Date(lastUpdate).toLocaleString('ar-EG') + ')' : ''}`;
-                console.log('✅ تم استعادة البيانات من IndexedDB');
-            }
+            const data = await db.transaction(['invoices'], 'readonly').objectStore('invoices').getAll();
+            if (data?.length) { invoicesData = data; loaded = true; }
         }
-        
         if (!loaded) {
             const saved = localStorage.getItem('invoiceData');
-            if (saved) {
-                invoicesData = JSON.parse(saved);
-                loaded = true;
-                const lastUpdate = localStorage.getItem('lastUpdate');
-                document.getElementById('fileStatus').innerHTML = `<i class="fas fa-database"></i> ✅ تم تحميل ${invoicesData.length} فاتورة من التخزين المحلي ${lastUpdate ? '(آخر تحديث: ' + new Date(lastUpdate).toLocaleString('ar-EG') + ')' : ''}`;
-                console.log('✅ تم استعادة البيانات من localStorage');
-            }
+            if (saved) { invoicesData = JSON.parse(saved); loaded = true; }
         }
-        
-        if (loaded) {
-            filterInvoicesByUser();
-        } else {
-            console.log('ℹ️ لا توجد بيانات محفوظة');
-        }
-        
+        if (loaded) filterInvoicesByUser();
         updateDataSource();
-    } catch (error) {
-        console.error('خطأ في تحميل البيانات:', error);
-    }
+    } catch { }
 }
 
 function saveSetting(key, value) {
-    if (!db) return Promise.resolve();
-    return new Promise((resolve) => {
-        try {
-            const tx = db.transaction(['settings'], 'readwrite');
-            const store = tx.objectStore('settings');
-            store.put({ key, value }).onsuccess = resolve;
-        } catch (error) {
-            console.error('خطأ في حفظ الإعداد:', error);
-            resolve();
-        }
-    });
+    return db?.transaction(['settings'], 'readwrite').objectStore('settings').put({ key, value });
 }
 
-function getSetting(key) {
-    if (!db) return Promise.resolve(null);
-    return new Promise((resolve) => {
-        try {
-            const tx = db.transaction(['settings'], 'readonly');
-            const store = tx.objectStore('settings');
-            const req = store.get(key);
-            req.onsuccess = () => resolve(req.result ? req.result.value : null);
-        } catch (error) {
-            console.error('خطأ في قراءة الإعداد:', error);
-            resolve(null);
-        }
+async function getSetting(key) {
+    if (!db) return null;
+    return new Promise(resolve => {
+        const req = db.transaction(['settings'], 'readonly').objectStore('settings').get(key);
+        req.onsuccess = () => resolve(req.result?.value || null);
     });
 }
 
 function showNotification(message, type) {
     const notif = document.createElement('div');
-    notif.className = `notification ${type}`;
+    Object.assign(notif.style, {
+        position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)',
+        background: type === 'success' ? '#10b981' : type === 'info' ? '#3b82f6' : '#ef4444',
+        color: 'white', padding: '12px 24px', borderRadius: '50px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
+        zIndex: '10000', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.95em'
+    });
     notif.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'info' ? 'info-circle' : 'exclamation-circle'}"></i><span>${message}</span>`;
-    notif.style.cssText = `
-        position: fixed; top: 20px; left: 50%; transform: translateX(-50%);
-        background: ${type === 'success' ? '#10b981' : type === 'info' ? '#3b82f6' : '#ef4444'};
-        color: white; padding: 12px 24px; border-radius: 50px; box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-        z-index: 10000; display: flex; align-items: center; gap: 10px; font-size: 0.95em;
-        animation: slideDown 0.3s ease;
-    `;
     document.body.appendChild(notif);
-    setTimeout(() => {
-        notif.style.animation = 'slideUp 0.3s ease';
-        setTimeout(() => notif.remove(), 300);
-    }, 3000);
+    setTimeout(() => { notif.style.animation = 'slideUp 0.3s ease'; setTimeout(() => notif.remove(), 300); }, 3000);
 }
 
 function addDatabaseControls() {
     const toolbar = document.querySelector('.toolbar-section');
     if (!toolbar) return;
-    
-    const existingControls = document.querySelector('.db-controls');
-    if (existingControls) existingControls.remove();
-    
-    const controls = document.createElement('div');
-    controls.className = 'db-controls';
-    
-    // أزرار حفظ البيانات تظهر فقط للمدير
-    if (currentUser && currentUser.userType === 'admin') {
-        controls.innerHTML = `
-            <button class="btn btn-secondary" onclick="toggleAutoSave()" title="الحفظ التلقائي">
-                <i class="fas fa-${autoSaveEnabled ? 'toggle-on' : 'toggle-off'}"></i>
-            </button>
-            <button class="btn btn-save" onclick="saveData(true)" title="حفظ البيانات الآن">
-                <i class="fas fa-save"></i> حفظ
-            </button>
-        `;
-        toolbar.appendChild(controls);
+    const existing = document.querySelector('.db-controls');
+    if (existing) existing.remove();
+    if (currentUser?.userType === 'admin') {
+        const c = document.createElement('div');
+        c.className = 'db-controls';
+        c.innerHTML = `<button class="btn btn-secondary" onclick="toggleAutoSave()"><i class="fas fa-${autoSaveEnabled ? 'toggle-on' : 'toggle-off'}"></i></button><button class="btn btn-save" onclick="saveData(true)"><i class="fas fa-save"></i> حفظ</button>`;
+        toolbar.appendChild(c);
     }
 }
 
 window.toggleAutoSave = function() {
-    if (!currentUser || currentUser.userType !== 'admin') {
-        showNotification('غير مصرح لك بهذا الإجراء', 'error');
-        return;
-    }
+    if (!currentUser || currentUser.userType !== 'admin') return showNotification('غير مصرح', 'error');
     autoSaveEnabled = !autoSaveEnabled;
     const btn = document.querySelector('.db-controls button:first-child i');
     if (btn) btn.className = `fas fa-${autoSaveEnabled ? 'toggle-on' : 'toggle-off'}`;
@@ -1220,18 +575,12 @@ window.toggleAutoSave = function() {
 };
 
 function updateDataSource() {
-    const sourceElement = document.getElementById('dataSource');
-    if (!sourceElement) return;
-    
+    const el = document.getElementById('dataSource');
+    if (!el) return;
     const count = invoicesData.length;
     const lastUpdate = localStorage.getItem('lastUpdate') || 'غير معروف';
-    const formattedDate = lastUpdate !== 'غير معروف' ? new Date(lastUpdate).toLocaleString('ar-EG') : '';
-    
-    if (db) {
-        sourceElement.innerHTML = `📦 ${count} فاتورة - قاعدة بيانات محلية ${formattedDate ? '(آخر تحديث: ' + formattedDate + ')' : ''}`;
-    } else {
-        sourceElement.innerHTML = `💾 ${count} فاتورة - تخزين مؤقت ${formattedDate ? '(آخر تحديث: ' + formattedDate + ')' : ''}`;
-    }
+    const date = lastUpdate !== 'غير معروف' ? ` (آخر تحديث: ${new Date(lastUpdate).toLocaleString('ar-EG')})` : '';
+    el.innerHTML = `${db ? '📦' : '💾'} ${count} فاتورة - ${db ? 'قاعدة بيانات محلية' : 'تخزين مؤقت'}${date}`;
 }
 
 // ============================================
@@ -1239,99 +588,52 @@ function updateDataSource() {
 // ============================================
 window.switchInvoiceType = function(type) {
     currentInvoiceType = type;
-    document.querySelectorAll('.type-tab').forEach((btn, index) => {
-        if ((index === 0 && type === INVOICE_TYPES.CASH) || (index === 1 && type === INVOICE_TYPES.POSTPONED)) {
-            btn.classList.add('active');
-        } else {
-            btn.classList.remove('active');
-        }
-    });
+    document.querySelectorAll('.type-tab').forEach((btn, i) => btn.classList.toggle('active', (i === 0 && type === INVOICE_TYPES.CASH) || (i === 1 && type === INVOICE_TYPES.POSTPONED)));
     filterInvoicesByUser();
 };
 
 // ============================================
-// دوال رفع الملفات وتحليل XML (للمدير فقط)
+// دوال رفع الملفات وتحليل XML
 // ============================================
 function handleFileUpload(event) {
-    // منع غير المدير من رفع الملفات
-    if (!currentUser || currentUser.userType !== 'admin') {
-        showNotification('غير مصرح لك برفع الملفات', 'error');
-        event.target.value = '';
-        return;
-    }
-    
+    if (!currentUser || currentUser.userType !== 'admin') { showNotification('غير مصرح', 'error'); event.target.value = ''; return; }
     const file = event.target.files[0];
     if (!file) return;
-    document.getElementById('fileStatus').innerHTML = `<i class="fas fa-spinner fa-spin"></i> جاري تحميل الملف: ${file.name}...`;
+    document.getElementById('fileStatus').innerHTML = `<i class="fas fa-spinner fa-spin"></i> جاري تحميل: ${file.name}...`;
     const reader = new FileReader();
-    reader.onload = (e) => {
-        try {
-            parseXMLContent(e.target.result, file.name);
-        } catch (error) {
-            document.getElementById('fileStatus').innerHTML = '<i class="fas fa-exclamation-circle"></i> ❌ خطأ في قراءة الملف';
-        }
-    };
-    reader.onerror = () => document.getElementById('fileStatus').innerHTML = '<i class="fas fa-exclamation-circle"></i> ❌ خطأ في قراءة الملف';
+    reader.onload = e => { try { parseXMLContent(e.target.result, file.name); } catch { document.getElementById('fileStatus').innerHTML = '<i class="fas fa-exclamation-circle"></i> ❌ خطأ'; } };
+    reader.onerror = () => document.getElementById('fileStatus').innerHTML = '<i class="fas fa-exclamation-circle"></i> ❌ خطأ';
     reader.readAsText(file);
 }
 
 window.parseXMLContent = async function(xmlString, source) {
     try {
         showProgress('جاري تحليل الملف...', 20);
-        
         const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(xmlString, "text/xml");
+        const xmlDoc = parser.parseFromString(xmlString, 'text/xml');
         const parseError = xmlDoc.querySelector('parsererror');
-        
         let newInvoices = [];
-        
-        showProgress('جاري استخراج الفواتير...', 40);
-        
+
         if (parseError) {
-            console.warn('⚠️ الملف ليس XML صحيح، محاولة استخراج XML من النص...');
-            const invoiceMatches = xmlString.match(/<invoice[\s\S]*?<\/invoice>/g);
-            if (invoiceMatches && invoiceMatches.length > 0) {
-                const wrappedXml = `<root>${invoiceMatches.join('')}</root>`;
-                const wrappedDoc = parser.parseFromString(wrappedXml, "text/xml");
-                const invoiceNodes = wrappedDoc.querySelectorAll('invoice');
-                
-                for (let i = 0; i < invoiceNodes.length; i++) {
-                    const inv = parseInvoiceNode(invoiceNodes[i]);
-                    if (inv) newInvoices.push(inv);
-                }
-            } else {
-                throw new Error('لم يتم العثور على بيانات فواتير صالحة');
-            }
+            const matches = xmlString.match(/<invoice[\s\S]*?<\/invoice>/g);
+            if (!matches?.length) throw new Error('لا توجد فواتير');
+            const wrapped = parser.parseFromString(`<root>${matches.join('')}</root>`, 'text/xml');
+            const nodes = wrapped.querySelectorAll('invoice');
+            for (let i = 0; i < nodes.length; i++) { const inv = parseInvoiceNode(nodes[i]); if (inv) newInvoices.push(inv); }
         } else {
-            const invoiceNodes = xmlDoc.getElementsByTagName('invoice');
-            for (let i = 0; i < invoiceNodes.length; i++) {
-                const inv = parseInvoiceNode(invoiceNodes[i]);
-                if (inv) newInvoices.push(inv);
-            }
+            const nodes = xmlDoc.getElementsByTagName('invoice');
+            for (let i = 0; i < nodes.length; i++) { const inv = parseInvoiceNode(nodes[i]); if (inv) newInvoices.push(inv); }
         }
 
-        if (newInvoices.length === 0) throw new Error('لا توجد فواتير');
-
+        if (!newInvoices.length) throw new Error('لا توجد فواتير');
         invoicesData = newInvoices;
-        
-        showProgress('تم تحديث البيانات بنجاح', 100);
-        
-        if (currentUser?.isGuest) {
-            filterInvoicesByGuest(currentUser.taxNumber, currentUser.blNumber);
-        } else {
-            filterInvoicesByUser();
-        }
-        
-        document.getElementById('fileStatus').innerHTML = `<i class="fas fa-check-circle"></i> ✅ تم تحديث البيانات من ${source} - تم تحميل ${invoicesData.length} فاتورة`;
+        showProgress('تم التحديث', 100);
+        currentUser?.isGuest ? filterInvoicesByGuest(currentUser.taxNumber, currentUser.blNumber) : filterInvoicesByUser();
+        document.getElementById('fileStatus').innerHTML = `<i class="fas fa-check-circle"></i> ✅ تم تحديث ${invoicesData.length} فاتورة من ${source}`;
         updateDataSource();
-        
     } catch (error) {
         document.getElementById('fileStatus').innerHTML = `<i class="fas fa-exclamation-circle"></i> ❌ خطأ: ${error.message}`;
-        if (!currentUser?.isGuest) {
-            invoicesData = [];
-            filteredInvoices = [];
-            renderData();
-        }
+        if (!currentUser?.isGuest) { invoicesData = []; filteredInvoices = []; renderData(); }
         hideProgress();
     }
 };
@@ -1375,28 +677,19 @@ function parseInvoiceNode(invoice) {
             'creator': invoice.getAttribute('creator') || '',
             'changed': invoice.getAttribute('changed') || '',
             'changer': invoice.getAttribute('changer') || '',
-            'charges': [],
-            'containers': []
+            'charges': [], 'containers': []
         };
 
         const charges = invoice.getElementsByTagName('charge');
         for (let j = 0; j < charges.length; j++) {
             const charge = charges[j];
-            
             let storageDays = 1;
             const from = charge.getAttribute('event-performed-from');
             const to = charge.getAttribute('event-performed-to');
-            
             if (from && to) {
-                const d1 = new Date(from);
-                const d2 = new Date(to);
-                if (!isNaN(d1) && !isNaN(d2)) {
-                    const diffTime = Math.abs(d2 - d1);
-                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-                    storageDays = diffDays + 1;
-                }
+                const d1 = new Date(from), d2 = new Date(to);
+                if (!isNaN(d1) && !isNaN(d2)) storageDays = Math.ceil(Math.abs(d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
             }
-            
             const chargeObj = {
                 'event-type-id': charge.getAttribute('event-type-id') || '',
                 'entity-id': charge.getAttribute('entity-id') || '',
@@ -1418,24 +711,17 @@ function parseInvoiceNode(invoice) {
                 'containerNumbers': [],
                 'taxes': []
             };
-            
             if (chargeObj['entity-id']) {
                 chargeObj.containerNumbers.push(chargeObj['entity-id']);
                 obj.containers.push(chargeObj['entity-id']);
             }
-            
             const taxes = charge.getElementsByTagName('tax');
             for (let k = 0; k < taxes.length; k++) {
                 const tax = taxes[k];
-                chargeObj.taxes.push({
-                    'amount': parseFloat(tax.getAttribute('amount') || 0),
-                    'created': tax.getAttribute('created') || ''
-                });
+                chargeObj.taxes.push({ amount: parseFloat(tax.getAttribute('amount') || 0), created: tax.getAttribute('created') || '' });
             }
-            
             obj.charges.push(chargeObj);
         }
-        
         obj.containers = [...new Set(obj.containers)];
         return obj;
     } catch (error) {
@@ -1445,73 +731,43 @@ function parseInvoiceNode(invoice) {
 }
 
 // ============================================
-// دوال البحث المتقدم (معدلة لتراعي صلاحيات المستخدم)
+// دوال البحث المتقدم
 // ============================================
 window.applyAdvancedSearch = function() {
-    if (!invoicesData.length) {
-        filteredInvoices = [];
-        renderData();
-        return;
-    }
+    if (!invoicesData.length) { filteredInvoices = []; renderData(); return; }
     
-    // قراءة قيم البحث
-    const final = document.getElementById('searchFinalNumber')?.value.toLowerCase().trim() || '';
-    const draft = document.getElementById('searchDraftNumber')?.value.toLowerCase().trim() || '';
-    const cust = document.getElementById('searchCustomer')?.value.toLowerCase().trim() || '';
-    const vessel = document.getElementById('searchVessel')?.value.toLowerCase().trim() || '';
-    const bl = document.getElementById('searchBlNumber')?.value.toLowerCase().trim() || '';
-    const cont = document.getElementById('searchContainer')?.value.toLowerCase().trim() || '';
-    const status = document.getElementById('searchStatus')?.value || '';
-    const from = document.getElementById('searchDateFrom')?.value || '';
-    const to = document.getElementById('searchDateTo')?.value || '';
-    const invType = document.getElementById('searchInvoiceType')?.value || '';
+    const [final, draft, cust, vessel, bl, cont, status, from, to, invType] = [
+        'searchFinalNumber', 'searchDraftNumber', 'searchCustomer', 'searchVessel', 'searchBlNumber', 'searchContainer', 'searchStatus', 'searchDateFrom', 'searchDateTo', 'searchInvoiceType'
+    ].map(id => document.getElementById(id)?.value.toLowerCase().trim() || '');
 
-    // نبدأ من جميع الفواتير
     let tempInvoices = [...invoicesData];
 
-    // تطبيق صلاحيات المستخدم أولاً
     if (currentUser?.isGuest) {
-        const taxNumber = currentUser.taxNumber;
-        const blNumber = currentUser.blNumber;
+        const { taxNumber, blNumber } = currentUser;
         tempInvoices = tempInvoices.filter(inv => {
             let match = true;
             if (taxNumber) {
                 const num = inv['final-number'] || '';
-                const isPostponed = num.startsWith('P') || num.startsWith('p');
-                if (isPostponed) {
-                    return false;
-                } else {
-                    const payeeMatch = (inv['payee-customer-id'] || '').toLowerCase().includes(taxNumber.toLowerCase());
-                    const contractMatch = (inv['contract-customer-id'] || '').toLowerCase().includes(taxNumber.toLowerCase());
-                    match = match && (payeeMatch || contractMatch);
-                }
+                if (num.startsWith('P') || num.startsWith('p')) return false;
+                const payeeMatch = (inv['payee-customer-id'] || '').toLowerCase().includes(taxNumber.toLowerCase());
+                const contractMatch = (inv['contract-customer-id'] || '').toLowerCase().includes(taxNumber.toLowerCase());
+                match = match && (payeeMatch || contractMatch);
             }
-            if (blNumber) {
-                const blMatch = (inv['key-word2'] || '').toLowerCase().includes(blNumber.toLowerCase());
-                match = match && blMatch;
-            }
+            if (blNumber) match = match && (inv['key-word2'] || '').toLowerCase().includes(blNumber.toLowerCase());
             return match;
         });
     } else if (currentUser && currentUser.userType !== 'admin' && !currentUser.isGuest) {
         const tax = currentUser.taxNumber || '';
         const contractId = currentUser.contractCustomerId || '';
-        
         tempInvoices = tempInvoices.filter(inv => {
             const num = inv['final-number'] || '';
             const isPostponed = num.startsWith('P') || num.startsWith('p');
-            
-            if (isPostponed) {
-                if (!contractId) return false;
-                const invContractId = inv['contract-customer-id'] || '';
-                return invContractId.trim().toLowerCase() === contractId.trim().toLowerCase();
-            } else {
-                return (inv['payee-customer-id'] || '').toLowerCase().includes(tax.toLowerCase()) || 
-                       (inv['contract-customer-id'] || '').toLowerCase().includes(tax.toLowerCase());
-            }
+            if (isPostponed) return contractId && (inv['contract-customer-id'] || '').trim().toLowerCase() === contractId.trim().toLowerCase();
+            else return (inv['payee-customer-id'] || '').toLowerCase().includes(tax.toLowerCase()) || (inv['contract-customer-id'] || '').toLowerCase().includes(tax.toLowerCase());
         });
     }
 
-    let searched = tempInvoices.filter(inv => {
+    const searched = tempInvoices.filter(inv => {
         if (final && !(inv['final-number'] || '').toLowerCase().includes(final)) return false;
         if (draft && !(inv['draft-number'] || '').toLowerCase().includes(draft)) return false;
         if (cust && !(inv['payee-customer-id'] || '').toLowerCase().includes(cust)) return false;
@@ -1538,27 +794,16 @@ window.applyAdvancedSearch = function() {
 
     filteredInvoices = searched;
     currentPage = 1;
+    clearSelectedInvoices();
     renderData();
     showNotification(`تم العثور على ${filteredInvoices.length} فاتورة`, filteredInvoices.length ? 'success' : 'info');
 };
 
 window.resetAdvancedSearch = function() {
-    document.getElementById('searchFinalNumber').value = '';
-    document.getElementById('searchDraftNumber').value = '';
-    document.getElementById('searchCustomer').value = '';
-    document.getElementById('searchVessel').value = '';
-    document.getElementById('searchBlNumber').value = '';
-    document.getElementById('searchContainer').value = '';
-    document.getElementById('searchStatus').value = '';
-    document.getElementById('searchDateFrom').value = '';
-    document.getElementById('searchDateTo').value = '';
-    document.getElementById('searchInvoiceType').value = '';
-    
-    if (currentUser?.isGuest) {
-        filterInvoicesByGuest(currentUser.taxNumber, currentUser.blNumber);
-    } else {
-        filterInvoicesByUser();
-    }
+    ['searchFinalNumber', 'searchDraftNumber', 'searchCustomer', 'searchVessel', 'searchBlNumber', 'searchContainer', 'searchStatus', 'searchDateFrom', 'searchDateTo', 'searchInvoiceType']
+        .forEach(id => document.getElementById(id).value = '');
+    currentUser?.isGuest ? filterInvoicesByGuest(currentUser.taxNumber, currentUser.blNumber) : filterInvoicesByUser();
+    clearSelectedInvoices();
     showNotification('تم إعادة ضبط البحث', 'info');
 };
 
@@ -1566,95 +811,57 @@ window.resetAdvancedSearch = function() {
 // دوال عرض البيانات
 // ============================================
 function filterInvoicesByUser() {
-    if (!invoicesData.length) {
-        filteredInvoices = [];
-        renderData();
-        return;
-    }
-
+    if (!invoicesData.length) { filteredInvoices = []; renderData(); return; }
     let temp = [...invoicesData];
 
-    if (currentUser?.isGuest) {
-        return filterInvoicesByGuest(currentUser.taxNumber, currentUser.blNumber);
-    }
+    if (currentUser?.isGuest) return filterInvoicesByGuest(currentUser.taxNumber, currentUser.blNumber);
 
     if (currentUser && currentUser.userType !== 'admin' && !currentUser.isGuest) {
         const tax = currentUser.taxNumber || '';
         const contractId = currentUser.contractCustomerId || '';
-        
         temp = temp.filter(inv => {
             const num = inv['final-number'] || '';
             const isPostponed = num.startsWith('P') || num.startsWith('p');
-            
-            if (isPostponed) {
-                if (!contractId) return false;
-                const invContractId = inv['contract-customer-id'] || '';
-                return invContractId.trim().toLowerCase() === contractId.trim().toLowerCase();
-            } else {
-                return (inv['payee-customer-id'] || '').toLowerCase().includes(tax.toLowerCase()) || 
-                       (inv['contract-customer-id'] || '').toLowerCase().includes(tax.toLowerCase());
-            }
+            if (isPostponed) return contractId && (inv['contract-customer-id'] || '').trim().toLowerCase() === contractId.trim().toLowerCase();
+            else return (inv['payee-customer-id'] || '').toLowerCase().includes(tax.toLowerCase()) || (inv['contract-customer-id'] || '').toLowerCase().includes(tax.toLowerCase());
         });
     }
 
     temp = temp.filter(inv => {
         const num = inv['final-number'] || '';
-        if (currentInvoiceType === INVOICE_TYPES.CASH) {
-            return num.startsWith('C') || num.startsWith('c');
-        } else {
-            return num.startsWith('P') || num.startsWith('p');
-        }
+        return currentInvoiceType === INVOICE_TYPES.CASH ? (num.startsWith('C') || num.startsWith('c')) : (num.startsWith('P') || num.startsWith('p'));
     });
 
     filteredInvoices = temp;
     currentPage = 1;
+    clearSelectedInvoices();
     renderData();
 }
 
 function filterInvoicesByGuest(taxNumber, blNumber) {
-    if (!invoicesData.length) {
-        filteredInvoices = [];
-        renderData();
-        showNotification('لا توجد بيانات لعرضها. حاول تحديث من Drive أولاً', 'warning');
-        return;
-    }
-    
+    if (!invoicesData.length) { filteredInvoices = []; renderData(); showNotification('لا توجد بيانات', 'warning'); return; }
     filteredInvoices = invoicesData.filter(inv => {
         let match = true;
-        
         if (taxNumber) {
             const num = inv['final-number'] || '';
-            const isPostponed = num.startsWith('P') || num.startsWith('p');
-            
-            if (isPostponed) {
-                return false;
-            } else {
-                const payeeMatch = (inv['payee-customer-id'] || '').toLowerCase().includes(taxNumber.toLowerCase());
-                const contractMatch = (inv['contract-customer-id'] || '').toLowerCase().includes(taxNumber.toLowerCase());
-                match = match && (payeeMatch || contractMatch);
-            }
+            if (num.startsWith('P') || num.startsWith('p')) return false;
+            const payeeMatch = (inv['payee-customer-id'] || '').toLowerCase().includes(taxNumber.toLowerCase());
+            const contractMatch = (inv['contract-customer-id'] || '').toLowerCase().includes(taxNumber.toLowerCase());
+            match = match && (payeeMatch || contractMatch);
         }
-        
-        if (blNumber) {
-            const blMatch = (inv['key-word2'] || '').toLowerCase().includes(blNumber.toLowerCase());
-            match = match && blMatch;
-        }
-        
+        if (blNumber) match = match && (inv['key-word2'] || '').toLowerCase().includes(blNumber.toLowerCase());
         return match;
     });
-    
     currentPage = 1;
+    clearSelectedInvoices();
     renderData();
-    
-    if (filteredInvoices.length === 0) {
-        let message = 'لم يتم العثور على فواتير نقدية تطابق ';
-        if (taxNumber && blNumber) message += `الرقم الضريبي ${taxNumber} ورقم البوليصة ${blNumber}`;
-        else if (taxNumber) message += `الرقم الضريبي ${taxNumber}`;
-        else if (blNumber) message += `رقم البوليصة ${blNumber}`;
-        showNotification(message, 'warning');
-    } else {
-        showNotification(`تم العثور على ${filteredInvoices.length} فاتورة نقدية`, 'success');
-    }
+    if (!filteredInvoices.length) {
+        let msg = 'لم يتم العثور على فواتير';
+        if (taxNumber && blNumber) msg += ` للضريبي ${taxNumber} والبوليصة ${blNumber}`;
+        else if (taxNumber) msg += ` للضريبي ${taxNumber}`;
+        else if (blNumber) msg += ` للبوليصة ${blNumber}`;
+        showNotification(msg, 'warning');
+    } else showNotification(`تم العثور على ${filteredInvoices.length} فاتورة`, 'success');
 }
 
 function renderData() {
@@ -1669,46 +876,12 @@ function renderData() {
     const start = itemsPerPage === Infinity ? 0 : (currentPage - 1) * itemsPerPage;
     const end = itemsPerPage === Infinity ? sorted.length : Math.min(start + itemsPerPage, sorted.length);
     const pageData = sorted.slice(start, end);
+    
     if (viewMode === 'table') renderTableView(pageData);
     else renderCardsView(pageData);
+    
     updateSummary();
     renderPagination(totalPages);
-}
-
-function renderTableView(data) {
-    let html = '<div class="table-container"><table class="data-table"><thead><tr><th>الرقم النهائي</th><th>رقم المسودة</th><th>العميل</th><th>السفينة</th><th>رقم البوليصة</th><th>تاريخ الرحله</th><th>الإجمالي (EGP)</th><th>المبلغ بالعملة</th><th>المتبقي</th></tr></thead><tbody>';
-    data.forEach(inv => {
-        const idx = invoicesData.indexOf(inv);
-        const finalNum = inv['final-number'] || '';
-        const invoiceTypeDisplay = finalNum.startsWith('P') || finalNum.startsWith('p') ? 'أجل' : 'نقدي';
-        
-        const currency = inv['currency'] || 'EGP';
-        const exRate = inv['flex-string-06'] || 48.0215;
-        const totalOriginal = inv['total-total'] || 0;
-        
-        let displayAmount, displayCurrency;
-        if (currency === 'USAD') {
-            displayAmount = (totalOriginal / exRate).toFixed(2);
-            displayCurrency = 'USAD';
-        } else {
-            displayAmount = totalOriginal.toFixed(2);
-            displayCurrency = 'EGP';
-        }
-        
-        html += `<tr onclick="showInvoiceDetails(${idx})" style="cursor: pointer;">
-            <td>${inv['final-number'] || '-'} (${invoiceTypeDisplay})</td>
-            <td>${inv['draft-number'] || '-'}</td>
-            <td>${(inv['payee-customer-id'] || '-').substring(0, 20)}</td>
-            <td>${inv['key-word1'] || '-'}</td>
-            <td>${inv['key-word2'] || '-'}</td>
-            <td>${inv['flex-date-02'] ? new Date(inv['flex-date-02']).toLocaleDateString('ar-EG') : '-'}</td>
-            <td>${totalOriginal.toFixed(2)}</td>
-            <td>${displayAmount} ${displayCurrency}</td>
-            <td>${(inv['total-owed'] || 0).toFixed(2)}</td>
-        </tr>`;
-    });
-    html += '</tbody></table></div>';
-    document.getElementById('dataViewContainer').innerHTML = html;
 }
 
 function renderCardsView(data) {
@@ -1718,20 +891,12 @@ function renderCardsView(data) {
         const voyageDate = inv['flex-date-02'] ? new Date(inv['flex-date-02']).toLocaleDateString('ar-EG') : 'غير محدد';
         const finalNum = inv['final-number'] || '';
         const invoiceTypeDisplay = finalNum.startsWith('P') || finalNum.startsWith('p') ? 'أجل' : 'نقدي';
-        
         const currency = inv['currency'] || 'EGP';
         const exRate = inv['flex-string-06'] || 48.0215;
         const totalOriginal = inv['total-total'] || 0;
-        
         let displayAmount, displayCurrency;
-        if (currency === 'USAD') {
-            displayAmount = (totalOriginal / exRate).toFixed(2);
-            displayCurrency = 'USAD';
-        } else {
-            displayAmount = totalOriginal.toFixed(2);
-            displayCurrency = 'EGP';
-        }
-        
+        if (currency === 'USAD') { displayAmount = (totalOriginal / exRate).toFixed(2); displayCurrency = 'USAD'; }
+        else { displayAmount = totalOriginal.toFixed(2); displayCurrency = 'EGP'; }
         html += `
             <div class="invoice-card" onclick="showInvoiceDetails(${idx})" style="cursor: pointer;">
                 <div class="card-header">
@@ -1763,8 +928,7 @@ function sortInvoices(invoices, field, order) {
     return [...invoices].sort((a, b) => {
         let va = a[field] || '', vb = b[field] || '';
         if (typeof va === 'number' && typeof vb === 'number') return order === 'asc' ? va - vb : vb - va;
-        va = String(va).toLowerCase();
-        vb = String(vb).toLowerCase();
+        va = String(va).toLowerCase(); vb = String(vb).toLowerCase();
         return order === 'asc' ? va.localeCompare(vb, 'ar') : vb.localeCompare(va, 'ar');
     });
 }
@@ -1773,6 +937,7 @@ window.toggleSortOrder = function() {
     sortOrder = sortOrder === 'asc' ? 'desc' : 'asc';
     const icon = document.querySelector('#sortToggle i');
     if (icon) icon.className = sortOrder === 'asc' ? 'fas fa-sort-amount-down-alt' : 'fas fa-sort-amount-up-alt';
+    clearSelectedInvoices();
     renderData();
 };
 
@@ -1780,14 +945,14 @@ window.changeItemsPerPage = function() {
     const select = document.getElementById('itemsPerPage');
     itemsPerPage = select.value === 'all' ? Infinity : parseInt(select.value);
     currentPage = 1;
+    clearSelectedInvoices();
     renderData();
 };
 
 window.setViewMode = function(mode) {
     viewMode = mode;
-    const btns = document.querySelectorAll('.btn-view');
-    btns[0].classList.toggle('active', mode === 'table');
-    btns[1].classList.toggle('active', mode === 'cards');
+    clearSelectedInvoices();
+    document.querySelectorAll('.btn-view').forEach((btn, i) => btn.classList.toggle('active', (i === 0 && mode === 'table') || (i === 1 && mode === 'cards')));
     renderData();
 };
 
@@ -1802,54 +967,34 @@ window.toggleAdvancedSearch = function() {
 
 function updateSummary() {
     const count = filteredInvoices.length;
-    
-    let totalEGP = 0;
-    let taxEGP = 0;
-    let totalUSD = 0;
-    let totalEGPWithoutTax = 0;
-    let totalMartyr = 0;
+    let totalEGP = 0, taxEGP = 0, totalUSD = 0, totalEGPWithoutTax = 0, totalMartyr = 0;
     
     filteredInvoices.forEach(inv => {
         const currency = inv['currency'] || 'EGP';
         const total = inv['total-total'] || 0;
         const taxes = inv['total-taxes'] || 0;
         const exRate = inv['flex-string-06'] || 48.0215;
-        
         const finalNum = inv['final-number'] || '';
         const isPostponed = finalNum.startsWith('P') || finalNum.startsWith('p');
-        const applyMartyr = !(isPostponed && currency === 'USAD');
-        if (applyMartyr) {
-            totalMartyr += 5;
-        }
+        if (!(isPostponed && currency === 'USAD')) totalMartyr += 5;
         
-        if (currency === 'USAD') {
-            totalUSD += total / exRate;
-        } else {
-            totalEGP += total;
-            taxEGP += taxes;
-            totalEGPWithoutTax += (total - taxes);
-        }
+        if (currency === 'USAD') totalUSD += total / exRate;
+        else { totalEGP += total; taxEGP += taxes; totalEGPWithoutTax += (total - taxes); }
     });
-    
+
     document.getElementById('invoiceCount').textContent = count;
     document.getElementById('totalSum').textContent = totalEGP.toFixed(2);
     document.getElementById('taxSum').textContent = taxEGP.toFixed(2);
     document.getElementById('totalUSD').textContent = totalUSD.toFixed(2);
     document.getElementById('totalEGPWithoutTax').textContent = totalEGPWithoutTax.toFixed(2);
     document.getElementById('totalMartyr').textContent = totalMartyr.toFixed(2);
-    
     document.getElementById('totalInvoicesHeader').textContent = count;
-    const customers = new Set(filteredInvoices.map(i => i['payee-customer-id'])).size;
-    const vessels = new Set(filteredInvoices.map(i => i['key-word1']).filter(v => v)).size;
-    document.getElementById('totalCustomers').textContent = customers;
-    document.getElementById('totalVessels').textContent = vessels;
+    document.getElementById('totalCustomers').textContent = new Set(filteredInvoices.map(i => i['payee-customer-id'])).size;
+    document.getElementById('totalVessels').textContent = new Set(filteredInvoices.map(i => i['key-word1']).filter(v => v)).size;
 }
 
 function renderPagination(totalPages) {
-    if (itemsPerPage === Infinity || totalPages <= 1) {
-        document.getElementById('pagination').innerHTML = '';
-        return;
-    }
+    if (itemsPerPage === Infinity || totalPages <= 1) { document.getElementById('pagination').innerHTML = ''; return; }
     let html = `<button class="pagination-btn" onclick="changePage(${currentPage - 1})" ${currentPage === 1 ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
     const maxPages = 5;
     let start = Math.max(1, currentPage - Math.floor(maxPages / 2));
@@ -1859,9 +1004,7 @@ function renderPagination(totalPages) {
         html += `<button class="pagination-btn" onclick="changePage(1)">1</button>`;
         if (start > 2) html += `<span class="pagination-btn disabled">...</span>`;
     }
-    for (let i = start; i <= end; i++) {
-        html += `<button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
-    }
+    for (let i = start; i <= end; i++) html += `<button class="pagination-btn ${i === currentPage ? 'active' : ''}" onclick="changePage(${i})">${i}</button>`;
     if (end < totalPages) {
         if (end < totalPages - 1) html += `<span class="pagination-btn disabled">...</span>`;
         html += `<button class="pagination-btn" onclick="changePage(${totalPages})">${totalPages}</button>`;
@@ -1872,74 +1015,110 @@ function renderPagination(totalPages) {
 
 window.changePage = function(page) {
     const totalPages = itemsPerPage === Infinity ? 1 : Math.ceil(filteredInvoices.length / itemsPerPage);
-    if (page >= 1 && page <= totalPages) {
-        currentPage = page;
-        renderData();
-    }
+    if (page >= 1 && page <= totalPages) { currentPage = page; clearSelectedInvoices(); renderData(); }
 };
+
+// ============================================
+// دوال التحكم في التحديد
+// ============================================
+window.handleRowClick = function(index, event) {
+    if (event.target.type === 'checkbox') return;
+    showInvoiceDetails(index);
+};
+
+window.updateSelectedInvoices = function(index, isSelected) {
+    if (isSelected) selectedInvoices.add(index);
+    else selectedInvoices.delete(index);
+    updateSelectedCount();
+    updateSelectAllCheckbox();
+    const row = document.querySelector(`tr:has(.invoice-checkbox[data-index="${index}"])`);
+    if (row) row.classList.toggle('selected-row', isSelected);
+};
+
+window.selectAllInvoices = function() {
+    document.querySelectorAll('.invoice-checkbox').forEach(cb => {
+        cb.checked = true;
+        const index = parseInt(cb.dataset.index);
+        selectedInvoices.add(index);
+        const row = document.querySelector(`tr:has(.invoice-checkbox[data-index="${index}"])`);
+        if (row) row.classList.add('selected-row');
+    });
+    updateSelectedCount();
+    const selectAll = document.getElementById('selectAllCheckbox');
+    if (selectAll) selectAll.checked = true;
+};
+
+window.deselectAllInvoices = function() {
+    document.querySelectorAll('.invoice-checkbox').forEach(cb => {
+        cb.checked = false;
+        const index = parseInt(cb.dataset.index);
+        selectedInvoices.delete(index);
+        const row = document.querySelector(`tr:has(.invoice-checkbox[data-index="${index}"])`);
+        if (row) row.classList.remove('selected-row');
+    });
+    updateSelectedCount();
+    const selectAll = document.getElementById('selectAllCheckbox');
+    if (selectAll) selectAll.checked = false;
+};
+
+window.toggleAllCheckboxes = function(selectAllCheckbox) {
+    document.querySelectorAll('.invoice-checkbox').forEach(cb => {
+        cb.checked = selectAllCheckbox.checked;
+        const index = parseInt(cb.dataset.index);
+        if (selectAllCheckbox.checked) selectedInvoices.add(index);
+        else selectedInvoices.delete(index);
+        const row = document.querySelector(`tr:has(.invoice-checkbox[data-index="${index}"])`);
+        if (row) row.classList.toggle('selected-row', selectAllCheckbox.checked);
+    });
+    updateSelectedCount();
+};
+
+function updateSelectedCount() {
+    const count = selectedInvoices.size;
+    const countSpan = document.getElementById('selectedCount');
+    const pdfBtn = document.getElementById('exportSelectedBtn');
+    const excelBtn = document.getElementById('exportSelectedExcelBtn');
+    if (countSpan) countSpan.textContent = count;
+    if (pdfBtn) pdfBtn.disabled = count === 0;
+    if (excelBtn) excelBtn.disabled = count === 0;
+}
+
+function updateSelectAllCheckbox() {
+    const checkboxes = document.querySelectorAll('.invoice-checkbox');
+    const selectAll = document.getElementById('selectAllCheckbox');
+    if (!selectAll || !checkboxes.length) return;
+    const allChecked = Array.from(checkboxes).every(cb => cb.checked);
+    selectAll.checked = allChecked;
+    selectAll.indeterminate = !allChecked && Array.from(checkboxes).some(cb => cb.checked);
+}
+
+function clearSelectedInvoices() {
+    selectedInvoices.clear();
+    updateSelectedCount();
+}
 
 // ============================================
 // دوال تجميع المصاريف للفواتير النقدية
 // ============================================
 function groupCashCharges(charges) {
-    // أولاً: فرز البنود حسب نوع الخدمة
-    const sortedCharges = [...charges].sort((a, b) => {
-        const typeA = a['event-type-id'] || '';
-        const typeB = b['event-type-id'] || '';
-        return typeA.localeCompare(typeB);
-    });
-    
-    const grouped = [];
-    const map = new Map();
-    
+    const sortedCharges = [...charges].sort((a, b) => (a['event-type-id'] || '').localeCompare(b['event-type-id'] || ''));
+    const grouped = [], map = new Map();
     sortedCharges.forEach(c => {
-        // مفتاح التجميع: الوصف + النوع + أيام التخزين
         const key = `${c.description || ''}-${c['event-type-id'] || ''}-${c['storage-days'] || 1}`;
         const storageDays = c['storage-days'] || 1;
-        
         if (map.has(key)) {
             const ex = map.get(key);
             ex.quantity += 1;
-            // لا يتم جمع أيام التخزين - نحتفظ بالقيمة الأصلية
             ex.amount += (c.amount || 0);
-            
-            if (c.containerNumbers?.length) {
-                c.containerNumbers.forEach(cont => {
-                    if (!ex.containerNumbers.includes(cont)) {
-                        ex.containerNumbers.push(cont);
-                    }
-                });
-            }
-            
-            if (c['event-performed-from'] || c['event-performed-to']) {
-                ex.dates.push({
-                    from: c['event-performed-from'] || '-',
-                    to: c['event-performed-to'] || '-',
-                    days: storageDays
-                });
-            }
+            if (c.containerNumbers?.length) c.containerNumbers.forEach(cont => { if (!ex.containerNumbers.includes(cont)) ex.containerNumbers.push(cont); });
+            if (c['event-performed-from'] || c['event-performed-to']) ex.dates.push({ from: c['event-performed-from'] || '-', to: c['event-performed-to'] || '-', days: storageDays });
         } else {
-            const newC = { 
-                ...c, 
-                quantity: 1, 
-                containerNumbers: [...(c.containerNumbers || [])],
-                totalStorageDays: storageDays,
-                dates: []
-            };
-            
-            if (c['event-performed-from'] || c['event-performed-to']) {
-                newC.dates.push({
-                    from: c['event-performed-from'] || '-',
-                    to: c['event-performed-to'] || '-',
-                    days: storageDays
-                });
-            }
-            
+            const newC = { ...c, quantity: 1, containerNumbers: [...(c.containerNumbers || [])], totalStorageDays: storageDays, dates: [] };
+            if (c['event-performed-from'] || c['event-performed-to']) newC.dates.push({ from: c['event-performed-from'] || '-', to: c['event-performed-to'] || '-', days: storageDays });
             map.set(key, newC);
             grouped.push(newC);
         }
     });
-    
     return grouped;
 }
 
@@ -1947,205 +1126,341 @@ function groupCashCharges(charges) {
 // دوال تجميع المصاريف للفواتير الآجلة
 // ============================================
 function groupPostponedCharges(charges) {
-    // أولاً: فرز البنود حسب نوع الخدمة
-    const sortedCharges = [...charges].sort((a, b) => {
-        const typeA = a['event-type-id'] || '';
-        const typeB = b['event-type-id'] || '';
-        return typeA.localeCompare(typeB);
-    });
-    
-    const grouped = [];
-    const map = new Map();
-    
+    const sortedCharges = [...charges].sort((a, b) => (a['event-type-id'] || '').localeCompare(b['event-type-id'] || ''));
+    const grouped = [], map = new Map();
     sortedCharges.forEach(c => {
-        // مفتاح التجميع: الوصف + النوع فقط
         const key = `${c.description || ''}-${c['event-type-id'] || ''}`;
         const storageDays = c['storage-days'] || 1;
-        
         if (map.has(key)) {
             const ex = map.get(key);
             ex.quantity += 1;
-            ex.totalStorageDays += storageDays; // جمع أيام التخزين
+            ex.totalStorageDays += storageDays;
             ex.amount += (c.amount || 0);
-            
-            if (c.containerNumbers?.length) {
-                c.containerNumbers.forEach(cont => {
-                    if (!ex.containerNumbers.includes(cont)) {
-                        ex.containerNumbers.push(cont);
-                    }
-                });
-            }
-            
-            if (c['event-performed-from'] || c['event-performed-to']) {
-                ex.dates.push({
-                    from: c['event-performed-from'] || '-',
-                    to: c['event-performed-to'] || '-',
-                    days: storageDays
-                });
-            }
+            if (c.containerNumbers?.length) c.containerNumbers.forEach(cont => { if (!ex.containerNumbers.includes(cont)) ex.containerNumbers.push(cont); });
+            if (c['event-performed-from'] || c['event-performed-to']) ex.dates.push({ from: c['event-performed-from'] || '-', to: c['event-performed-to'] || '-', days: storageDays });
         } else {
-            const newC = { 
-                ...c, 
-                quantity: 1, 
-                containerNumbers: [...(c.containerNumbers || [])],
-                totalStorageDays: storageDays,
-                dates: []
-            };
-            
-            if (c['event-performed-from'] || c['event-performed-to']) {
-                newC.dates.push({
-                    from: c['event-performed-from'] || '-',
-                    to: c['event-performed-to'] || '-',
-                    days: storageDays
-                });
-            }
-            
+            const newC = { ...c, quantity: 1, containerNumbers: [...(c.containerNumbers || [])], totalStorageDays: storageDays, dates: [] };
+            if (c['event-performed-from'] || c['event-performed-to']) newC.dates.push({ from: c['event-performed-from'] || '-', to: c['event-performed-to'] || '-', days: storageDays });
             map.set(key, newC);
             grouped.push(newC);
         }
     });
-    
     return grouped;
 }
 
 // ============================================
-// دوال تصدير تفاصيل الحاويات بصيغة Excel
+// دوال تصدير تفاصيل الحاويات
 // ============================================
 window.exportContainerDetails = async function(groupIndex) {
     const inv = invoicesData[selectedInvoiceIndex];
     if (!inv) return;
-    
     const finalNum = inv['final-number'] || '';
     const isPostponed = finalNum.startsWith('P') || finalNum.startsWith('p');
-    
     const grouped = isPostponed ? groupPostponedCharges(inv.charges) : groupCashCharges(inv.charges);
     const charge = grouped[groupIndex];
-    
-    if (!charge || !charge.containerNumbers?.length) return;
-    
+    if (!charge?.containerNumbers?.length) return;
+
     showProgress('جاري تجهيز بيانات التصدير...', 30);
-    
     const exRate = inv['flex-string-06'] || 48.0215;
     const currency = inv['currency'] || 'EGP';
-    
-    const exportData = [];
-    
-    exportData.push(['تقرير تفاصيل الحاويات']);
-    exportData.push(['الفاتورة: ' + (inv['final-number'] || 'غير محدد')]);
-    exportData.push(['الوصف: ' + (charge.description || 'بند غير محدد')]);
-    exportData.push(['تاريخ التقرير: ' + new Date().toLocaleDateString('ar-EG')]);
-    exportData.push([]);
-    
-    exportData.push(['معلومات الفاتورة:']);
-    exportData.push(['رقم الفاتورة:', inv['final-number'] || '-']);
-    exportData.push(['العميل:', inv['payee-customer-id'] || '-']);
-    exportData.push(['السفينة:', inv['key-word1'] || '-']);
-    exportData.push(['رقم البوليصة:', inv['key-word2'] || '-']);
-    exportData.push(['سعر الصرف:', exRate.toFixed(4)]);
-    exportData.push([]);
-    
-    exportData.push([
-        'م',
-        'رقم الحاوية',
-        'التاريخ من',
-        'التاريخ إلى',
-        'عدد الأيام',
-        'سعر الوحدة',
-        'المبلغ',
-        'العملة'
-    ]);
-    
+    const exportData = [
+        ['تقرير تفاصيل الحاويات'],
+        ['الفاتورة: ' + (inv['final-number'] || 'غير محدد')],
+        ['الوصف: ' + (charge.description || 'بند غير محدد')],
+        ['تاريخ التقرير: ' + new Date().toLocaleDateString('ar-EG')],
+        [],
+        ['معلومات الفاتورة:'],
+        ['رقم الفاتورة:', inv['final-number'] || '-'],
+        ['العميل:', inv['payee-customer-id'] || '-'],
+        ['السفينة:', inv['key-word1'] || '-'],
+        ['رقم البوليصة:', inv['key-word2'] || '-'],
+        ['سعر الصرف:', exRate.toFixed(4)],
+        [],
+        ['م', 'رقم الحاوية', 'التاريخ من', 'التاريخ إلى', 'عدد الأيام', 'سعر الوحدة', 'المبلغ', 'العملة']
+    ];
+
     let totalAmount = 0;
     charge.containerNumbers.forEach((container, idx) => {
-        const dateInfo = charge.dates && charge.dates[idx] ? charge.dates[idx] : {
-            from: charge['event-performed-from'] || '-',
-            to: charge['event-performed-to'] || '-',
-            days: charge['storage-days'] || 1
-        };
-        
+        const dateInfo = charge.dates?.[idx] || { from: charge['event-performed-from'] || '-', to: charge['event-performed-to'] || '-', days: charge['storage-days'] || 1 };
         let amountPerContainer;
-        if (isPostponed && currency === 'USAD') {
-            amountPerContainer = (charge.amount / exRate / charge.containerNumbers.length).toFixed(2);
-        } else {
-            amountPerContainer = (charge.amount / charge.containerNumbers.length).toFixed(2);
-        }
-        
+        if (isPostponed && currency === 'USAD') amountPerContainer = (charge.amount / exRate / charge.containerNumbers.length).toFixed(2);
+        else amountPerContainer = (charge.amount / charge.containerNumbers.length).toFixed(2);
         totalAmount += parseFloat(amountPerContainer);
-        
         exportData.push([
-            (idx + 1).toString(),
-            container,
-            dateInfo.from,
-            dateInfo.to,
-            dateInfo.days.toString(),
-            (charge['rate-billed'] || 0).toFixed(2),
-            amountPerContainer,
+            (idx + 1).toString(), container, dateInfo.from, dateInfo.to, dateInfo.days.toString(),
+            (charge['rate-billed'] || 0).toFixed(2), amountPerContainer,
             (isPostponed && currency === 'USAD') ? 'USAD' : 'EGP'
         ]);
     });
-    
-    exportData.push([]);
-    exportData.push([
-        'الإجمالي',
-        '',
-        '',
-        '',
-        '',
-        '',
-        totalAmount.toFixed(2),
-        (isPostponed && currency === 'USAD') ? 'USAD' : 'EGP'
-    ]);
-    
-    exportData.push([]);
-    exportData.push(['ملخص البند:']);
-    exportData.push(['الوصف:', charge.description || '-']);
-    exportData.push(['النوع:', charge['event-type-id'] || '-']);
-    exportData.push(['عدد الحاويات:', charge.containerNumbers.length.toString()]);
-    exportData.push(['إجمالي المبلغ:', charge.amount.toFixed(2), 'جنيه']);
-    if (isPostponed && currency === 'USAD') {
-        exportData.push(['المبلغ بعد سعر الصرف:', (charge.amount / exRate).toFixed(2), 'USAD']);
-    }
-    
+
+    exportData.push([], ['الإجمالي', '', '', '', '', '', totalAmount.toFixed(2), (isPostponed && currency === 'USAD') ? 'USAD' : 'EGP']);
+    exportData.push([], ['ملخص البند:'], ['الوصف:', charge.description || '-'], ['النوع:', charge['event-type-id'] || '-'], ['عدد الحاويات:', charge.containerNumbers.length.toString()], ['إجمالي المبلغ:', charge.amount.toFixed(2), 'جنيه']);
+    if (isPostponed && currency === 'USAD') exportData.push(['المبلغ بعد سعر الصرف:', (charge.amount / exRate).toFixed(2), 'USAD']);
+
     showProgress('جاري إنشاء ملف Excel...', 70);
-    
     try {
         const wb = XLSX.utils.book_new();
         const ws = XLSX.utils.aoa_to_sheet(exportData);
-        
-        const colWidths = [
-            { wch: 5 },   // م
-            { wch: 20 },  // رقم الحاوية
-            { wch: 15 },  // التاريخ من
-            { wch: 15 },  // التاريخ إلى
-            { wch: 12 },  // عدد الأيام
-            { wch: 12 },  // سعر الوحدة
-            { wch: 15 },  // المبلغ
-            { wch: 8 }    // العملة
-        ];
-        ws['!cols'] = colWidths;
-        
+        ws['!cols'] = [{ wch: 5 }, { wch: 20 }, { wch: 15 }, { wch: 15 }, { wch: 12 }, { wch: 12 }, { wch: 15 }, { wch: 8 }];
         XLSX.utils.book_append_sheet(wb, ws, 'تفاصيل الحاويات');
-        
-        const fileName = `حاويات-${charge.description?.substring(0, 30) || 'بند'}-${inv['final-number']}.xlsx`;
-        XLSX.writeFile(wb, fileName);
-        
-        showProgress('تم التصدير بنجاح!', 100);
-        showNotification('تم تصدير تفاصيل الحاويات بنجاح', 'success');
+        XLSX.writeFile(wb, `حاويات-${charge.description?.substring(0, 30) || 'بند'}-${inv['final-number']}.xlsx`);
+        showNotification('تم تصدير تفاصيل الحاويات', 'success');
     } catch (error) {
-        console.error('خطأ في تصدير Excel:', error);
-        showNotification('حدث خطأ في تصدير الملف: ' + error.message, 'error');
-    } finally {
-        setTimeout(hideProgress, 1500);
+        showNotification('حدث خطأ في التصدير: ' + error.message, 'error');
+    } finally { setTimeout(hideProgress, 1500); }
+};
+
+// ============================================
+// دوال تصدير Excel للفواتير المحددة (مع طابع الشهيد)
+// ============================================
+window.exportSelectedInvoicesExcel = async function() {
+    if (selectedInvoices.size === 0) {
+        showNotification('لم يتم تحديد أي فواتير', 'warning');
+        return;
+    }
+    
+    const selectedIndices = Array.from(selectedInvoices).sort((a, b) => a - b);
+    showProgress(`جاري تجهيز ${selectedIndices.length} فاتورة...`, 30);
+    
+    try {
+        const excelData = [
+            ['تقرير الفواتير المحددة'],
+            ['تاريخ التقرير: ' + new Date().toLocaleDateString('ar-EG')],
+            ['عدد الفواتير: ' + selectedIndices.length],
+            [],
+            ['Draft Nbr', 'Final Nbr', 'Finalized Date', 'Payee', 'Invoice Type', 'Currency', 'Total Charges', 'Taxes', 'Martyr (5 EGP)', 'Key Word 1', 'Key Word 2']
+        ];
+        
+        selectedIndices.forEach(index => {
+            const inv = invoicesData[index];
+            const finalNum = inv['final-number'] || '';
+            const isPostponed = finalNum.startsWith('P') || finalNum.startsWith('p');
+            const currency = inv['currency'] || 'EGP';
+            const applyMartyr = !(isPostponed && currency === 'USAD');
+            
+            excelData.push([
+                inv['draft-number'] || '',
+                inv['final-number'] || '',
+                inv['finalized-date'] ? new Date(inv['finalized-date']).toLocaleDateString('ar-EG') : '',
+                inv['payee-customer-id'] || '',
+                inv['invoice-type-id'] || '',
+                inv['currency'] || 'EGP',
+                (inv['total-charges'] || 0).toFixed(2),
+                (inv['total-taxes'] || 0).toFixed(2),
+                applyMartyr ? '5.00' : '0.00',
+                inv['key-word1'] || '',
+                inv['key-word2'] || ''
+            ]);
+        });
+        
+        excelData.push([]);
+        excelData.push(['ملخص']);
+        excelData.push(['إجمالي الفواتير:', selectedIndices.length]);
+        
+        const totalCharges = selectedIndices.reduce((sum, idx) => sum + (invoicesData[idx]['total-charges'] || 0), 0);
+        const totalTaxes = selectedIndices.reduce((sum, idx) => sum + (invoicesData[idx]['total-taxes'] || 0), 0);
+        const totalMartyr = selectedIndices.reduce((sum, idx) => {
+            const inv = invoicesData[idx];
+            const finalNum = inv['final-number'] || '';
+            const isPostponed = finalNum.startsWith('P') || finalNum.startsWith('p');
+            const currency = inv['currency'] || 'EGP';
+            return sum + (!(isPostponed && currency === 'USAD') ? 5 : 0);
+        }, 0);
+        
+        excelData.push(['إجمالي المصاريف:', totalCharges.toFixed(2)]);
+        excelData.push(['إجمالي الضرائب:', totalTaxes.toFixed(2)]);
+        excelData.push(['إجمالي طابع الشهيد:', totalMartyr.toFixed(2)]);
+        excelData.push(['الإجمالي النهائي:', (totalCharges + totalTaxes + totalMartyr).toFixed(2)]);
+        
+        showProgress('جاري إنشاء ملف Excel...', 70);
+        
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(excelData);
+        ws['!cols'] = [{ wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 30 }, { wch: 20 }, { wch: 10 }, { wch: 15 }, { wch: 15 }, { wch: 15 }, { wch: 20 }, { wch: 20 }];
+        XLSX.utils.book_append_sheet(wb, ws, 'الفواتير المحددة');
+        
+        let fileName = selectedIndices.length === 1
+            ? `فاتورة-${invoicesData[selectedIndices[0]]['final-number'] || 'غير معروف'}.xlsx`
+            : `فواتير-${invoicesData[selectedIndices[0]]['final-number'] || 'بدون'}-إلى-${invoicesData[selectedIndices[selectedIndices.length - 1]]['final-number'] || 'بدون'}.xlsx`;
+        
+        XLSX.writeFile(wb, fileName);
+        showNotification(`تم تصدير ${selectedIndices.length} فاتورة بنجاح`, 'success');
+    } catch (error) {
+        showNotification('حدث خطأ في التصدير: ' + error.message, 'error');
+    } finally { setTimeout(hideProgress, 1500); }
+};
+
+// ============================================
+// دوال تصدير الفواتير PDF - محسنة للحجم
+// ============================================
+window.exportSelectedInvoices = async function() {
+    if (selectedInvoices.size === 0) {
+        showNotification('لم يتم تحديد أي فواتير', 'warning');
+        return;
+    }
+    
+    const selectedIndices = Array.from(selectedInvoices).sort((a, b) => a - b);
+    
+    if (selectedIndices.length === 1) {
+        const index = selectedIndices[0];
+        if (index >= 0 && index < invoicesData.length) {
+            selectedInvoiceIndex = index;
+            showInvoiceDetails(index);
+            setTimeout(() => exportSingleInvoice(), 500);
+        }
+    } else {
+        await exportMultipleInvoices(selectedIndices);
     }
 };
 
-// ============================================
-// دوال الفاتورة والنموذج الفرعي
-// ============================================
-window.closeModal = function() {
-    document.getElementById('invoiceModal').style.display = 'none';
+async function exportSingleInvoice() {
+    if (typeof window.jspdf === 'undefined' || typeof window.html2canvas === 'undefined') {
+        showNotification('جاري تحميل مكتبات PDF...', 'info');
+        return;
+    }
+    
+    const element = document.getElementById('invoicePrint');
+    if (!element) {
+        showNotification('لا توجد فاتورة للتصدير', 'error');
+        return;
+    }
+    
+    const loading = document.createElement('div');
+    loading.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#4361ee;color:white;padding:15px 30px;border-radius:8px;z-index:10000;';
+    loading.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري إنشاء PDF...';
+    document.body.appendChild(loading);
+    
+    try {
+        const canvas = await html2canvas(element, {
+            scale: 1.5,
+            backgroundColor: '#ffffff',
+            logging: false,
+            allowTaint: true,
+            useCORS: true,
+            imageTimeout: 0
+        });
+        
+        const imgData = canvas.toDataURL('image/jpeg', 0.85);
+        
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4',
+            compress: true
+        });
+        
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+        pdf.save(`فاتورة-${document.getElementById('modalInvoiceNumber').textContent}.pdf`);
+        
+        showNotification('تم التصدير بنجاح', 'success');
+        
+    } catch (error) {
+        console.error('خطأ في إنشاء PDF:', error);
+        showNotification('حدث خطأ في إنشاء PDF: ' + error.message, 'error');
+    } finally {
+        loading.remove();
+    }
+}
+
+async function exportMultipleInvoices(indices) {
+    if (typeof window.jspdf === 'undefined' || typeof window.html2canvas === 'undefined') {
+        showNotification('جاري تحميل مكتبات PDF...', 'info');
+        return;
+    }
+    
+    showProgress(`جاري تجهيز ${indices.length} فاتورة...`, 10);
+    
+    try {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4',
+            compress: true
+        });
+        
+        let currentPage = 0;
+        
+        for (let i = 0; i < indices.length; i++) {
+            const index = indices[i];
+            
+            showProgress(`جاري تجهيز الفاتورة ${i + 1} من ${indices.length}...`, Math.round((i / indices.length) * 100));
+            
+            const modalBody = document.getElementById('modalBody');
+            const originalContent = modalBody.innerHTML;
+            const originalSelectedIndex = selectedInvoiceIndex;
+            
+            selectedInvoiceIndex = index;
+            showInvoiceDetails(index);
+            
+            await new Promise(resolve => setTimeout(resolve, 300));
+            
+            const invoiceElement = document.getElementById('invoicePrint');
+            
+            if (invoiceElement) {
+                try {
+                    const canvas = await html2canvas(invoiceElement, {
+                        scale: 1.4,
+                        backgroundColor: '#ffffff',
+                        logging: false,
+                        allowTaint: true,
+                        useCORS: true,
+                        imageTimeout: 0
+                    });
+                    
+                    if (currentPage > 0) {
+                        pdf.addPage();
+                    }
+                    
+                    const imgData = canvas.toDataURL('image/jpeg', 0.7);
+                    const pdfWidth = pdf.internal.pageSize.getWidth();
+                    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                    
+                    pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+                    currentPage++;
+                    
+                } catch (error) {
+                    console.error(`خطأ في تصدير الفاتورة ${i + 1}:`, error);
+                }
+            }
+            
+            modalBody.innerHTML = originalContent;
+            selectedInvoiceIndex = originalSelectedIndex;
+        }
+        
+        showProgress('جاري حفظ الملف...', 100);
+        
+        let fileName;
+        if (indices.length === 1) {
+            fileName = `فاتورة-${invoicesData[indices[0]]['final-number'] || 'غير معروف'}.pdf`;
+        } else {
+            const firstNum = invoicesData[indices[0]]['final-number'] || 'بدون';
+            const lastNum = invoicesData[indices[indices.length - 1]]['final-number'] || 'بدون';
+            fileName = `فواتير-${firstNum}-إلى-${lastNum}.pdf`;
+        }
+        
+        pdf.save(fileName);
+        showNotification(`تم تصدير ${indices.length} فاتورة بنجاح`, 'success');
+        
+    } catch (error) {
+        console.error('خطأ في التصدير:', error);
+        showNotification('حدث خطأ في تصدير الفواتير: ' + error.message, 'error');
+    } finally {
+        setTimeout(hideProgress, 1500);
+    }
+}
+
+window.exportInvoicePDF = function() {
+    exportSingleInvoice();
 };
 
+// ============================================
+// دوال الفاتورة والنموذج الفرعي - بالتنسيق الأصلي مع تحسين الطباعة
+// ============================================
 window.showInvoiceDetails = function(index) {
     if (index < 0 || index >= invoicesData.length) return;
     selectedInvoiceIndex = index;
@@ -2158,7 +1473,6 @@ window.showInvoiceDetails = function(index) {
     document.getElementById('modalInvoiceNumber').textContent = inv['final-number'] || 'غير محدد';
     const voyageDate = inv['flex-date-02'] ? new Date(inv['flex-date-02']).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : 'غير محدد';
     
-    // اختيار دالة التجميع المناسبة حسب نوع الفاتورة
     const grouped = isPostponed ? groupPostponedCharges(inv.charges) : groupCashCharges(inv.charges);
     
     const invoiceTypeText = isPostponed ? 'آجل' : 'نقدي';
@@ -2196,17 +1510,14 @@ window.showInvoiceDetails = function(index) {
         const containerCount = charge.containerNumbers?.length || 0;
         const qtyDisplay = charge.quantity > 1 ? ` (${charge.quantity})` : '';
 
-        // تحديد أيام التخزين المعروضة حسب نوع الفاتورة
         let displayStorageDays;
         if (isPostponed) {
-            // الفواتير الآجلة: REEFER/STORAGE تعرض القيمة المجمعة، والباقي 1
             if (charge['event-type-id'] === 'REEFER' || charge['event-type-id'] === 'STORAGE') {
                 displayStorageDays = charge.totalStorageDays;
             } else {
                 displayStorageDays = 1;
             }
         } else {
-            // الفواتير النقدية: تعرض القيمة الأصلية (غير المجمعة)
             displayStorageDays = charge.totalStorageDays;
         }
 
@@ -2318,52 +1629,145 @@ window.showInvoiceDetails = function(index) {
         `<tr><th>الوصف</th><th>النوع</th><th>العدد</th><th>أيام التخزين</th><th>سعر الوحدة</th><th>المبلغ/سعر الصرف</th><th></th></tr>` :
         `<tr><th>الوصف</th><th>النوع</th><th>العدد</th><th>أيام التخزين</th><th>سعر الوحدة</th><th>المبلغ/سعر الصرف</th><th>تاريخ الصرف</th><th></th></tr>`;
 
+    // إضافة استايلات محسنة للطباعة
+    const printStyles = `
+        <style>
+            @media print {
+                @page {
+                    size: A4;
+                    margin: 0.5cm;
+                }
+                body {
+                    -webkit-print-color-adjust: exact;
+                    print-color-adjust: exact;
+                }
+                .invoice-container {
+                    max-width: 100%;
+                    padding: 10px !important;
+                    font-size: 11pt;
+                }
+                .invoice-company-header {
+                    padding: 12px !important;
+                    margin-bottom: 10px !important;
+                }
+                .invoice-company-logo {
+                    width: 50px !important;
+                    height: 50px !important;
+                    font-size: 1.8em !important;
+                }
+                .invoice-header {
+                    padding: 10px !important;
+                    margin-bottom: 10px !important;
+                }
+                .invoice-info-grid {
+                    gap: 8px !important;
+                    margin-bottom: 10px !important;
+                }
+                .info-box {
+                    padding: 8px !important;
+                }
+                .info-box h4 {
+                    margin-bottom: 5px !important;
+                    font-size: 0.95em !important;
+                }
+                .info-row {
+                    padding: 3px 0 !important;
+                    font-size: 0.85em !important;
+                }
+                .charges-section h3 {
+                    margin-bottom: 8px !important;
+                    font-size: 1em !important;
+                }
+                .charges-table th {
+                    padding: 5px 3px !important;
+                    font-size: 0.8em !important;
+                }
+                .charges-table td {
+                    padding: 4px 3px !important;
+                    font-size: 0.75em !important;
+                }
+                .summary-box {
+                    width: 250px !important;
+                    padding: 8px !important;
+                }
+                .summary-row {
+                    padding: 3px 0 !important;
+                    font-size: 0.8em !important;
+                }
+                .summary-row.total {
+                    padding: 5px 0 !important;
+                    font-size: 0.9em !important;
+                }
+                .signature-section {
+                    margin: 15px 0 10px !important;
+                    padding: 8px 0 !important;
+                }
+                .signature-box {
+                    width: 130px !important;
+                }
+                .signature-name {
+                    font-size: 0.9em !important;
+                }
+                .signature-date {
+                    font-size: 0.7em !important;
+                }
+                .invoice-footer {
+                    padding: 5px !important;
+                    font-size: 0.7em !important;
+                }
+            }
+        </style>
+    `;
+
     let html = `
-        <div class="invoice-container" id="invoicePrint">
-            <div class="invoice-company-header">
-                <div class="invoice-company-logo"><i class="fas fa-ship"></i></div>
+        <div class="invoice-container" id="invoicePrint" style="max-width: 1100px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+            ${printStyles}
+            <div class="invoice-company-header" style="display: flex; align-items: center; gap: 20px; background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; padding: 20px; border-radius: 10px; margin-bottom: 20px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                <div class="invoice-company-logo" style="width: 70px; height: 70px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2.2em; border: 2px solid #ffd700;">
+                    <i class="fas fa-ship"></i>
+                </div>
                 <div class="invoice-company-details">
-                    <h2>${COMPANY_INFO.name}</h2>
-                    <p>${COMPANY_INFO.nameEn}</p>
-                    <div class="invoice-company-meta">
-                        <span><i class="fas fa-map-marker-alt"></i> ${COMPANY_INFO.address}</span>
-                        <span><i class="fas fa-phone"></i> ${COMPANY_INFO.phone}</span>
-                        <span><i class="fas fa-envelope"></i> ${COMPANY_INFO.email}</span>
-                        <span><i class="fas fa-building"></i> الرقم الضريبي: ${COMPANY_INFO.taxNumber}</span>
+                    <h2 style="color: #ffd700; margin: 0 0 5px; font-size: 1.3em;">${COMPANY_INFO.name}</h2>
+                    <p style="margin-bottom: 8px; opacity: 0.9; font-style: italic; font-size: 0.9em;">${COMPANY_INFO.nameEn}</p>
+                    <div class="invoice-company-meta" style="display: flex; flex-wrap: wrap; gap: 15px; font-size: 0.85em;">
+                        <span><i class="fas fa-map-marker-alt" style="color: #ffd700; margin-left: 5px;"></i> ${COMPANY_INFO.address}</span>
+                        <span><i class="fas fa-phone" style="color: #ffd700; margin-left: 5px;"></i> ${COMPANY_INFO.phone}</span>
+                        <span><i class="fas fa-envelope" style="color: #ffd700; margin-left: 5px;"></i> ${COMPANY_INFO.email}</span>
+                        <span><i class="fas fa-building" style="color: #ffd700; margin-left: 5px;"></i> الرقم الضريبي: ${COMPANY_INFO.taxNumber}</span>
                     </div>
                 </div>
             </div>
-            <div class="invoice-header">
-                <h2><i class="fas fa-file-invoice"></i> فاتورة رسمية - ${invoiceTypeText}</h2>
-                <p style="font-size: 1em; margin-top: 5px; color: #f0f0f0;"><i class="fas fa-tag"></i> ${inv['invoice-type-id'] || 'غير محدد'}</p>
-                <p style="margin-top: 5px;">رقم: ${inv['final-number'] || 'غير محدد'} | تاريخ: ${inv['created'] ? new Date(inv['created']).toLocaleDateString('ar-EG') : '-'}</p>
+            <div class="invoice-header" style="background: linear-gradient(135deg, #4361ee, #3f37c9); color: white; padding: 15px; text-align: center; border-radius: 10px; margin-bottom: 20px; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
+                <h2 style="font-size: 1.2em; margin-bottom: 5px;"><i class="fas fa-file-invoice"></i> فاتورة رسمية - ${invoiceTypeText}</h2>
+                <p style="font-size: 0.9em; margin-top: 5px; color: #f0f0f0;"><i class="fas fa-tag"></i> ${inv['invoice-type-id'] || 'غير محدد'}</p>
+                <p style="margin-top: 5px; font-size: 0.85em;">رقم: ${inv['final-number'] || 'غير محدد'} | تاريخ: ${inv['created'] ? new Date(inv['created']).toLocaleDateString('ar-EG') : '-'}</p>
             </div>
-            <div class="invoice-info-grid">
-                <div class="info-box">
-                    <h4><i class="fas fa-building"></i> بيانات العميل</h4>
-                    <div class="info-row"><span>الاسم:</span><span>${inv['payee-customer-id'] || '-'}</span></div>
-                    <div class="info-row"><span>الدور:</span><span>${inv['payee-customer-role'] || '-'}</span></div>
-                    <div class="info-row"><span>رقم العقد:</span><span>${inv['contract-customer-id'] || '-'}</span></div>
+            <div class="invoice-info-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 15px; margin-bottom: 20px;">
+                <div class="info-box" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-right: 4px solid #4361ee;">
+                    <h4 style="color: #4361ee; margin-bottom: 10px; font-size: 1em; display: flex; align-items: center; gap: 5px;"><i class="fas fa-building"></i> بيانات العميل</h4>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #dee2e6;"><span>الاسم:</span><span>${inv['payee-customer-id'] || '-'}</span></div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #dee2e6;"><span>الدور:</span><span>${inv['payee-customer-role'] || '-'}</span></div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #dee2e6;"><span>رقم العقد:</span><span>${inv['contract-customer-id'] || '-'}</span></div>
                 </div>
-                <div class="info-box">
-                    <h4><i class="fas fa-ship"></i> بيانات الشحنة</h4>
-                    <div class="info-row"><span>السفينة:</span><span>${inv['key-word1'] || '-'}</span></div>
-                    <div class="info-row"><span>رقم البوليصة:</span><span>${inv['key-word2'] || '-'}</span></div>
-                    <div class="info-row"><span>الخط الملاحي:</span><span>${inv['key-word3'] || '-'}</span></div>
-                    <div class="info-row"><span>تاريخ الرحلة:</span><span><strong>${voyageDate}</strong></span></div>
+                <div class="info-box" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-right: 4px solid #4361ee;">
+                    <h4 style="color: #4361ee; margin-bottom: 10px; font-size: 1em; display: flex; align-items: center; gap: 5px;"><i class="fas fa-ship"></i> بيانات الشحنة</h4>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #dee2e6;"><span>السفينة:</span><span>${inv['key-word1'] || '-'}</span></div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #dee2e6;"><span>رقم البوليصة:</span><span>${inv['key-word2'] || '-'}</span></div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #dee2e6;"><span>الخط الملاحي:</span><span>${inv['key-word3'] || '-'}</span></div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #dee2e6;"><span>تاريخ الرحلة:</span><span><strong>${voyageDate}</strong></span></div>
                 </div>
-                <div class="info-box">
-                    <h4><i class="fas fa-info-circle"></i> معلومات إضافية</h4>
-                    <div class="info-row"><span>الحالة:</span><span>${inv['status'] || '-'}</span></div>
-                    <div class="info-row"><span>العملة:</span><span>${inv['currency'] || '-'}</span></div>
-                    <div class="info-row"><span>المنشأة:</span><span>${facilityDisplay}</span></div>
+                <div class="info-box" style="background: #f8f9fa; padding: 15px; border-radius: 8px; border-right: 4px solid #4361ee;">
+                    <h4 style="color: #4361ee; margin-bottom: 10px; font-size: 1em; display: flex; align-items: center; gap: 5px;"><i class="fas fa-info-circle"></i> معلومات إضافية</h4>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #dee2e6;"><span>الحالة:</span><span>${inv['status'] || '-'}</span></div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #dee2e6;"><span>العملة:</span><span>${inv['currency'] || '-'}</span></div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px dashed #dee2e6;"><span>المنشأة:</span><span>${facilityDisplay}</span></div>
                     ${exchangeRateRow}
                 </div>
             </div>
-            <div class="charges-section">
-                <h3><i class="fas fa-list"></i> تفاصيل المصاريف</h3>
-                <table class="charges-table">
-                    <thead>
+            <div class="charges-section" style="margin-bottom: 15px;">
+                <h3 style="color: #212529; margin-bottom: 10px; font-size: 1.1em; display: flex; align-items: center; gap: 8px;"><i class="fas fa-list"></i> تفاصيل المصاريف</h3>
+                <table class="charges-table" style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 10px rgba(0,0,0,0.05);">
+                    <thead style="background: #4361ee; color: white; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                         ${tableHeaders}
                     </thead>
                     <tbody>
@@ -2371,24 +1775,88 @@ window.showInvoiceDetails = function(index) {
                     </tbody>
                 </table>
             </div>
-            <div class="invoice-summary">
+            <div class="invoice-summary" style="display: flex; justify-content: flex-end; margin-top: 10px;">
                 ${summaryHtml}
             </div>
-            <div class="signature-section">
-                <div class="signature-box"><div class="signature-title">معد الفاتورة</div><div class="signature-name">${preparer}</div><div class="signature-line"></div><div class="signature-date">${new Date().toLocaleDateString('ar-EG')}</div></div>
-                <div class="signature-box"><div class="signature-title">المراجع</div><div class="signature-name">${reviewer}</div><div class="signature-line"></div><div class="signature-date">${new Date().toLocaleDateString('ar-EG')}</div></div>
-                <div class="signature-box"><div class="signature-title">الختم</div><div class="signature-stamp"><i class="fas fa-certificate"></i></div></div>
+            <div class="signature-section" style="display: flex; justify-content: space-around; margin: 20px 0 15px; padding: 10px 0; border-top: 2px dashed #dee2e6;">
+                <div class="signature-box" style="text-align: center; width: 150px;">
+                    <div class="signature-title" style="color: #4361ee; font-weight: bold; margin-bottom: 5px; font-size: 0.9em;">معد الفاتورة</div>
+                    <div class="signature-name" style="font-size: 0.9em; margin-bottom: 5px; color: #212529; font-weight: 600;">${preparer}</div>
+                    <div class="signature-line" style="height: 2px; background: #4361ee; width: 100%; margin: 5px 0;"></div>
+                    <div class="signature-date" style="font-size: 0.8em; color: #666;">${new Date().toLocaleDateString('ar-EG')}</div>
+                </div>
+                <div class="signature-box" style="text-align: center; width: 150px;">
+                    <div class="signature-title" style="color: #4361ee; font-weight: bold; margin-bottom: 5px; font-size: 0.9em;">المراجع</div>
+                    <div class="signature-name" style="font-size: 0.9em; margin-bottom: 5px; color: #212529; font-weight: 600;">${reviewer}</div>
+                    <div class="signature-line" style="height: 2px; background: #4361ee; width: 100%; margin: 5px 0;"></div>
+                    <div class="signature-date" style="font-size: 0.8em; color: #666;">${new Date().toLocaleDateString('ar-EG')}</div>
+                </div>
+                <div class="signature-box" style="text-align: center; width: 150px;">
+                    <div class="signature-title" style="color: #4361ee; font-weight: bold; margin-bottom: 5px; font-size: 0.9em;">الختم</div>
+                    <div class="signature-stamp" style="font-size: 2.2em; color: #e63946; opacity: 0.5; transform: rotate(-15deg);"><i class="fas fa-certificate"></i></div>
+                </div>
             </div>
-            <div class="invoice-footer">
-                <p>شكراً لتعاملكم مع ${COMPANY_INFO.name}</p>
-                <p>تم إنشاء هذه الفاتورة إلكترونياً</p>
-                <p>تاريخ الطباعة: ${new Date().toLocaleDateString('ar-EG')}</p>
+            <div class="invoice-footer" style="text-align: center; padding: 10px; border-top: 2px solid #e9ecef; color: #6c757d; font-size: 0.8em;">
+                <p style="margin: 2px 0;">شكراً لتعاملكم مع ${COMPANY_INFO.name}</p>
+                <p style="margin: 2px 0;">تم إنشاء هذه الفاتورة إلكترونياً</p>
+                <p style="margin: 2px 0;">تاريخ الطباعة: ${new Date().toLocaleDateString('ar-EG')}</p>
             </div>
         </div>
     `;
 
     document.getElementById('modalBody').innerHTML = html;
     document.getElementById('invoiceModal').style.display = 'block';
+    
+    // إعادة ربط أزرار التنقل والإغلاق بعد تحميل المحتوى
+    setTimeout(() => {
+        const closeBtn = document.querySelector('#invoiceModal .close-button');
+        if (closeBtn) {
+            closeBtn.onclick = function() { window.closeModal(); };
+        }
+        
+        const prevBtn = document.querySelector('[onclick="navigateInvoice(\'prev\')"]');
+        const nextBtn = document.querySelector('[onclick="navigateInvoice(\'next\')"]');
+        
+        if (prevBtn) {
+            prevBtn.onclick = function() { window.navigateInvoice('prev'); };
+        }
+        if (nextBtn) {
+            nextBtn.onclick = function() { window.navigateInvoice('next'); };
+        }
+        
+        const printBtn = document.querySelector('[onclick="printInvoice()"]');
+        if (printBtn) {
+            printBtn.onclick = function() { window.printInvoice(); };
+        }
+        
+        const pdfBtn = document.querySelector('[onclick="exportInvoicePDF()"]');
+        if (pdfBtn) {
+            pdfBtn.onclick = function() { window.exportInvoicePDF(); };
+        }
+        
+        const excelBtn = document.querySelector('[onclick="exportInvoiceExcel()"]');
+        if (excelBtn) {
+            excelBtn.onclick = function() { window.exportInvoiceExcel(); };
+        }
+    }, 100);
+};
+
+// ============================================
+// دوال إضافية للتحكم في الأزرار
+// ============================================
+window.closeModal = function() {
+    const modal = document.getElementById('invoiceModal');
+    if (modal) modal.style.display = 'none';
+};
+
+window.navigateInvoice = function(direction) {
+    if (selectedInvoiceIndex === -1) return;
+    const newIndex = direction === 'prev' ? selectedInvoiceIndex - 1 : selectedInvoiceIndex + 1;
+    if (newIndex >= 0 && newIndex < invoicesData.length) {
+        showInvoiceDetails(newIndex);
+    } else {
+        alert(direction === 'prev' ? 'هذه أول فاتورة' : 'هذه آخر فاتورة');
+    }
 };
 
 window.toggleContainers = function(index) {
@@ -2405,19 +1873,6 @@ window.toggleContainers = function(index) {
     }
 };
 
-window.navigateInvoice = function(direction) {
-    if (selectedInvoiceIndex === -1) return;
-    const newIndex = direction === 'prev' ? selectedInvoiceIndex - 1 : selectedInvoiceIndex + 1;
-    if (newIndex >= 0 && newIndex < invoicesData.length) {
-        showInvoiceDetails(newIndex);
-    } else {
-        alert(direction === 'prev' ? 'هذه أول فاتورة' : 'هذه آخر فاتورة');
-    }
-};
-
-// ============================================
-// دوال الطباعة والتصدير للفواتير
-// ============================================
 window.printInvoice = function() {
     const content = document.getElementById('invoicePrint');
     if (!content) return alert('لا توجد فاتورة للطباعة');
@@ -2426,200 +1881,20 @@ window.printInvoice = function() {
     
     const printStyles = `
         <style>
-            * { margin: 0; padding: 0; box-sizing: border-box; }
-            body { 
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-                padding: 20px; 
-                background: white; 
-                direction: rtl;
-            }
-            .invoice-container { 
-                max-width: 1100px; 
-                margin: 0 auto; 
-                background: white; 
-                padding: 25px;
-                border-radius: 15px;
-                box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            }
-            .invoice-company-header {
-                display: flex;
-                align-items: center;
-                gap: 25px;
-                background: linear-gradient(135deg, #1e3c72, #2a5298);
-                color: white;
-                padding: 25px;
-                border-radius: 10px;
-                margin-bottom: 25px;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            .invoice-company-logo {
-                width: 80px;
-                height: 80px;
-                background: rgba(255,255,255,0.1);
-                border-radius: 50%;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                font-size: 2.5em;
-                border: 3px solid #ffd700;
-            }
-            .invoice-company-details h2 { 
-                color: #ffd700; 
-                margin: 0 0 5px; 
-                font-size: 1.5em;
-            }
-            .invoice-company-details p {
-                margin-bottom: 10px;
-                opacity: 0.9;
-                font-style: italic;
-            }
-            .invoice-company-meta {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 20px;
-                font-size: 0.9em;
-            }
-            .invoice-company-meta i { color: #ffd700; margin-left: 5px; }
-            .invoice-header {
-                background: linear-gradient(135deg, #4361ee, #3f37c9);
-                color: white;
-                padding: 20px;
-                text-align: center;
-                border-radius: 10px;
-                margin-bottom: 25px;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            .invoice-info-grid {
-                display: grid;
-                grid-template-columns: repeat(3, 1fr);
-                gap: 20px;
-                margin-bottom: 30px;
-            }
-            .info-box {
-                background: #f8f9fa;
-                padding: 20px;
-                border-radius: 10px;
-                border-right: 4px solid #4361ee;
-            }
-            .info-box h4 {
-                color: #4361ee;
-                margin-bottom: 15px;
-                font-size: 1.1em;
-                display: flex;
-                align-items: center;
-                gap: 8px;
-            }
-            .info-row {
-                display: flex;
-                justify-content: space-between;
-                padding: 8px 0;
-                border-bottom: 1px dashed #dee2e6;
-            }
-            .info-row:last-child { border-bottom: none; }
-            .charges-section { margin-bottom: 30px; }
-            .charges-section h3 {
-                color: #212529;
-                margin-bottom: 20px;
-                font-size: 1.3em;
-                display: flex;
-                align-items: center;
-                gap: 10px;
-            }
-            .charges-table {
-                width: 100%;
-                border-collapse: collapse;
-                background: white;
-                border-radius: 10px;
-                overflow: hidden;
-                box-shadow: 0 2px 10px rgba(0,0,0,0.05);
-                font-size: 0.9em;
-            }
-            .charges-table th {
-                background: #4361ee;
-                color: white;
-                padding: 12px;
-                font-weight: 600;
-                text-align: center;
-                -webkit-print-color-adjust: exact;
-                print-color-adjust: exact;
-            }
-            .charges-table td {
-                padding: 10px;
-                border-bottom: 1px solid #e9ecef;
-                text-align: center;
-            }
-            .charges-table tbody tr:last-child td { border-bottom: none; }
-            .invoice-summary {
-                display: flex;
-                justify-content: flex-end;
-                margin-top: 20px;
-            }
-            .summary-box {
-                width: 350px;
-                background: #f8f9fa;
-                padding: 20px;
-                border-radius: 10px;
-            }
-            .summary-row {
-                display: flex;
-                justify-content: space-between;
-                padding: 10px 0;
-                border-bottom: 1px solid #dee2e6;
-            }
-            .summary-row.total {
-                border-bottom: none;
-                font-size: 1.2em;
-                font-weight: bold;
-                color: #4361ee;
-                padding-top: 15px;
-            }
-            .signature-section {
-                display: flex;
-                justify-content: space-around;
-                margin: 40px 0 30px;
-                padding: 20px 0;
-                border-top: 2px dashed #dee2e6;
-            }
-            .signature-box { text-align: center; width: 180px; }
-            .signature-title {
-                color: #4361ee;
-                font-weight: bold;
-                margin-bottom: 10px;
-                font-size: 1.1em;
-            }
-            .signature-name {
-                font-size: 1.1em;
-                margin-bottom: 5px;
-                color: #212529;
-                font-weight: 600;
-            }
-            .signature-line {
-                height: 2px;
-                background: #4361ee;
-                width: 100%;
-                margin: 8px 0;
-            }
-            .signature-date { font-size: 0.9em; color: #666; }
-            .signature-stamp {
-                font-size: 3em;
-                color: #e63946;
-                opacity: 0.5;
-                transform: rotate(-15deg);
-            }
-            .invoice-footer {
-                text-align: center;
-                margin-top: 30px;
-                padding-top: 20px;
-                border-top: 2px solid #e9ecef;
-                color: #6c757d;
-                font-size: 0.9em;
-            }
-            @media print {
-                body { padding: 0; }
-                .invoice-container { box-shadow: none; }
-            }
+            @page { size: A4; margin: 0.5cm; }
+            body { font-family: 'Segoe UI', sans-serif; padding: 0; margin: 0; background: white; direction: rtl; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            .invoice-container { max-width: 100%; margin: 0 auto; background: white; padding: 15px; }
+            .invoice-company-header { display: flex; align-items: center; gap: 20px; background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
+            .invoice-company-logo { width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2em; border: 2px solid #ffd700; }
+            .invoice-header { background: linear-gradient(135deg, #4361ee, #3f37c9); color: white; padding: 12px; text-align: center; border-radius: 8px; margin-bottom: 15px; }
+            .invoice-info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
+            .info-box { background: #f8f9fa; padding: 10px; border-radius: 8px; border-right: 4px solid #4361ee; font-size: 0.85em; }
+            .charges-table { width: 100%; border-collapse: collapse; font-size: 0.8em; }
+            .charges-table th { background: #4361ee; color: white; padding: 6px 4px; }
+            .charges-table td { padding: 5px 4px; border-bottom: 1px solid #e9ecef; }
+            .summary-box { width: 280px; background: #f8f9fa; padding: 10px; border-radius: 8px; font-size: 0.85em; }
+            .signature-section { display: flex; justify-content: space-around; margin: 15px 0 10px; padding: 8px 0; border-top: 2px dashed #dee2e6; }
+            .invoice-footer { text-align: center; padding: 8px; border-top: 2px solid #e9ecef; color: #6c757d; font-size: 0.75em; }
         </style>
     `;
     
@@ -2639,33 +1914,11 @@ window.printInvoice = function() {
     
     printWindow.document.close();
     printWindow.focus();
-    printWindow.print();
+    setTimeout(() => printWindow.print(), 500);
 };
 
 window.exportInvoicePDF = function() {
-    if (typeof window.jspdf === 'undefined' || typeof window.html2canvas === 'undefined') {
-        alert('جاري تحميل مكتبات PDF...');
-        return;
-    }
-    const element = document.getElementById('invoicePrint');
-    if (!element) return alert('لا توجد فاتورة');
-    const loading = document.createElement('div');
-    loading.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#4361ee;color:white;padding:20px 40px;border-radius:10px;z-index:10000;';
-    loading.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري إنشاء PDF...';
-    document.body.appendChild(loading);
-    html2canvas(element, { scale: 2 }).then(canvas => {
-        document.body.removeChild(loading);
-        const img = canvas.toDataURL('image/png');
-        const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF();
-        const w = pdf.internal.pageSize.getWidth();
-        const h = (canvas.height * w) / canvas.width;
-        pdf.addImage(img, 'PNG', 0, 0, w, h);
-        pdf.save(`فاتورة-${document.getElementById('modalInvoiceNumber').textContent}.pdf`);
-    }).catch(() => {
-        document.body.removeChild(loading);
-        alert('حدث خطأ في إنشاء PDF');
-    });
+    exportSingleInvoice();
 };
 
 window.exportInvoiceExcel = function() {
@@ -2675,15 +1928,11 @@ window.exportInvoiceExcel = function() {
     const martyr = 5;
     const isPostponed = (inv['final-number'] || '').startsWith('P') || (inv['final-number'] || '').startsWith('p');
     const currency = inv['currency'] || 'EGP';
+    const applyMartyr = !(isPostponed && currency === 'USAD');
     
     let csv = "الوصف,النوع,العدد,أيام التخزين,سعر الوحدة,المبلغ,العملة,تاريخ الصرف\n";
     inv.charges.forEach(c => {
-        let amountDisplay;
-        if (isPostponed && currency === 'USAD') {
-            amountDisplay = (c.amount / exRate).toFixed(2);
-        } else {
-            amountDisplay = (c.amount).toFixed(2);
-        }
+        let amountDisplay = (isPostponed && currency === 'USAD') ? (c.amount / exRate).toFixed(2) : (c.amount).toFixed(2);
         const displayCurrency = (isPostponed && currency === 'USAD') ? 'USAD' : 'EGP';
         const date = c['paid-thru-day'] || c['created'] || '';
         const fmtDate = date ? new Date(date).toLocaleDateString('ar-EG') : '-';
@@ -2694,14 +1943,14 @@ window.exportInvoiceExcel = function() {
     if (isPostponed && currency === 'USAD') {
         totalCharges = ((inv['total-charges'] || 0) / exRate).toFixed(2);
         totalTaxes = ((inv['total-taxes'] || 0) / exRate).toFixed(2);
-        totalFinal = ((inv['total-total'] || 0) / exRate + martyr).toFixed(2);
+        totalFinal = ((inv['total-total'] || 0) / exRate + (applyMartyr ? martyr : 0)).toFixed(2);
     } else {
         totalCharges = (inv['total-charges'] || 0).toFixed(2);
         totalTaxes = (inv['total-taxes'] || 0).toFixed(2);
-        totalFinal = ((inv['total-total'] || 0) + martyr).toFixed(2);
+        totalFinal = ((inv['total-total'] || 0) + (applyMartyr ? martyr : 0)).toFixed(2);
     }
     
-    csv += `\nإجمالي المصاريف,${totalCharges},إجمالي الضرائب,${totalTaxes},طابع الشهيد,${martyr},الإجمالي النهائي,${totalFinal}`;
+    csv += `\nإجمالي المصاريف,${totalCharges},إجمالي الضرائب,${totalTaxes},طابع الشهيد,${applyMartyr ? martyr : 0},الإجمالي النهائي,${totalFinal}`;
     
     const blob = new Blob(["\uFEFF" + csv], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement('a');
@@ -2711,34 +1960,87 @@ window.exportInvoiceExcel = function() {
 };
 
 // ============================================
-// دوال نظام التقارير المتكاملة
+// دوال عرض الجدول مع Checkbox
+// ============================================
+function renderTableView(data) {
+    if (!document.getElementById('table-style')) {
+        const style = document.createElement('style');
+        style.id = 'table-style';
+        style.textContent = `
+            .selected-row { background-color: #e3f2fd !important; border-left: 4px solid #2196f3; }
+            .invoice-checkbox, #selectAllCheckbox { width: 18px; height: 18px; cursor: pointer; }
+            .table-toolbar button:disabled { opacity: 0.5; cursor: not-allowed; }
+            .data-table tbody tr:hover { background-color: #f5f5f5; }
+            .export-buttons { display: flex; gap: 10px; }
+        `;
+        document.head.appendChild(style);
+    }
+    
+    let html = `
+        <div class="table-container">
+            <div class="table-toolbar" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding:10px; background:#f8f9fa; border-radius:8px;">
+                <div>
+                    <button class="btn btn-secondary" onclick="selectAllInvoices()" style="margin-left:10px;"><i class="fas fa-check-double"></i> تحديد الكل</button>
+                    <button class="btn btn-secondary" onclick="deselectAllInvoices()"><i class="fas fa-times"></i> إلغاء الكل</button>
+                </div>
+                <div class="export-buttons">
+                    <span id="selectedCount" style="margin-left:15px; font-weight:bold;">0</span> فاتورة محددة
+                    <button class="btn btn-primary" onclick="exportSelectedInvoices()" id="exportSelectedBtn" disabled><i class="fas fa-file-pdf"></i> PDF</button>
+                    <button class="btn btn-success" onclick="exportSelectedInvoicesExcel()" id="exportSelectedExcelBtn" disabled><i class="fas fa-file-excel"></i> Excel</button>
+                </div>
+            </div>
+            <table class="data-table">
+                <thead><tr>
+                    <th style="width:40px;"><input type="checkbox" onclick="toggleAllCheckboxes(this)" id="selectAllCheckbox"></th>
+                    <th>الرقم النهائي</th><th>رقم المسودة</th><th>العميل</th><th>السفينة</th><th>رقم البوليصة</th><th>تاريخ الرحله</th><th>الإجمالي (EGP)</th><th>المبلغ بالعملة</th>
+                </tr></thead>
+                <tbody>`;
+    
+    data.forEach(inv => {
+        const idx = invoicesData.indexOf(inv);
+        const finalNum = inv['final-number'] || '';
+        const invoiceTypeDisplay = finalNum.startsWith('P') || finalNum.startsWith('p') ? 'أجل' : 'نقدي';
+        const currency = inv['currency'] || 'EGP';
+        const exRate = inv['flex-string-06'] || 48.0215;
+        const totalOriginal = inv['total-total'] || 0;
+        let displayAmount, displayCurrency;
+        if (currency === 'USAD') { displayAmount = (totalOriginal / exRate).toFixed(2); displayCurrency = 'USAD'; }
+        else { displayAmount = totalOriginal.toFixed(2); displayCurrency = 'EGP'; }
+        const isSelected = selectedInvoices.has(idx) ? 'checked' : '';
+        const selectedClass = isSelected ? 'selected-row' : '';
+        
+        html += `<tr onclick="handleRowClick(${idx}, event)" class="${selectedClass}" data-index="${idx}">
+            <td onclick="event.stopPropagation()"><input type="checkbox" class="invoice-checkbox" data-index="${idx}" ${isSelected} onchange="updateSelectedInvoices(${idx}, this.checked)"></td>
+            <td>${inv['final-number'] || '-'} (${invoiceTypeDisplay})</td>
+            <td>${inv['draft-number'] || '-'}</td>
+            <td>${(inv['payee-customer-id'] || '-').substring(0,20)}</td>
+            <td>${inv['key-word1'] || '-'}</td>
+            <td>${inv['key-word2'] || '-'}</td>
+            <td>${inv['flex-date-02'] ? new Date(inv['flex-date-02']).toLocaleDateString('ar-EG') : '-'}</td>
+            <td>${totalOriginal.toFixed(2)}</td>
+            <td>${displayAmount} ${displayCurrency}</td>
+        </tr>`;
+    });
+    
+    html += '</tbody></table></div>';
+    document.getElementById('dataViewContainer').innerHTML = html;
+    updateSelectedCount();
+}
+
+// ============================================
+// دوال نظام التقارير
 // ============================================
 window.showReports = function(type) {
     currentReportType = type;
-    
-    document.querySelectorAll('.report-tab').forEach(tab => {
-        tab.classList.remove('active');
-    });
+    document.querySelectorAll('.report-tab').forEach(t => t.classList.remove('active'));
     event.target.classList.add('active');
-    
     document.getElementById('dataViewContainer').style.display = 'none';
     document.getElementById('reportsContainer').style.display = 'block';
     document.getElementById('pagination').style.display = 'none';
-    
-    switch(type) {
-        case 'daily':
-            generateDailyReport();
-            break;
-        case 'monthly':
-            generateMonthlyReport();
-            break;
-        case 'customer':
-            generateCustomerReport();
-            break;
-        case 'vessel':
-            generateVesselReport();
-            break;
-    }
+    if (type === 'daily') generateDailyReport();
+    else if (type === 'monthly') generateMonthlyReport();
+    else if (type === 'customer') generateCustomerReport();
+    else generateVesselReport();
 };
 
 window.closeReports = function() {
@@ -2749,755 +2051,310 @@ window.closeReports = function() {
 
 function generateDailyReport() {
     document.getElementById('reportTitle').textContent = 'التقارير اليومية';
-    
-    if (filteredInvoices.length === 0) {
-        document.getElementById('reportContent').innerHTML = '<div class="no-data">لا توجد بيانات للعرض</div>';
-        return;
-    }
-    
-    const dailyData = new Map();
-    
+    if (!filteredInvoices.length) { document.getElementById('reportContent').innerHTML = '<div class="no-data">لا توجد بيانات</div>'; return; }
+    const daily = new Map();
     filteredInvoices.forEach(inv => {
         const date = inv['created'] ? new Date(inv['created']).toLocaleDateString('ar-EG') : 'غير محدد';
-        if (!dailyData.has(date)) {
-            dailyData.set(date, {
-                count: 0,
-                total: 0,
-                taxes: 0,
-                invoices: []
-            });
-        }
-        const dayData = dailyData.get(date);
-        dayData.count++;
-        dayData.total += inv['total-total'] || 0;
-        dayData.taxes += inv['total-taxes'] || 0;
-        dayData.invoices.push(inv);
+        if (!daily.has(date)) daily.set(date, { count:0, total:0, taxes:0 });
+        const d = daily.get(date);
+        d.count++; d.total += inv['total-total'] || 0; d.taxes += inv['total-taxes'] || 0;
     });
-    
-    const sortedDays = Array.from(dailyData.entries()).sort((a, b) => 
-        new Date(b[0]) - new Date(a[0])
-    );
-    
-    let html = '<div class="report-card">';
-    html += '<h3><i class="fas fa-calendar-day"></i> إحصائيات يومية</h3>';
-    
-    const totalDays = sortedDays.length;
-    const totalAmount = Array.from(dailyData.values()).reduce((sum, d) => sum + d.total, 0);
-    const avgPerDay = totalDays > 0 ? (totalAmount / totalDays).toFixed(2) : 0;
-    
-    html += '<div class="report-stats">';
-    html += `<div class="stat-item"><div class="stat-label">عدد الأيام</div><div class="stat-value">${totalDays}</div></div>`;
-    html += `<div class="stat-item"><div class="stat-label">إجمالي الفواتير</div><div class="stat-value">${filteredInvoices.length}</div></div>`;
-    html += `<div class="stat-item"><div class="stat-label">المتوسط اليومي</div><div class="stat-value">${avgPerDay} جنيه</div></div>`;
-    html += `<div class="stat-item"><div class="stat-label">إجمالي المبالغ</div><div class="stat-value">${totalAmount.toFixed(2)} جنيه</div></div>`;
-    html += '</div>';
-    
-    const last7Days = sortedDays.slice(0, 7);
-    const maxAmount = Math.max(...last7Days.map(d => d[1].total));
-    
-    html += '<div class="chart-container">';
-    html += '<h4>آخر 7 أيام</h4>';
-    html += '<div class="chart-bars">';
-    
-    last7Days.forEach(([date, data]) => {
-        const height = maxAmount > 0 ? (data.total / maxAmount) * 180 : 0;
-        html += `<div class="chart-bar" style="height: ${height}px;" title="${data.total.toFixed(2)} جنيه">`;
-        html += `<span class="bar-label">${date.split('/')[0]}</span>`;
-        html += `<span class="bar-value">${data.total.toFixed(0)}</span>`;
-        html += '</div>';
-    });
-    
-    html += '</div></div>';
-    
-    html += '<h4>تفاصيل يومية</h4>';
-    html += '<table class="report-table">';
-    html += '<thead><tr><th>التاريخ</th><th>عدد الفواتير</th><th>إجمالي المبالغ</th><th>الضرائب</th><th>المتوسط</th></tr></thead>';
-    html += '<tbody>';
-    
-    sortedDays.forEach(([date, data]) => {
-        const avg = data.count > 0 ? (data.total / data.count).toFixed(2) : 0;
-        html += `<tr>
-            <td>${date}</td>
-            <td>${data.count}</td>
-            <td>${data.total.toFixed(2)} جنيه</td>
-            <td>${data.taxes.toFixed(2)} جنيه</td>
-            <td>${avg} جنيه</td>
-        </tr>`;
-    });
-    
-    html += '</tbody></table>';
-    html += '</div>';
-    
+    const sorted = Array.from(daily.entries()).sort((a,b) => new Date(b[0]) - new Date(a[0]));
+    const totalAmount = Array.from(daily.values()).reduce((s,d) => s + d.total, 0);
+    let html = `<div class="report-card"><h3><i class="fas fa-calendar-day"></i> إحصائيات يومية</h3>
+        <div class="report-stats">${[['عدد الأيام',sorted.length],['إجمالي الفواتير',filteredInvoices.length],['المتوسط اليومي',(totalAmount/(sorted.length||1)).toFixed(2)+' جنيه'],['إجمالي المبالغ',totalAmount.toFixed(2)+' جنيه']].map(([l,v])=>`<div class="stat-item"><div class="stat-label">${l}</div><div class="stat-value">${v}</div></div>`).join('')}</div>`;
+    html += '<h4>تفاصيل يومية</h4><table class="report-table"><thead><tr><th>التاريخ</th><th>عدد الفواتير</th><th>إجمالي المبالغ</th><th>الضرائب</th><th>المتوسط</th></tr></thead><tbody>';
+    sorted.forEach(([date,data]) => html += `<tr><td>${date}</td><td>${data.count}</td><td>${data.total.toFixed(2)}</td><td>${data.taxes.toFixed(2)}</td><td>${(data.total/data.count).toFixed(2)}</td></tr>`);
+    html += '</tbody></table></div>';
     document.getElementById('reportContent').innerHTML = html;
 }
 
 function generateMonthlyReport() {
     document.getElementById('reportTitle').textContent = 'التقارير الشهرية';
-    
-    if (filteredInvoices.length === 0) {
-        document.getElementById('reportContent').innerHTML = '<div class="no-data">لا توجد بيانات للعرض</div>';
-        return;
-    }
-    
-    const monthlyData = new Map();
-    
+    if (!filteredInvoices.length) { document.getElementById('reportContent').innerHTML = '<div class="no-data">لا توجد بيانات</div>'; return; }
+    const monthly = new Map();
     filteredInvoices.forEach(inv => {
         const date = inv['created'] ? new Date(inv['created']) : new Date();
-        const monthKey = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, '0')}`;
-        const monthName = date.toLocaleDateString('ar-EG', { year: 'numeric', month: 'long' });
-        
-        if (!monthlyData.has(monthKey)) {
-            monthlyData.set(monthKey, {
-                name: monthName,
-                count: 0,
-                total: 0,
-                taxes: 0,
-                invoices: []
-            });
-        }
-        const monthData = monthlyData.get(monthKey);
-        monthData.count++;
-        monthData.total += inv['total-total'] || 0;
-        monthData.taxes += inv['total-taxes'] || 0;
-        monthData.invoices.push(inv);
+        const key = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`;
+        const name = date.toLocaleDateString('ar-EG', { year:'numeric', month:'long' });
+        if (!monthly.has(key)) monthly.set(key, { name, count:0, total:0, taxes:0 });
+        const m = monthly.get(key);
+        m.count++; m.total += inv['total-total'] || 0; m.taxes += inv['total-taxes'] || 0;
     });
-    
-    const sortedMonths = Array.from(monthlyData.entries()).sort((a, b) => b[0].localeCompare(a[0]));
-    
-    let html = '<div class="report-card">';
-    html += '<h3><i class="fas fa-calendar-alt"></i> إحصائيات شهرية</h3>';
-    
-    const totalMonths = sortedMonths.length;
-    const totalAmount = Array.from(monthlyData.values()).reduce((sum, d) => sum + d.total, 0);
-    const avgPerMonth = totalMonths > 0 ? (totalAmount / totalMonths).toFixed(2) : 0;
-    
-    html += '<div class="report-stats">';
-    html += `<div class="stat-item"><div class="stat-label">عدد الأشهر</div><div class="stat-value">${totalMonths}</div></div>`;
-    html += `<div class="stat-item"><div class="stat-label">إجمالي الفواتير</div><div class="stat-value">${filteredInvoices.length}</div></div>`;
-    html += `<div class="stat-item"><div class="stat-label">المتوسط الشهري</div><div class="stat-value">${avgPerMonth} جنيه</div></div>`;
-    html += `<div class="stat-item"><div class="stat-label">إجمالي المبالغ</div><div class="stat-value">${totalAmount.toFixed(2)} جنيه</div></div>`;
-    html += '</div>';
-    
-    html += '<table class="report-table">';
-    html += '<thead><tr><th>الشهر</th><th>عدد الفواتير</th><th>إجمالي المبالغ</th><th>الضرائب</th><th>المتوسط</th></tr></thead>';
-    html += '<tbody>';
-    
-    sortedMonths.forEach(([key, data]) => {
-        const avg = data.count > 0 ? (data.total / data.count).toFixed(2) : 0;
-        html += `<tr>
-            <td>${data.name}</td>
-            <td>${data.count}</td>
-            <td>${data.total.toFixed(2)} جنيه</td>
-            <td>${data.taxes.toFixed(2)} جنيه</td>
-            <td>${avg} جنيه</td>
-        </tr>`;
-    });
-    
-    html += '</tbody></table>';
-    html += '</div>';
-    
+    const sorted = Array.from(monthly.entries()).sort((a,b) => b[0].localeCompare(a[0]));
+    const totalAmount = Array.from(monthly.values()).reduce((s,d) => s + d.total, 0);
+    let html = `<div class="report-card"><h3><i class="fas fa-calendar-alt"></i> إحصائيات شهرية</h3>
+        <div class="report-stats">${[['عدد الأشهر',sorted.length],['إجمالي الفواتير',filteredInvoices.length],['المتوسط الشهري',(totalAmount/(sorted.length||1)).toFixed(2)+' جنيه'],['إجمالي المبالغ',totalAmount.toFixed(2)+' جنيه']].map(([l,v])=>`<div class="stat-item"><div class="stat-label">${l}</div><div class="stat-value">${v}</div></div>`).join('')}</div>`;
+    html += '<table class="report-table"><thead><tr><th>الشهر</th><th>عدد الفواتير</th><th>إجمالي المبالغ</th><th>الضرائب</th><th>المتوسط</th></tr></thead><tbody>';
+    sorted.forEach(([_,data]) => html += `<tr><td>${data.name}</td><td>${data.count}</td><td>${data.total.toFixed(2)}</td><td>${data.taxes.toFixed(2)}</td><td>${(data.total/data.count).toFixed(2)}</td></tr>`);
+    html += '</tbody></table></div>';
     document.getElementById('reportContent').innerHTML = html;
 }
 
 function generateCustomerReport() {
     document.getElementById('reportTitle').textContent = 'تقارير العملاء';
-    
-    if (filteredInvoices.length === 0) {
-        document.getElementById('reportContent').innerHTML = '<div class="no-data">لا توجد بيانات للعرض</div>';
-        return;
-    }
-    
-    const customerData = new Map();
-    
+    if (!filteredInvoices.length) { document.getElementById('reportContent').innerHTML = '<div class="no-data">لا توجد بيانات</div>'; return; }
+    const cust = new Map();
     filteredInvoices.forEach(inv => {
-        const customerId = inv['payee-customer-id'] || 'غير معروف';
-        
-        if (!customerData.has(customerId)) {
-            customerData.set(customerId, {
-                count: 0,
-                total: 0,
-                taxes: 0,
-                invoices: []
-            });
-        }
-        const custData = customerData.get(customerId);
-        custData.count++;
-        custData.total += inv['total-total'] || 0;
-        custData.taxes += inv['total-taxes'] || 0;
-        custData.invoices.push(inv);
+        const id = inv['payee-customer-id'] || 'غير معروف';
+        if (!cust.has(id)) cust.set(id, { count:0, total:0, taxes:0 });
+        const c = cust.get(id);
+        c.count++; c.total += inv['total-total'] || 0; c.taxes += inv['total-taxes'] || 0;
     });
-    
-    const sortedCustomers = Array.from(customerData.entries()).sort((a, b) => b[1].total - a[1].total);
-    
-    let html = '<div class="report-card">';
-    html += '<h3><i class="fas fa-users"></i> إحصائيات العملاء</h3>';
-    
-    const totalCustomers = sortedCustomers.length;
-    const totalAmount = sortedCustomers.reduce((sum, [_, data]) => sum + data.total, 0);
-    const topCustomer = sortedCustomers.length > 0 ? sortedCustomers[0][0] : 'لا يوجد';
-    
-    html += '<div class="report-stats">';
-    html += `<div class="stat-item"><div class="stat-label">عدد العملاء</div><div class="stat-value">${totalCustomers}</div></div>`;
-    html += `<div class="stat-item"><div class="stat-label">إجمالي الفواتير</div><div class="stat-value">${filteredInvoices.length}</div></div>`;
-    html += `<div class="stat-item"><div class="stat-label">أعلى عميل</div><div class="stat-value">${topCustomer.substring(0, 20)}</div></div>`;
-    html += `<div class="stat-item"><div class="stat-label">إجمالي المبالغ</div><div class="stat-value">${totalAmount.toFixed(2)} جنيه</div></div>`;
-    html += '</div>';
-    
-    html += '<table class="report-table">';
-    html += '<thead><tr><th>العميل</th><th>عدد الفواتير</th><th>إجمالي المبالغ</th><th>الضرائب</th><th>المتوسط</th></tr></thead>';
-    html += '<tbody>';
-    
-    sortedCustomers.forEach(([customer, data]) => {
-        const avg = data.count > 0 ? (data.total / data.count).toFixed(2) : 0;
-        html += `<tr>
-            <td>${customer.substring(0, 30)}</td>
-            <td>${data.count}</td>
-            <td>${data.total.toFixed(2)} جنيه</td>
-            <td>${data.taxes.toFixed(2)} جنيه</td>
-            <td>${avg} جنيه</td>
-        </tr>`;
-    });
-    
-    html += '</tbody></table>';
-    html += '</div>';
-    
+    const sorted = Array.from(cust.entries()).sort((a,b) => b[1].total - a[1].total);
+    const totalAmount = sorted.reduce((s,[_,d]) => s + d.total, 0);
+    let html = `<div class="report-card"><h3><i class="fas fa-users"></i> إحصائيات العملاء</h3>
+        <div class="report-stats">${[['عدد العملاء',sorted.length],['إجمالي الفواتير',filteredInvoices.length],['أعلى عميل',sorted.length?sorted[0][0].substring(0,20):'لا يوجد'],['إجمالي المبالغ',totalAmount.toFixed(2)+' جنيه']].map(([l,v])=>`<div class="stat-item"><div class="stat-label">${l}</div><div class="stat-value">${v}</div></div>`).join('')}</div>`;
+    html += '<table class="report-table"><thead><tr><th>العميل</th><th>عدد الفواتير</th><th>إجمالي المبالغ</th><th>الضرائب</th><th>المتوسط</th></tr></thead><tbody>';
+    sorted.forEach(([customer,data]) => html += `<tr><td>${customer.substring(0,30)}</td><td>${data.count}</td><td>${data.total.toFixed(2)}</td><td>${data.taxes.toFixed(2)}</td><td>${(data.total/data.count).toFixed(2)}</td></tr>`);
+    html += '</tbody></table></div>';
     document.getElementById('reportContent').innerHTML = html;
 }
 
 function generateVesselReport() {
     document.getElementById('reportTitle').textContent = 'تقارير السفن';
-    
-    if (filteredInvoices.length === 0) {
-        document.getElementById('reportContent').innerHTML = '<div class="no-data">لا توجد بيانات للعرض</div>';
-        return;
-    }
-    
-    const vesselData = new Map();
-    
+    if (!filteredInvoices.length) { document.getElementById('reportContent').innerHTML = '<div class="no-data">لا توجد بيانات</div>'; return; }
+    const vessel = new Map();
     filteredInvoices.forEach(inv => {
-        const vessel = inv['key-word1'] || 'غير معروف';
-        
-        if (!vesselData.has(vessel)) {
-            vesselData.set(vessel, {
-                count: 0,
-                total: 0,
-                taxes: 0,
-                invoices: []
-            });
-        }
-        const vesData = vesselData.get(vessel);
-        vesData.count++;
-        vesData.total += inv['total-total'] || 0;
-        vesData.taxes += inv['total-taxes'] || 0;
-        vesData.invoices.push(inv);
+        const v = inv['key-word1'] || 'غير معروف';
+        if (!vessel.has(v)) vessel.set(v, { count:0, total:0, taxes:0 });
+        const ves = vessel.get(v);
+        ves.count++; ves.total += inv['total-total'] || 0; ves.taxes += inv['total-taxes'] || 0;
     });
-    
-    const sortedVessels = Array.from(vesselData.entries()).sort((a, b) => b[1].total - a[1].total);
-    
-    let html = '<div class="report-card">';
-    html += '<h3><i class="fas fa-ship"></i> إحصائيات السفن</h3>';
-    
-    const totalVessels = sortedVessels.length;
-    const totalAmount = sortedVessels.reduce((sum, [_, data]) => sum + data.total, 0);
-    const topVessel = sortedVessels.length > 0 ? sortedVessels[0][0] : 'لا يوجد';
-    
-    html += '<div class="report-stats">';
-    html += `<div class="stat-item"><div class="stat-label">عدد السفن</div><div class="stat-value">${totalVessels}</div></div>`;
-    html += `<div class="stat-item"><div class="stat-label">إجمالي الفواتير</div><div class="stat-value">${filteredInvoices.length}</div></div>`;
-    html += `<div class="stat-item"><div class="stat-label">أكثر سفينة</div><div class="stat-value">${topVessel}</div></div>`;
-    html += `<div class="stat-item"><div class="stat-label">إجمالي المبالغ</div><div class="stat-value">${totalAmount.toFixed(2)} جنيه</div></div>`;
-    html += '</div>';
-    
-    html += '<table class="report-table">';
-    html += '<thead><tr><th>السفينة</th><th>عدد الفواتير</th><th>إجمالي المبالغ</th><th>الضرائب</th><th>المتوسط</th></tr></thead>';
-    html += '<tbody>';
-    
-    sortedVessels.forEach(([vessel, data]) => {
-        const avg = data.count > 0 ? (data.total / data.count).toFixed(2) : 0;
-        html += `<tr>
-            <td>${vessel}</td>
-            <td>${data.count}</td>
-            <td>${data.total.toFixed(2)} جنيه</td>
-            <td>${data.taxes.toFixed(2)} جنيه</td>
-            <td>${avg} جنيه</td>
-        </tr>`;
-    });
-    
-    html += '</tbody></table>';
-    html += '</div>';
-    
+    const sorted = Array.from(vessel.entries()).sort((a,b) => b[1].total - a[1].total);
+    const totalAmount = sorted.reduce((s,[_,d]) => s + d.total, 0);
+    let html = `<div class="report-card"><h3><i class="fas fa-ship"></i> إحصائيات السفن</h3>
+        <div class="report-stats">${[['عدد السفن',sorted.length],['إجمالي الفواتير',filteredInvoices.length],['أكثر سفينة',sorted.length?sorted[0][0]:'لا يوجد'],['إجمالي المبالغ',totalAmount.toFixed(2)+' جنيه']].map(([l,v])=>`<div class="stat-item"><div class="stat-label">${l}</div><div class="stat-value">${v}</div></div>`).join('')}</div>`;
+    html += '<table class="report-table"><thead><tr><th>السفينة</th><th>عدد الفواتير</th><th>إجمالي المبالغ</th><th>الضرائب</th><th>المتوسط</th></tr></thead><tbody>';
+    sorted.forEach(([vessel,data]) => html += `<tr><td>${vessel}</td><td>${data.count}</td><td>${data.total.toFixed(2)}</td><td>${data.taxes.toFixed(2)}</td><td>${(data.total/data.count).toFixed(2)}</td></tr>`);
+    html += '</tbody></table></div>';
     document.getElementById('reportContent').innerHTML = html;
 }
 
 // ============================================
-// دوال تصدير التقارير إلى PDF و Excel
+// دوال تصدير التقارير
 // ============================================
 window.exportReportPDF = function() {
-    const reportContent = document.getElementById('reportContent');
-    if (!reportContent || reportContent.innerHTML.trim() === '') {
-        alert('لا يوجد تقرير لتصديره');
-        return;
-    }
-
-    const loading = document.createElement('div');
-    loading.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#4361ee;color:white;padding:20px 40px;border-radius:10px;z-index:10000;';
+    const content = document.getElementById('reportContent');
+    if (!content?.innerHTML.trim()) return alert('لا يوجد تقرير');
+    const loading = document.body.appendChild(document.createElement('div'));
+    Object.assign(loading.style, { position:'fixed', top:'50%', left:'50%', transform:'translate(-50%,-50%)', background:'#4361ee', color:'white', padding:'15px 30px', borderRadius:'8px', zIndex:10000 });
     loading.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري إنشاء PDF...';
-    document.body.appendChild(loading);
-
-    html2canvas(reportContent, { scale: 2, backgroundColor: '#ffffff' }).then(canvas => {
-        document.body.removeChild(loading);
-        const imgData = canvas.toDataURL('image/png');
+    html2canvas(content, { scale:2 }).then(canvas => {
+        loading.remove();
         const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({
-            orientation: 'portrait',
-            unit: 'mm',
-            format: 'a4'
-        });
-        const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-        pdf.addImage(imgData, 'PNG', 0, 0, pdfWidth, pdfHeight);
-        const reportTitle = document.getElementById('reportTitle').textContent.replace(/\s/g, '_');
-        pdf.save(`تقرير_${reportTitle}_${new Date().toLocaleDateString('ar-EG')}.pdf`);
-    }).catch(error => {
-        document.body.removeChild(loading);
-        alert('حدث خطأ في إنشاء PDF: ' + error.message);
-    });
+        const pdf = new jsPDF({ orientation:'portrait', unit:'mm', format:'a4' });
+        pdf.addImage(canvas.toDataURL('image/png'), 'PNG', 0, 0, pdf.internal.pageSize.getWidth(), (canvas.height * pdf.internal.pageSize.getWidth()) / canvas.width);
+        pdf.save(`تقرير_${document.getElementById('reportTitle').textContent.replace(/\s/g,'_')}_${new Date().toLocaleDateString('ar-EG')}.pdf`);
+    }).catch(() => { loading.remove(); alert('حدث خطأ'); });
 };
 
 window.exportReportExcel = function() {
-    const reportContent = document.getElementById('reportContent');
-    if (!reportContent) {
-        alert('لا يوجد تقرير لتصديره');
-        return;
-    }
-
-    const tables = reportContent.querySelectorAll('table');
-    if (tables.length === 0) {
-        alert('لا توجد جداول في التقرير لتصديرها');
-        return;
-    }
-
-    let html = `
-        <html>
-        <head>
-            <meta charset="UTF-8">
-            <title>تقرير - ${document.getElementById('reportTitle').textContent}</title>
-            <style>
-                body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; direction: rtl; }
-                table { border-collapse: collapse; width: 100%; margin: 20px 0; }
-                th { background: #4361ee; color: white; padding: 10px; text-align: center; }
-                td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-                h2 { color: #4361ee; }
-                .report-title { margin-bottom: 20px; }
-            </style>
-        </head>
-        <body>
-            <h2 class="report-title">${document.getElementById('reportTitle').textContent}</h2>
-            ${reportContent.innerHTML}
-        </body>
-        </html>
-    `;
-
-    const blob = new Blob([html], { type: 'application/vnd.ms-excel' });
+    const content = document.getElementById('reportContent');
+    if (!content) return alert('لا يوجد تقرير');
+    const tables = content.querySelectorAll('table');
+    if (!tables.length) return alert('لا توجد جداول');
+    const html = `<html><head><meta charset="UTF-8"><title>تقرير - ${document.getElementById('reportTitle').textContent}</title><style>body{font-family:"Segoe UI",sans-serif;direction:rtl}table{border-collapse:collapse;width:100%}th{background:#4361ee;color:white;padding:10px}td{border:1px solid #ddd;padding:8px}</style></head><body><h2>${document.getElementById('reportTitle').textContent}</h2>${content.innerHTML}</body></html>`;
+    const blob = new Blob([html], { type:'application/vnd.ms-excel' });
     const link = document.createElement('a');
     link.href = URL.createObjectURL(blob);
-    link.download = `تقرير_${document.getElementById('reportTitle').textContent.replace(/\s/g, '_')}_${new Date().toLocaleDateString('ar-EG')}.xlsx`;
+    link.download = `تقرير_${document.getElementById('reportTitle').textContent.replace(/\s/g,'_')}_${new Date().toLocaleDateString('ar-EG')}.xlsx`;
     link.click();
 };
 
 // ============================================
-// دوال Google Drive المتطورة (للمدير فقط)
+// دوال Google Drive
 // ============================================
 function loadDriveSettings() {
     const saved = localStorage.getItem('driveConfig');
-    if (saved) {
-        try {
-            const parsed = JSON.parse(saved);
-            driveConfig = { ...driveConfig, ...parsed };
-        } catch (e) {
-            console.error('خطأ في تحميل إعدادات Drive:', e);
-        }
-    }
-    
-    updateDriveSettingsFields();
+    if (saved) try { driveConfig = { ...driveConfig, ...JSON.parse(saved) }; } catch { }
+    ['driveApiKey','driveFolderId','driveFileName','driveFileId','driveUsersFileName','driveUsersFileId'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.value = driveConfig[id.replace('drive','').charAt(0).toLowerCase() + id.replace('drive','').slice(1)] || '';
+    });
 }
 
-function updateDriveSettingsFields() {
-    const apiKeyInput = document.getElementById('driveApiKey');
-    const folderIdInput = document.getElementById('driveFolderId');
-    const fileNameInput = document.getElementById('driveFileName');
-    const fileIdInput = document.getElementById('driveFileId');
-    const usersFileNameInput = document.getElementById('driveUsersFileName');
-    const usersFileIdInput = document.getElementById('driveUsersFileId');
-    
-    if (apiKeyInput) apiKeyInput.value = driveConfig.apiKey || '';
-    if (folderIdInput) folderIdInput.value = driveConfig.folderId || '';
-    if (fileNameInput) fileNameInput.value = driveConfig.fileName || 'datatxt.txt';
-    if (fileIdInput) fileIdInput.value = driveConfig.fileId || '';
-    if (usersFileNameInput) usersFileNameInput.value = driveConfig.usersFileName || 'users.json';
-    if (usersFileIdInput) usersFileIdInput.value = driveConfig.usersFileId || '';
-}
-
-function saveDriveSettingsToStorage() {
-    localStorage.setItem('driveConfig', JSON.stringify(driveConfig));
-}
+function saveDriveSettingsToStorage() { localStorage.setItem('driveConfig', JSON.stringify(driveConfig)); }
 
 window.openDriveSettings = function() {
-    if (!currentUser || currentUser.userType !== 'admin') {
-        showNotification('غير مصرح لك بتغيير إعدادات Drive', 'error');
-        return;
-    }
-    
+    if (!currentUser || currentUser.userType !== 'admin') return showNotification('غير مصرح', 'error');
     loadDriveSettings();
     document.getElementById('driveSettingsModal').style.display = 'block';
-    document.getElementById('driveMessage').style.display = 'none';
-    document.getElementById('driveTestResult').style.display = 'none';
+    ['driveMessage','driveTestResult'].forEach(id => document.getElementById(id).style.display = 'none');
 };
 
-window.closeDriveSettings = function() {
-    document.getElementById('driveSettingsModal').style.display = 'none';
-};
+window.closeDriveSettings = function() { document.getElementById('driveSettingsModal').style.display = 'none'; };
 
 window.saveDriveSettings = function() {
-    if (!currentUser || currentUser.userType !== 'admin') {
-        showNotification('غير مصرح لك بهذا الإجراء', 'error');
-        return;
-    }
-    
-    driveConfig.apiKey = document.getElementById('driveApiKey').value.trim();
-    driveConfig.folderId = document.getElementById('driveFolderId').value.trim();
-    driveConfig.fileName = document.getElementById('driveFileName').value.trim() || 'datatxt.txt';
-    driveConfig.fileId = document.getElementById('driveFileId').value.trim();
-    driveConfig.usersFileName = document.getElementById('driveUsersFileName').value.trim() || 'users.json';
-    driveConfig.usersFileId = document.getElementById('driveUsersFileId').value.trim();
-    
+    if (!currentUser || currentUser.userType !== 'admin') return showNotification('غير مصرح', 'error');
+    driveConfig = {
+        apiKey: document.getElementById('driveApiKey').value.trim(),
+        folderId: document.getElementById('driveFolderId').value.trim(),
+        fileName: document.getElementById('driveFileName').value.trim() || 'datatxt.txt',
+        fileId: document.getElementById('driveFileId').value.trim(),
+        usersFileName: document.getElementById('driveUsersFileName').value.trim() || 'users.json',
+        usersFileId: document.getElementById('driveUsersFileId').value.trim()
+    };
     saveDriveSettingsToStorage();
-    showDriveMessage('✅ تم حفظ الإعدادات بنجاح', 'success');
+    const d = document.getElementById('driveMessage');
+    d.textContent = '✅ تم حفظ الإعدادات'; d.className = 'login-message success'; d.style.display = 'block';
 };
 
-function showDriveMessage(msg, type) {
-    const msgDiv = document.getElementById('driveMessage');
-    if (msgDiv) {
-        msgDiv.textContent = msg;
-        msgDiv.className = `login-message ${type}`;
-        msgDiv.style.display = 'block';
-    }
-}
-
 window.testDriveConnection = async function() {
-    if (!currentUser || currentUser.userType !== 'admin') {
-        showNotification('غير مصرح لك بهذا الإجراء', 'error');
-        return;
-    }
-    
+    if (!currentUser || currentUser.userType !== 'admin') return showNotification('غير مصرح', 'error');
     const apiKey = document.getElementById('driveApiKey').value.trim();
     const folderId = document.getElementById('driveFolderId').value.trim();
-
-    if (!apiKey || !folderId) {
-        showDriveMessage('❌ الرجاء إدخال مفتاح API ومعرف المجلد', 'error');
-        return;
-    }
-
-    showDriveMessage('🔄 جاري الاتصال...', 'info');
-
+    if (!apiKey || !folderId) return document.getElementById('driveMessage').innerHTML = '❌ أدخل المفتاح والمجلد' + (document.getElementById('driveMessage').className = 'login-message error') + (document.getElementById('driveMessage').style.display = 'block');
+    document.getElementById('driveMessage').innerHTML = '🔄 جاري الاتصال...';
+    document.getElementById('driveMessage').className = 'login-message info';
     try {
-        const query = `'${folderId}' in parents`;
-        const encodedQuery = encodeURIComponent(query);
-        const url = `https://www.googleapis.com/drive/v3/files?q=${encodedQuery}&key=${apiKey}&fields=files(id,name,mimeType,size,createdTime)`;
-        
-        const response = await fetch(url);
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || `HTTP ${response.status}`);
-        }
-        
-        const data = await response.json();
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(`'${folderId}' in parents`)}&key=${apiKey}&fields=files(id,name,mimeType,size,createdTime)`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
         const files = data.files || [];
-        
         window.driveFilesList = files;
-        
-        let message = `✅ اتصال ناجح!\n📁 إجمالي الملفات في المجلد: ${files.length}\n\n`;
-        
-        let filesHtml = '<div style="margin-top: 10px; max-height: 300px; overflow-y: auto;">';
-        
-        if (files.length > 0) {
-            message += `قائمة الملفات:\n${'-'.repeat(40)}\n`;
-            
-            files.forEach((f, i) => {
-                const size = f.size ? `${(parseInt(f.size) / 1024).toFixed(1)} KB` : 'حجم غير معروف';
-                const created = f.createdTime ? new Date(f.createdTime).toLocaleDateString('ar-EG') : '';
-                
-                filesHtml += `
-                    <div style="padding: 10px; margin: 5px 0; background: #2d3748; border-radius: 5px; border-right: 3px solid #4cc9f0;">
-                        <div style="display: flex; justify-content: space-between; align-items: center;">
-                            <div>
-                                <strong style="color: #ffd700;">${f.name}</strong>
-                                <div style="font-size: 0.85em; color: #a0aec0;">
-                                    معرف: ${f.id}<br>
-                                    حجم: ${size} | تاريخ: ${created}
-                                </div>
-                            </div>
-                            <div style="display: flex; gap: 5px;">
-                                <button onclick="selectDataFile('${f.id}', '${f.name}')" class="btn-small" style="background: #4361ee; color: white; border: none; border-radius: 3px; padding: 5px 10px; cursor: pointer;">
-                                    <i class="fas fa-file"></i> كملف بيانات
-                                </button>
-                                <button onclick="selectUsersFile('${f.id}', '${f.name}')" class="btn-small" style="background: #0F9D58; color: white; border: none; border-radius: 3px; padding: 5px 10px; cursor: pointer;">
-                                    <i class="fas fa-users"></i> كملف مستخدمين
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-        } else {
-            filesHtml += '<p style="color: #a0aec0;">لا توجد ملفات في هذا المجلد</p>';
-        }
-        
-        filesHtml += '</div>';
-        
-        const resultBox = document.getElementById('driveTestResult');
-        if (resultBox) {
-            resultBox.innerHTML = message.replace(/\n/g, '<br>') + filesHtml;
-            resultBox.style.display = 'block';
-        }
-        
-        showDriveMessage('✅ تم الاختبار بنجاح - انقر على الملف لاختياره', 'success');
-        
+        let html = `<div style="margin-top:10px;max-height:300px;overflow-y:auto;">${files.length ? files.map(f => `<div style="padding:10px;margin:5px 0;background:#2d3748;border-radius:5px;border-right:3px solid #4cc9f0;"><div style="display:flex;justify-content:space-between"><div><strong style="color:#ffd700;">${f.name}</strong><div style="font-size:0.85em;color:#a0aec0;">معرف: ${f.id}<br>حجم: ${f.size ? (parseInt(f.size)/1024).toFixed(1) : '?'} KB | تاريخ: ${f.createdTime ? new Date(f.createdTime).toLocaleDateString('ar-EG') : ''}</div></div><div><button onclick="selectDataFile('${f.id}','${f.name}')" class="btn-small" style="background:#4361ee;">كملف بيانات</button><button onclick="selectUsersFile('${f.id}','${f.name}')" class="btn-small" style="background:#0F9D58;margin-right:5px;">كملف مستخدمين</button></div></div></div>`).join('') : '<p style="color:#a0aec0;">لا توجد ملفات</p>'}</div>`;
+        document.getElementById('driveTestResult').innerHTML = `✅ اتصال ناجح!<br>📁 عدد الملفات: ${files.length}<br><br>${html}`;
+        document.getElementById('driveTestResult').style.display = 'block';
+        document.getElementById('driveMessage').innerHTML = '✅ تم الاختبار - انقر على ملف لاختياره';
+        document.getElementById('driveMessage').className = 'login-message success';
     } catch (error) {
-        showDriveMessage(`❌ فشل الاتصال: ${error.message}`, 'error');
-        const resultBox = document.getElementById('driveTestResult');
-        if (resultBox) {
-            resultBox.innerHTML = `❌ فشل الاتصال: ${error.message}`;
-            resultBox.style.display = 'block';
-        }
+        document.getElementById('driveMessage').innerHTML = `❌ فشل: ${error.message}`;
+        document.getElementById('driveMessage').className = 'login-message error';
+        document.getElementById('driveTestResult').innerHTML = `❌ خطأ: ${error.message}`;
+        document.getElementById('driveTestResult').style.display = 'block';
     }
 };
 
 window.selectDataFile = function(fileId, fileName) {
-    if (!currentUser || currentUser.userType !== 'admin') {
-        showNotification('غير مصرح لك بهذا الإجراء', 'error');
-        return;
-    }
-    
+    if (!currentUser || currentUser.userType !== 'admin') return showNotification('غير مصرح', 'error');
     document.getElementById('driveFileId').value = fileId;
     document.getElementById('driveFileName').value = fileName;
-    driveConfig.fileId = fileId;
-    driveConfig.fileName = fileName;
-    showDriveMessage(`✅ تم اختيار "${fileName}" كملف بيانات`, 'success');
-    
-    const resultBox = document.getElementById('driveTestResult');
-    if (resultBox) {
-        resultBox.innerHTML = `✅ تم اختيار ملف البيانات: <strong>${fileName}</strong><br>المعرف: ${fileId}`;
-    }
+    driveConfig.fileId = fileId; driveConfig.fileName = fileName;
+    document.getElementById('driveTestResult').innerHTML = `✅ تم اختيار ملف البيانات: <strong>${fileName}</strong><br>المعرف: ${fileId}`;
 };
 
 window.selectUsersFile = function(fileId, fileName) {
-    if (!currentUser || currentUser.userType !== 'admin') {
-        showNotification('غير مصرح لك بهذا الإجراء', 'error');
-        return;
-    }
-    
+    if (!currentUser || currentUser.userType !== 'admin') return showNotification('غير مصرح', 'error');
     document.getElementById('driveUsersFileId').value = fileId;
     document.getElementById('driveUsersFileName').value = fileName;
-    driveConfig.usersFileId = fileId;
-    driveConfig.usersFileName = fileName;
-    showDriveMessage(`✅ تم اختيار "${fileName}" كملف مستخدمين`, 'success');
-    
-    const resultBox = document.getElementById('driveTestResult');
-    if (resultBox) {
-        resultBox.innerHTML = `✅ تم اختيار ملف المستخدمين: <strong>${fileName}</strong><br>المعرف: ${fileId}`;
-    }
+    driveConfig.usersFileId = fileId; driveConfig.usersFileName = fileName;
+    document.getElementById('driveTestResult').innerHTML = `✅ تم اختيار ملف المستخدمين: <strong>${fileName}</strong><br>المعرف: ${fileId}`;
 };
 
-window.findDataFileId = async function() {
-    if (!currentUser || currentUser.userType !== 'admin') {
-        showNotification('غير مصرح لك بهذا الإجراء', 'error');
-        return;
-    }
-    
+window.findDataFileId = window.findUsersFileId = async function(isUsers = false) {
+    if (!currentUser || currentUser.userType !== 'admin') return showNotification('غير مصرح', 'error');
     const apiKey = document.getElementById('driveApiKey').value.trim();
     const folderId = document.getElementById('driveFolderId').value.trim();
-    const fileName = document.getElementById('driveFileName').value.trim() || 'datatxt.txt';
-
-    if (!apiKey || !folderId) {
-        showDriveMessage('❌ الرجاء إدخال مفتاح API ومعرف المجلد أولاً', 'error');
-        return;
-    }
-
-    showDriveMessage('🔄 جاري البحث عن ملف البيانات...', 'info');
-
+    const fileName = isUsers ? document.getElementById('driveUsersFileName').value.trim() : document.getElementById('driveFileName').value.trim();
+    if (!apiKey || !folderId || !fileName) return document.getElementById('driveMessage').innerHTML = '❌ أكمل الحقول' + (document.getElementById('driveMessage').className = 'login-message error') + (document.getElementById('driveMessage').style.display = 'block');
+    document.getElementById('driveMessage').innerHTML = `🔄 جاري البحث عن ${fileName}...`;
+    document.getElementById('driveMessage').className = 'login-message info';
     try {
-        const query = `'${folderId}' in parents and name='${fileName}' and trashed=false`;
-        const encodedQuery = encodeURIComponent(query);
-        const url = `https://www.googleapis.com/drive/v3/files?q=${encodedQuery}&key=${apiKey}&fields=files(id,name)`;
-        
-        const response = await fetch(url);
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || `HTTP ${response.status}`);
-        }
-        
-        const data = await response.json();
-        const files = data.files || [];
-        
-        if (files.length > 0) {
-            const fileId = files[0].id;
-            document.getElementById('driveFileId').value = fileId;
-            driveConfig.fileId = fileId;
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(`'${folderId}' in parents and name='${fileName}' and trashed=false`)}&key=${apiKey}&fields=files(id,name)`);
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const data = await res.json();
+        if (data.files?.length) {
+            const fileId = data.files[0].id;
+            if (isUsers) { document.getElementById('driveUsersFileId').value = fileId; driveConfig.usersFileId = fileId; }
+            else { document.getElementById('driveFileId').value = fileId; driveConfig.fileId = fileId; }
             saveDriveSettingsToStorage();
-            showDriveMessage(`✅ تم العثور على ملف البيانات: ${fileName}\nالمعرف: ${fileId}`, 'success');
-            
-            const resultBox = document.getElementById('driveTestResult');
-            if (resultBox) {
-                resultBox.innerHTML = `✅ تم العثور على ملف البيانات:<br>الاسم: ${fileName}<br>المعرف: ${fileId}`;
-                resultBox.style.display = 'block';
-            }
+            document.getElementById('driveMessage').innerHTML = `✅ تم العثور: ${fileName}<br>المعرف: ${fileId}`;
+            document.getElementById('driveMessage').className = 'login-message success';
+            document.getElementById('driveTestResult').innerHTML = `✅ تم العثور:<br>الاسم: ${fileName}<br>المعرف: ${fileId}`;
+            document.getElementById('driveTestResult').style.display = 'block';
         } else {
-            showDriveMessage(`❌ لم يتم العثور على ملف بيانات باسم "${fileName}" في المجلد`, 'error');
-            const resultBox = document.getElementById('driveTestResult');
-            if (resultBox) {
-                resultBox.innerHTML = `❌ لم يتم العثور على ملف بيانات باسم "${fileName}" في المجلد`;
-                resultBox.style.display = 'block';
-            }
+            document.getElementById('driveMessage').innerHTML = `❌ لم يتم العثور على ${fileName}`;
+            document.getElementById('driveMessage').className = 'login-message error';
         }
     } catch (error) {
-        console.error('خطأ في البحث:', error);
-        showDriveMessage(`❌ خطأ في البحث: ${error.message}`, 'error');
-        const resultBox = document.getElementById('driveTestResult');
-        if (resultBox) {
-            resultBox.innerHTML = `❌ خطأ: ${error.message}`;
-            resultBox.style.display = 'block';
-        }
-    }
-};
-
-window.findUsersFileId = async function() {
-    if (!currentUser || currentUser.userType !== 'admin') {
-        showNotification('غير مصرح لك بهذا الإجراء', 'error');
-        return;
-    }
-    
-    const apiKey = document.getElementById('driveApiKey').value.trim();
-    const folderId = document.getElementById('driveFolderId').value.trim();
-    const fileName = document.getElementById('driveUsersFileName').value.trim() || 'users.json';
-
-    if (!apiKey || !folderId) {
-        showDriveMessage('❌ الرجاء إدخال مفتاح API ومعرف المجلد أولاً', 'error');
-        return;
-    }
-
-    showDriveMessage('🔄 جاري البحث عن ملف المستخدمين...', 'info');
-
-    try {
-        const query = `'${folderId}' in parents and name='${fileName}' and trashed=false`;
-        const encodedQuery = encodeURIComponent(query);
-        const url = `https://www.googleapis.com/drive/v3/files?q=${encodedQuery}&key=${apiKey}&fields=files(id,name)`;
-        
-        const response = await fetch(url);
-        
-        if (!response.ok) {
-            const errorData = await response.json();
-            throw new Error(errorData.error?.message || `HTTP ${response.status}`);
-        }
-        
-        const data = await response.json();
-        const files = data.files || [];
-        
-        if (files.length > 0) {
-            const fileId = files[0].id;
-            document.getElementById('driveUsersFileId').value = fileId;
-            driveConfig.usersFileId = fileId;
-            saveDriveSettingsToStorage();
-            showDriveMessage(`✅ تم العثور على ملف المستخدمين: ${fileName}\nالمعرف: ${fileId}`, 'success');
-            
-            const resultBox = document.getElementById('driveTestResult');
-            if (resultBox) {
-                resultBox.innerHTML = `✅ تم العثور على ملف المستخدمين:<br>الاسم: ${fileName}<br>المعرف: ${fileId}`;
-                resultBox.style.display = 'block';
-            }
-        } else {
-            showDriveMessage(`❌ لم يتم العثور على ملف مستخدمين باسم "${fileName}" في المجلد`, 'error');
-            const resultBox = document.getElementById('driveTestResult');
-            if (resultBox) {
-                resultBox.innerHTML = `❌ لم يتم العثور على ملف مستخدمين باسم "${fileName}" في المجلد`;
-                resultBox.style.display = 'block';
-            }
-        }
-    } catch (error) {
-        console.error('خطأ في البحث:', error);
-        showDriveMessage(`❌ خطأ في البحث: ${error.message}`, 'error');
-        const resultBox = document.getElementById('driveTestResult');
-        if (resultBox) {
-            resultBox.innerHTML = `❌ خطأ: ${error.message}`;
-            resultBox.style.display = 'block';
-        }
+        document.getElementById('driveMessage').innerHTML = `❌ خطأ: ${error.message}`;
+        document.getElementById('driveMessage').className = 'login-message error';
     }
 };
 
 function startPeriodicUserUpdate() {
     setInterval(async () => {
-        if (currentUser && currentUser.userType === 'admin') {
-            console.log('🔄 تحديث دوري للمستخدمين من Drive...');
-            await loadUsersFromDrive(true);
-        }
+        if (currentUser?.userType === 'admin') await loadUsersFromDrive();
     }, 5 * 60 * 1000);
 }
 
+async function loadInvoicesFromDrive() {
+    if (!driveConfig.apiKey || !driveConfig.folderId) return false;
+    let fileId = driveConfig.fileId;
+    if (!fileId && driveConfig.fileName) {
+        try {
+            const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(`'${driveConfig.folderId}' in parents and name='${driveConfig.fileName}'`)}&key=${driveConfig.apiKey}&fields=files(id,name)`);
+            if (!res.ok) throw new Error('فشل البحث');
+            const data = await res.json();
+            if (!data.files?.length) return false;
+            fileId = data.files[0].id;
+            driveConfig.fileId = fileId;
+            if (currentUser?.userType === 'admin') saveDriveSettingsToStorage();
+        } catch { return false; }
+    } else if (!fileId) return false;
+
+    try {
+        showProgress('جاري تحميل البيانات...', 30);
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${driveConfig.apiKey}`);
+        if (!res.ok) throw new Error('فشل التحميل');
+        const content = await res.text();
+        showProgress('جاري تحليل البيانات...', 60);
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(content, "text/xml");
+        const parseError = xmlDoc.querySelector('parsererror');
+        let newInvoices = [];
+
+        if (parseError) {
+            const matches = content.match(/<invoice[\s\S]*?<\/invoice>/g);
+            if (!matches?.length) throw new Error('لا توجد فواتير');
+            const wrapped = parser.parseFromString(`<root>${matches.join('')}</root>`, 'text/xml');
+            const nodes = wrapped.querySelectorAll('invoice');
+            for (let i = 0; i < nodes.length; i++) { const inv = parseInvoiceNode(nodes[i]); if (inv) newInvoices.push(inv); }
+        } else {
+            const nodes = xmlDoc.getElementsByTagName('invoice');
+            for (let i = 0; i < nodes.length; i++) { const inv = parseInvoiceNode(nodes[i]); if (inv) newInvoices.push(inv); }
+        }
+
+        if (!newInvoices.length) throw new Error('لا توجد فواتير');
+        invoicesData = newInvoices;
+        showProgress('تم التحميل', 100);
+        currentUser?.isGuest ? filterInvoicesByGuest(currentUser.taxNumber, currentUser.blNumber) : filterInvoicesByUser();
+        document.getElementById('fileStatus').innerHTML = `<i class="fas fa-check-circle"></i> ✅ تم تحميل ${invoicesData.length} فاتورة من Drive`;
+        updateDataSource();
+        return true;
+    } catch (error) {
+        showNotification(`❌ خطأ: ${error.message}`, 'error');
+        return false;
+    } finally { setTimeout(hideProgress, 1500); }
+}
+
+window.updateFromDrive = async function() {
+    if (!currentUser || currentUser.userType !== 'admin') return showNotification('غير مصرح', 'error');
+    const success = await loadInvoicesFromDrive();
+    showNotification(success ? 'تم التحديث' : 'فشل التحديث', success ? 'success' : 'error');
+};
+
 // ============================================
-// التهيئة الرئيسية مع الإعداد التلقائي
+// التهيئة الرئيسية
 // ============================================
-document.addEventListener('DOMContentLoaded', async function() {
+document.addEventListener('DOMContentLoaded', async () => {
     console.log('بدء تشغيل النظام...');
-    
     loadDriveSettings();
     await autoConfigureDrive();
     await loadUsers();
     await initDatabase();
     checkSession();
-    setupEventListeners();
-    setupModalListeners();
+    document.getElementById('fileInput')?.addEventListener('change', handleFileUpload);
+    document.getElementById('sortSelect')?.addEventListener('change', () => { currentSortField = document.getElementById('sortSelect').value; renderData(); });
+    document.getElementById('itemsPerPage')?.addEventListener('change', changeItemsPerPage);
+    document.querySelectorAll('#searchFinalNumber, #searchDraftNumber, #searchCustomer, #searchVessel, #searchBlNumber, #searchContainer, #searchStatus, #searchDateFrom, #searchDateTo, #searchInvoiceType').forEach(input => input?.addEventListener('input', debounce(applyAdvancedSearch, 500)));
+    window.addEventListener('click', e => { if (e.target === document.getElementById('invoiceModal')) window.closeModal(); });
     await loadSavedData();
     updateDataSource();
 });
 
-function setupEventListeners() {
-    const fileInput = document.getElementById('fileInput');
-    if (fileInput) fileInput.addEventListener('change', handleFileUpload);
-
-    const sortSelect = document.getElementById('sortSelect');
-    if (sortSelect) {
-        sortSelect.addEventListener('change', () => {
-            currentSortField = sortSelect.value;
-            renderData();
-        });
-    }
-
-    const itemsPerPageSelect = document.getElementById('itemsPerPage');
-    if (itemsPerPageSelect) itemsPerPageSelect.addEventListener('change', changeItemsPerPage);
-
-    const searchInputs = document.querySelectorAll('#searchFinalNumber, #searchDraftNumber, #searchCustomer, #searchVessel, #searchBlNumber, #searchContainer, #searchStatus, #searchDateFrom, #searchDateTo, #searchInvoiceType');
-    searchInputs.forEach(input => {
-        if (input) input.addEventListener('input', debounce(applyAdvancedSearch, 500));
-    });
-}
-
 function debounce(func, wait) {
     let timeout;
-    return function executedFunction(...args) {
-        const later = () => {
-            clearTimeout(timeout);
-            func(...args);
-        };
-        clearTimeout(timeout);
-        timeout = setTimeout(later, wait);
-    };
-}
-
-function setupModalListeners() {
-    window.addEventListener('click', function(event) {
-        const modal = document.getElementById('invoiceModal');
-        if (event.target === modal) closeModal();
-    });
+    return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func(...args), wait); };
 }
