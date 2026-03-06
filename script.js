@@ -1,5 +1,5 @@
 // ============================================
-// نظام الفواتير المتقدم - النسخة النهائية مع دعم أنواع الفواتير في QR Code
+// نظام الفواتير المتقدم - النسخة النهائية مع استعادة دوال التجميع الأصلية
 // جميع الحقوق محفوظة لشركة دمياط لتداول الحاويات و البضائع
 // ============================================
 
@@ -54,759 +54,11 @@ let driveConfig = {
 // متغيرات التقارير
 let currentReportType = 'daily';
 
-// متغير لتخزين قائمة الملفات من Drive
+// متغير لتخبين قائمة الملفات من Drive
 window.driveFilesList = [];
 
 // متغير لتخزين الفواتير المحددة
 let selectedInvoices = new Set();
-
-// ============================================
-// نظام QR Code المستقل - إضافة جديدة بدون تأثير على النظام الرئيسي
-// ============================================
-
-let isQRCodeMode = false;
-let qrContainer = null;
-
-/**
- * إنشاء رابط الفاتورة المباشر (يدعم الرقم النهائي ورقم المسودة)
- */
-function getInvoiceLink(invoiceNumber, draftNumber = '') {
-    let url = `${COMPANY_INFO.baseUrl}?invoice=${encodeURIComponent(invoiceNumber)}`;
-    if (draftNumber) {
-        url += `&draft=${encodeURIComponent(draftNumber)}`;
-    }
-    return url;
-}
-
-/**
- * إنشاء QR Code للفاتورة وعرضه (لجميع الشاشات)
- */
-function generateQRCode(invoiceNumber, draftNumber, containerId, size = 100) {
-    const container = document.getElementById(containerId);
-    if (!container) return;
-    
-    container.innerHTML = '';
-    
-    const canvas = document.createElement('canvas');
-    canvas.id = `qrcode-${invoiceNumber}`;
-    canvas.style.width = '100%';
-    canvas.style.height = 'auto';
-    canvas.style.maxWidth = size + 'px';
-    container.appendChild(canvas);
-    
-    try {
-        QRCode.toCanvas(canvas, getInvoiceLink(invoiceNumber, draftNumber), {
-            width: size,
-            margin: 1,
-            color: {
-                dark: '#000000',
-                light: '#ffffff'
-            },
-            errorCorrectionLevel: 'H'
-        }, function(error) {
-            if (error) {
-                console.error('❌ خطأ في إنشاء QR Code:', error);
-                canvas.remove();
-                container.innerHTML = `<div style="color:red; font-size:0.8em;">خطأ</div>`;
-            } else {
-                console.log(`✅ تم إنشاء QR Code للفاتورة: ${invoiceNumber}`);
-                
-                const caption = document.createElement('div');
-                caption.style.fontSize = '0.6em';
-                caption.style.marginTop = '2px';
-                caption.style.color = '#666';
-                caption.textContent = 'امسح للوصول';
-                container.appendChild(caption);
-            }
-        });
-    } catch (error) {
-        console.error('❌ خطأ في إنشاء QR Code:', error);
-        canvas.remove();
-        container.innerHTML = `<div style="color:red; font-size:0.8em;">خطأ</div>`;
-    }
-}
-
-/**
- * تجميع المصاريف للفواتير النقدية (نسخة مخصصة لـ QR Code)
- */
-function groupCashChargesQR(charges) {
-    const sortedCharges = [...charges].sort((a, b) => (a['event-type-id'] || '').localeCompare(b['event-type-id'] || ''));
-    const grouped = [], map = new Map();
-    
-    sortedCharges.forEach(c => {
-        const key = `${c.description || ''}-${c['event-type-id'] || ''}-${c['storage-days'] || 1}`;
-        const storageDays = c['storage-days'] || 1;
-        
-        if (map.has(key)) {
-            const ex = map.get(key);
-            ex.quantity += 1;
-            ex.amount += (c.amount || 0);
-            ex.totalStorageDays += storageDays;
-            
-            if (c.containerNumbers?.length) {
-                c.containerNumbers.forEach(cont => { 
-                    if (!ex.containerNumbers.includes(cont)) ex.containerNumbers.push(cont); 
-                });
-            }
-        } else {
-            const newC = { 
-                ...c, 
-                quantity: 1, 
-                containerNumbers: [...(c.containerNumbers || [])], 
-                totalStorageDays: storageDays,
-                dates: []
-            };
-            map.set(key, newC);
-            grouped.push(newC);
-        }
-    });
-    
-    return grouped;
-}
-
-/**
- * تجميع المصاريف للفواتير الآجلة (نسخة مخصصة لـ QR Code)
- */
-function groupPostponedChargesQR(charges) {
-    const sortedCharges = [...charges].sort((a, b) => (a['event-type-id'] || '').localeCompare(b['event-type-id'] || ''));
-    const grouped = [], map = new Map();
-    
-    sortedCharges.forEach(c => {
-        const key = `${c.description || ''}-${c['event-type-id'] || ''}`;
-        const storageDays = c['storage-days'] || 1;
-        
-        if (map.has(key)) {
-            const ex = map.get(key);
-            ex.quantity += 1;
-            ex.totalStorageDays += storageDays;
-            ex.amount += (c.amount || 0);
-            
-            if (c.containerNumbers?.length) {
-                c.containerNumbers.forEach(cont => { 
-                    if (!ex.containerNumbers.includes(cont)) ex.containerNumbers.push(cont); 
-                });
-            }
-        } else {
-            const newC = { 
-                ...c, 
-                quantity: 1, 
-                containerNumbers: [...(c.containerNumbers || [])], 
-                totalStorageDays: storageDays,
-                dates: []
-            };
-            map.set(key, newC);
-            grouped.push(newC);
-        }
-    });
-    
-    return grouped;
-}
-
-/**
- * إنشاء HTML مبسط للفاتورة النقدية (لنظام QR Code المستقل)
- */
-function createQRCodeCashInvoiceHTML(invoice) {
-    const finalNum = invoice['final-number'] || '';
-    const currency = invoice['currency'] || 'EGP';
-    const exRate = invoice['flex-string-06'] || 48.0215;
-    const voyageDate = invoice['flex-date-02'] ? new Date(invoice['flex-date-02']).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : 'غير محدد';
-    
-    const grouped = groupCashChargesQR(invoice.charges);
-    const invoiceTypeText = 'نقدي';
-    const martyr = 5;
-    const baseTotal = invoice['total-total'] || 0;
-    const adjustedTotal = baseTotal + martyr;
-    
-    let displayCurrency;
-    let totalChargesDisplay, totalTaxesDisplay, displayTotal;
-    
-    if (currency === 'USAD') {
-        displayCurrency = 'USAD';
-        totalChargesDisplay = ((invoice['total-charges'] || 0) / exRate).toFixed(2);
-        totalTaxesDisplay = ((invoice['total-taxes'] || 0) / exRate).toFixed(2);
-        displayTotal = (adjustedTotal / exRate).toFixed(2);
-    } else {
-        displayCurrency = 'EGP';
-        totalChargesDisplay = (invoice['total-charges'] || 0).toFixed(2);
-        totalTaxesDisplay = (invoice['total-taxes'] || 0).toFixed(2);
-        displayTotal = adjustedTotal.toFixed(2);
-    }
-
-    const chargesRows = grouped.map(c => {
-        const amountDisplay = ((c.amount || 0) / exRate).toFixed(2);
-        const containerCount = c.containerNumbers?.length || 0;
-        const qtyDisplay = c.quantity > 1 ? ` (${c.quantity})` : '';
-        const chargeDate = c['paid-thru-day'] || c['created'] || '';
-        const formattedDate = chargeDate ? new Date(chargeDate).toLocaleDateString('ar-EG') : '-';
-        
-        return `
-            <tr>
-                <td>${c.description || '-'}${qtyDisplay}</td>
-                <td>${c['event-type-id'] || '-'}</td>
-                <td>${c.quantity}</td>
-                <td>${c.totalStorageDays}</td>
-                <td>${(c['rate-billed'] || 0).toFixed(2)}</td>
-                <td>${amountDisplay}</td>
-                <td>${formattedDate}</td>
-                <td>${containerCount > 0 ? `📦 ${containerCount}` : ''}</td>
-            </tr>
-        `;
-    }).join('');
-
-    return `
-        <div class="qr-invoice-container" style="max-width: 1100px; margin: 0 auto; background: white; padding: 20px; font-family: 'Segoe UI', sans-serif; direction: rtl;">
-            <style>
-                .qr-invoice-header { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-                .qr-invoice-title { background: #4361ee; color: white; padding: 10px; text-align: center; border-radius: 8px; margin-bottom: 15px; }
-                .qr-info-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 15px; }
-                .qr-info-box { background: #f8f9fa; padding: 10px; border-radius: 8px; border-right: 4px solid #4361ee; }
-                .qr-info-row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em; }
-                .qr-charges-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-                .qr-charges-table th { background: #4361ee; color: white; padding: 8px; }
-                .qr-charges-table td { padding: 6px; border-bottom: 1px solid #dee2e6; text-align: center; }
-                .qr-summary { width: 280px; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-right: auto; }
-                .qr-signature { display: flex; justify-content: space-around; margin: 15px 0; padding: 10px 0; border-top: 2px dashed #dee2e6; }
-                .qr-footer { text-align: center; padding: 8px; border-top: 2px solid #e9ecef; color: #6c757d; font-size:0.8em; }
-                .qr-controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; z-index: 10001; direction: rtl; background: rgba(255,255,255,0.95); padding: 15px 25px; border-radius: 60px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); backdrop-filter: blur(5px); }
-                .qr-btn { padding: 12px 25px; border: none; border-radius: 50px; cursor: pointer; font-size: 1em; display: flex; align-items: center; gap: 8px; transition: all 0.3s; color: white; }
-                .qr-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-                .qr-btn-primary { background: #4361ee; }
-                .qr-btn-secondary { background: #6c757d; }
-                .qr-btn-danger { background: #e63946; }
-            </style>
-            
-            <div class="qr-invoice-header">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8em; border: 2px solid #ffd700;">
-                        <i class="fas fa-ship"></i>
-                    </div>
-                    <div>
-                        <h2 style="color: #ffd700; margin: 0; font-size: 1.2em;">${COMPANY_INFO.name}</h2>
-                        <p style="margin: 3px 0; opacity: 0.9; font-size: 0.8em;">${COMPANY_INFO.nameEn}</p>
-                    </div>
-                </div>
-                <div id="qr-pdf-container" style="background: white; padding: 5px; border-radius: 8px; width: 100px; height: 100px; text-align: center;"></div>
-            </div>
-            
-            <div class="qr-invoice-title">
-                <h2 style="font-size: 1.1em; margin:0;">فاتورة نقدية</h2>
-                <p style="margin:3px 0 0; font-size:0.8em;">
-                    رقم: ${invoice['final-number'] || 'غير محدد'} | مسودة: ${invoice['draft-number'] || 'غير محدد'} | تاريخ: ${invoice['created'] ? new Date(invoice['created']).toLocaleDateString('ar-EG') : '-'}
-                </p>
-            </div>
-            
-            <div class="qr-info-grid">
-                <div class="qr-info-box">
-                    <h4 style="color:#4361ee; margin:0 0 8px; font-size:0.95em;">بيانات العميل</h4>
-                    <div class="qr-info-row"><span>الاسم:</span><span>${invoice['payee-customer-id'] || '-'}</span></div>
-                    <div class="qr-info-row"><span>الدور:</span><span>${invoice['payee-customer-role'] || '-'}</span></div>
-                    <div class="qr-info-row"><span>رقم العقد:</span><span>${invoice['contract-customer-id'] || '-'}</span></div>
-                </div>
-                <div class="qr-info-box">
-                    <h4 style="color:#4361ee; margin:0 0 8px; font-size:0.95em;">بيانات الشحنة</h4>
-                    <div class="qr-info-row"><span>السفينة:</span><span>${invoice['key-word1'] || '-'}</span></div>
-                    <div class="qr-info-row"><span>البوليصة:</span><span>${invoice['key-word2'] || '-'}</span></div>
-                    <div class="qr-info-row"><span>الخط الملاحي:</span><span>${invoice['key-word3'] || '-'}</span></div>
-                    <div class="qr-info-row"><span>تاريخ الرحلة:</span><span><strong>${voyageDate}</strong></span></div>
-                </div>
-                <div class="qr-info-box">
-                    <h4 style="color:#4361ee; margin:0 0 8px; font-size:0.95em;">معلومات إضافية</h4>
-                    <div class="qr-info-row"><span>الحالة:</span><span>${invoice['status'] || '-'}</span></div>
-                    <div class="qr-info-row"><span>العملة:</span><span>${invoice['currency'] || '-'}</span></div>
-                    <div class="qr-info-row"><span>سعر الصرف:</span><span><strong>${exRate.toFixed(4)}</strong></span></div>
-                </div>
-            </div>
-            
-            <table class="qr-charges-table">
-                <thead>
-                    <tr>
-                        <th>الوصف</th>
-                        <th>النوع</th>
-                        <th>العدد</th>
-                        <th>أيام التخزين</th>
-                        <th>سعر الوحدة</th>
-                        <th>المبلغ</th>
-                        <th>تاريخ الصرف</th>
-                        <th>الحاويات</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${chargesRows}
-                </tbody>
-            </table>
-            
-            <div class="qr-summary">
-                <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>إجمالي المصاريف:</span><span>${totalChargesDisplay} ${displayCurrency}</span></div>
-                <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>إجمالي الضرائب:</span><span>${totalTaxesDisplay} ${displayCurrency}</span></div>
-                <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>طابع الشهيد:</span><span>5 جنيه</span></div>
-                <div style="display:flex; justify-content:space-between; padding:5px 0; font-weight:bold; color:#4361ee;"><span>الإجمالي النهائي:</span><span>${displayTotal} ${displayCurrency}</span></div>
-            </div>
-            
-            <div class="qr-signature">
-                <div style="text-align:center;">
-                    <div style="color:#4361ee; font-weight:bold;">معد الفاتورة</div>
-                    <div>${invoice['creator'] || 'غير محدد'}</div>
-                    <div style="font-size:0.7em;">${new Date().toLocaleDateString('ar-EG')}</div>
-                </div>
-                <div style="text-align:center;">
-                    <div style="color:#4361ee; font-weight:bold;">المراجع</div>
-                    <div>${invoice['changer'] || invoice['creator'] || 'غير محدد'}</div>
-                    <div style="font-size:0.7em;">${new Date().toLocaleDateString('ar-EG')}</div>
-                </div>
-                <div style="text-align:center;">
-                    <div style="color:#4361ee; font-weight:bold;">الختم</div>
-                    <div style="font-size:2em; opacity:0.5;"><i class="fas fa-certificate"></i></div>
-                </div>
-            </div>
-            
-            <div class="qr-footer">
-                <p>شكراً لتعاملكم مع ${COMPANY_INFO.name}<br>تاريخ الطباعة: ${new Date().toLocaleDateString('ar-EG')}</p>
-            </div>
-        </div>
-    `;
-}
-
-/**
- * إنشاء HTML مبسط للفاتورة الآجلة (لنظام QR Code المستقل)
- */
-function createQRCodePostponedInvoiceHTML(invoice) {
-    const finalNum = invoice['final-number'] || '';
-    const isPostponed = finalNum.startsWith('P') || finalNum.startsWith('p');
-    const currency = invoice['currency'] || 'EGP';
-    const exRate = invoice['flex-string-06'] || 48.0215;
-    const voyageDate = invoice['flex-date-02'] ? new Date(invoice['flex-date-02']).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : 'غير محدد';
-    
-    const grouped = groupPostponedChargesQR(invoice.charges);
-    const invoiceTypeText = 'آجل';
-    const showMartyr = !(isPostponed && currency === 'USAD');
-    const martyr = showMartyr ? 5 : 0;
-    const baseTotal = invoice['total-total'] || 0;
-    const adjustedTotal = baseTotal + martyr;
-    
-    let displayCurrency;
-    let totalChargesDisplay, totalTaxesDisplay, displayTotal;
-    
-    if (isPostponed && currency === 'USAD') {
-        displayCurrency = 'USAD';
-        totalChargesDisplay = ((invoice['total-charges'] || 0) / exRate).toFixed(2);
-        totalTaxesDisplay = ((invoice['total-taxes'] || 0) / exRate).toFixed(2);
-        displayTotal = (adjustedTotal / exRate).toFixed(2);
-    } else {
-        displayCurrency = 'EGP';
-        totalChargesDisplay = (invoice['total-charges'] || 0).toFixed(2);
-        totalTaxesDisplay = (invoice['total-taxes'] || 0).toFixed(2);
-        displayTotal = adjustedTotal.toFixed(2);
-    }
-
-    const chargesRows = grouped.map(c => {
-        const amountDisplay = ((c.amount || 0) / exRate).toFixed(2);
-        const containerCount = c.containerNumbers?.length || 0;
-        const qtyDisplay = c.quantity > 1 ? ` (${c.quantity})` : '';
-        
-        return `
-            <tr>
-                <td>${c.description || '-'}${qtyDisplay}</td>
-                <td>${c['event-type-id'] || '-'}</td>
-                <td>${c.quantity}</td>
-                <td>${c.totalStorageDays}</td>
-                <td>${(c['rate-billed'] || 0).toFixed(2)}</td>
-                <td>${amountDisplay}</td>
-                <td>${containerCount > 0 ? `📦 ${containerCount}` : ''}</td>
-            </tr>
-        `;
-    }).join('');
-
-    return `
-        <div class="qr-invoice-container" style="max-width: 1100px; margin: 0 auto; background: white; padding: 20px; font-family: 'Segoe UI', sans-serif; direction: rtl;">
-            <style>
-                .qr-invoice-header { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
-                .qr-invoice-title { background: #4361ee; color: white; padding: 10px; text-align: center; border-radius: 8px; margin-bottom: 15px; }
-                .qr-info-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 15px; }
-                .qr-info-box { background: #f8f9fa; padding: 10px; border-radius: 8px; border-right: 4px solid #4361ee; }
-                .qr-info-row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em; }
-                .qr-charges-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
-                .qr-charges-table th { background: #4361ee; color: white; padding: 8px; }
-                .qr-charges-table td { padding: 6px; border-bottom: 1px solid #dee2e6; text-align: center; }
-                .qr-summary { width: 280px; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-right: auto; }
-                .qr-signature { display: flex; justify-content: space-around; margin: 15px 0; padding: 10px 0; border-top: 2px dashed #dee2e6; }
-                .qr-footer { text-align: center; padding: 8px; border-top: 2px solid #e9ecef; color: #6c757d; font-size:0.8em; }
-                .qr-controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; z-index: 10001; direction: rtl; background: rgba(255,255,255,0.95); padding: 15px 25px; border-radius: 60px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); backdrop-filter: blur(5px); }
-                .qr-btn { padding: 12px 25px; border: none; border-radius: 50px; cursor: pointer; font-size: 1em; display: flex; align-items: center; gap: 8px; transition: all 0.3s; color: white; }
-                .qr-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
-                .qr-btn-primary { background: #4361ee; }
-                .qr-btn-secondary { background: #6c757d; }
-                .qr-btn-danger { background: #e63946; }
-            </style>
-            
-            <div class="qr-invoice-header">
-                <div style="display: flex; align-items: center; gap: 15px;">
-                    <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8em; border: 2px solid #ffd700;">
-                        <i class="fas fa-ship"></i>
-                    </div>
-                    <div>
-                        <h2 style="color: #ffd700; margin: 0; font-size: 1.2em;">${COMPANY_INFO.name}</h2>
-                        <p style="margin: 3px 0; opacity: 0.9; font-size: 0.8em;">${COMPANY_INFO.nameEn}</p>
-                    </div>
-                </div>
-                <div id="qr-pdf-container" style="background: white; padding: 5px; border-radius: 8px; width: 100px; height: 100px; text-align: center;"></div>
-            </div>
-            
-            <div class="qr-invoice-title">
-                <h2 style="font-size: 1.1em; margin:0;">فاتورة آجلة</h2>
-                <p style="margin:3px 0 0; font-size:0.8em;">
-                    رقم: ${invoice['final-number'] || 'غير محدد'} | مسودة: ${invoice['draft-number'] || 'غير محدد'} | تاريخ: ${invoice['created'] ? new Date(invoice['created']).toLocaleDateString('ar-EG') : '-'}
-                </p>
-            </div>
-            
-            <div class="qr-info-grid">
-                <div class="qr-info-box">
-                    <h4 style="color:#4361ee; margin:0 0 8px; font-size:0.95em;">بيانات العميل</h4>
-                    <div class="qr-info-row"><span>الاسم:</span><span>${invoice['payee-customer-id'] || '-'}</span></div>
-                    <div class="qr-info-row"><span>الدور:</span><span>${invoice['payee-customer-role'] || '-'}</span></div>
-                    <div class="qr-info-row"><span>رقم العقد:</span><span>${invoice['contract-customer-id'] || '-'}</span></div>
-                </div>
-                <div class="qr-info-box">
-                    <h4 style="color:#4361ee; margin:0 0 8px; font-size:0.95em;">بيانات الشحنة</h4>
-                    <div class="qr-info-row"><span>السفينة:</span><span>${invoice['key-word1'] || '-'}</span></div>
-                    <div class="qr-info-row"><span>البوليصة:</span><span>${invoice['key-word2'] || '-'}</span></div>
-                    <div class="qr-info-row"><span>الخط الملاحي:</span><span>${invoice['key-word3'] || '-'}</span></div>
-                    <div class="qr-info-row"><span>تاريخ الرحلة:</span><span><strong>${voyageDate}</strong></span></div>
-                </div>
-                <div class="qr-info-box">
-                    <h4 style="color:#4361ee; margin:0 0 8px; font-size:0.95em;">معلومات إضافية</h4>
-                    <div class="qr-info-row"><span>الحالة:</span><span>${invoice['status'] || '-'}</span></div>
-                    <div class="qr-info-row"><span>العملة:</span><span>${invoice['currency'] || '-'}</span></div>
-                    <div class="qr-info-row"><span>سعر الصرف:</span><span><strong>${exRate.toFixed(4)}</strong></span></div>
-                </div>
-            </div>
-            
-            <table class="qr-charges-table">
-                <thead>
-                    <tr>
-                        <th>الوصف</th>
-                        <th>النوع</th>
-                        <th>العدد</th>
-                        <th>أيام التخزين</th>
-                        <th>سعر الوحدة</th>
-                        <th>المبلغ</th>
-                        <th>الحاويات</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    ${chargesRows}
-                </tbody>
-            </table>
-            
-            <div class="qr-summary">
-                <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>إجمالي المصاريف:</span><span>${totalChargesDisplay} ${displayCurrency}</span></div>
-                <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>إجمالي الضرائب:</span><span>${totalTaxesDisplay} ${displayCurrency}</span></div>
-                ${showMartyr ? `<div style="display:flex; justify-content:space-between; padding:3px 0;"><span>طابع الشهيد:</span><span>5 جنيه</span></div>` : ''}
-                <div style="display:flex; justify-content:space-between; padding:5px 0; font-weight:bold; color:#4361ee;"><span>الإجمالي النهائي:</span><span>${displayTotal} ${displayCurrency}</span></div>
-            </div>
-            
-            <div class="qr-signature">
-                <div style="text-align:center;">
-                    <div style="color:#4361ee; font-weight:bold;">معد الفاتورة</div>
-                    <div>${invoice['creator'] || 'غير محدد'}</div>
-                    <div style="font-size:0.7em;">${new Date().toLocaleDateString('ar-EG')}</div>
-                </div>
-                <div style="text-align:center;">
-                    <div style="color:#4361ee; font-weight:bold;">المراجع</div>
-                    <div>${invoice['changer'] || invoice['creator'] || 'غير محدد'}</div>
-                    <div style="font-size:0.7em;">${new Date().toLocaleDateString('ar-EG')}</div>
-                </div>
-                <div style="text-align:center;">
-                    <div style="color:#4361ee; font-weight:bold;">الختم</div>
-                    <div style="font-size:2em; opacity:0.5;"><i class="fas fa-certificate"></i></div>
-                </div>
-            </div>
-            
-            <div class="qr-footer">
-                <p>شكراً لتعاملكم مع ${COMPANY_INFO.name}<br>تاريخ الطباعة: ${new Date().toLocaleDateString('ar-EG')}</p>
-            </div>
-        </div>
-    `;
-}
-
-/**
- * إنشاء PDF محسن
- */
-async function generateQRCodePDF(element, fileName) {
-    if (typeof window.jspdf === 'undefined' || typeof window.html2canvas === 'undefined') {
-        throw new Error('مكتبات PDF غير متوفرة');
-    }
-    
-    const canvas = await html2canvas(element, {
-        scale: 1.5,
-        backgroundColor: '#ffffff',
-        logging: false,
-        allowTaint: true,
-        useCORS: true,
-        imageTimeout: 0
-    });
-    
-    const imgData = canvas.toDataURL('image/jpeg', 0.7);
-    const { jsPDF } = window.jspdf;
-    
-    const pdf = new jsPDF({
-        orientation: canvas.width > canvas.height ? 'l' : 'p',
-        unit: 'mm',
-        format: 'a4',
-        compress: true
-    });
-    
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
-    
-    pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-    pdf.save(fileName);
-}
-
-/**
- * تحميل البيانات من Drive بشكل مستقل
- */
-async function loadQRCodeData() {
-    try {
-        const apiKey = driveConfig.apiKey || 'AIzaSyBy4WRI3zkUwlCvbrXpB8o9ZbFMuH4AdGA';
-        const folderId = driveConfig.folderId || '1FlBXLupfXCICs6xt7xxEE02wr_cjAapC';
-        const fileName = driveConfig.fileName || 'datatxt.txt';
-        let fileId = driveConfig.fileId;
-        
-        if (!fileId) {
-            const searchUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(`'${folderId}' in parents and name='${fileName}' and trashed=false`)}&key=${apiKey}&fields=files(id,name)`;
-            const searchRes = await fetch(searchUrl);
-            if (!searchRes.ok) throw new Error('فشل البحث عن الملف');
-            const searchData = await searchRes.json();
-            if (!searchData.files?.length) throw new Error('لم يتم العثور على ملف البيانات');
-            fileId = searchData.files[0].id;
-            driveConfig.fileId = fileId;
-            localStorage.setItem('driveConfig', JSON.stringify(driveConfig));
-        }
-        
-        const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${apiKey}`;
-        const res = await fetch(url);
-        if (!res.ok) throw new Error('فشل تحميل الملف');
-        const content = await res.text();
-        
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(content, "text/xml");
-        const parseError = xmlDoc.querySelector('parsererror');
-        let newInvoices = [];
-
-        if (parseError) {
-            const matches = content.match(/<invoice[\s\S]*?<\/invoice>/g);
-            if (!matches?.length) throw new Error('لا توجد فواتير');
-            const wrapped = parser.parseFromString(`<root>${matches.join('')}</root>`, 'text/xml');
-            const nodes = wrapped.querySelectorAll('invoice');
-            for (let i = 0; i < nodes.length; i++) { 
-                const inv = parseInvoiceNode(nodes[i]); 
-                if (inv) newInvoices.push(inv); 
-            }
-        } else {
-            const nodes = xmlDoc.getElementsByTagName('invoice');
-            for (let i = 0; i < nodes.length; i++) { 
-                const inv = parseInvoiceNode(nodes[i]); 
-                if (inv) newInvoices.push(inv); 
-            }
-        }
-
-        if (!newInvoices.length) throw new Error('لا توجد فواتير');
-        
-        return newInvoices;
-        
-    } catch (error) {
-        console.error('خطأ في تحميل بيانات QR Code:', error);
-        throw error;
-    }
-}
-
-/**
- * معالجة رابط QR Code - نظام مستقل تماماً (يدعم الرقم النهائي ورقم المسودة)
- */
-async function handleQRCodeLink() {
-    const urlParams = new URLSearchParams(window.location.search);
-    const invoiceNumber = urlParams.get('invoice');
-    const draftNumber = urlParams.get('draft');
-    
-    if (!invoiceNumber) return false;
-    
-    console.log('📱 نظام QR Code المستقل - فتح الفاتورة:', invoiceNumber, draftNumber ? `(مسودة: ${draftNumber})` : '');
-    isQRCodeMode = true;
-    
-    document.getElementById('loginScreen').style.display = 'none';
-    document.getElementById('mainApp').style.display = 'none';
-    
-    qrContainer = document.createElement('div');
-    qrContainer.id = 'qrCodeSystem';
-    qrContainer.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: white;
-        z-index: 1000000;
-        overflow: auto;
-        direction: rtl;
-    `;
-    
-    qrContainer.innerHTML = `
-        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-            <div style="background: white; padding: 40px; border-radius: 20px; text-align: center; max-width: 400px; margin: 20px;">
-                <i class="fas fa-spinner fa-spin" style="font-size: 4em; color: #4361ee; margin-bottom: 20px;"></i>
-                <h2 style="color: #333; margin-bottom: 15px;">جاري تجهيز الفاتورة</h2>
-                <p style="color: #666; margin-bottom: 10px;">رقم الفاتورة: <strong style="color: #4361ee;">${invoiceNumber}</strong></p>
-                ${draftNumber ? `<p style="color: #666; margin-bottom: 10px;">رقم المسودة: <strong style="color: #4361ee;">${draftNumber}</strong></p>` : ''}
-                <div id="qrStatus" style="margin-top: 20px; padding: 10px; border-radius: 10px; background: #f0f2f5; color: #666;"></div>
-            </div>
-        </div>
-    `;
-    
-    document.body.appendChild(qrContainer);
-    
-    const statusDiv = document.getElementById('qrStatus');
-    
-    try {
-        statusDiv.innerHTML = '🔄 جاري تحميل إعدادات النظام...';
-        
-        loadDriveSettings();
-        
-        statusDiv.innerHTML = '📥 جاري تحميل البيانات من Drive...';
-        
-        const data = await loadQRCodeData();
-        
-        if (!data || data.length === 0) {
-            throw new Error('لا توجد بيانات متاحة');
-        }
-        
-        statusDiv.innerHTML = '🔍 جاري البحث عن الفاتورة...';
-        
-        const invoice = data.find(inv => 
-            inv['final-number'] === invoiceNumber || 
-            (draftNumber && inv['draft-number'] === draftNumber)
-        );
-        
-        if (!invoice) {
-            throw new Error('لم يتم العثور على الفاتورة');
-        }
-        
-        statusDiv.innerHTML = '📄 جاري إنشاء الفاتورة...';
-        
-        const finalNum = invoice['final-number'] || '';
-        const isPostponed = finalNum.startsWith('P') || finalNum.startsWith('p');
-        
-        let invoiceHTML;
-        if (isPostponed) {
-            invoiceHTML = createQRCodePostponedInvoiceHTML(invoice);
-            console.log('📋 استخدام نموذج الفاتورة الآجلة');
-        } else {
-            invoiceHTML = createQRCodeCashInvoiceHTML(invoice);
-            console.log('📋 استخدام نموذج الفاتورة النقدية');
-        }
-        
-        qrContainer.innerHTML = invoiceHTML;
-        
-        const qrPdfContainer = qrContainer.querySelector('#qr-pdf-container');
-        if (qrPdfContainer) {
-            await new Promise((resolve) => {
-                const canvas = document.createElement('canvas');
-                QRCode.toCanvas(canvas, getInvoiceLink(invoiceNumber, invoice['draft-number']), {
-                    width: 90,
-                    margin: 1,
-                    color: { dark: '#000000', light: '#ffffff' }
-                }, function(error) {
-                    if (!error) {
-                        qrPdfContainer.innerHTML = '';
-                        qrPdfContainer.appendChild(canvas);
-                    }
-                    resolve();
-                });
-            });
-        }
-        
-        const controlsDiv = document.createElement('div');
-        controlsDiv.className = 'qr-controls';
-        controlsDiv.innerHTML = `
-            <button onclick="exitQRCodeSystem()" class="qr-btn qr-btn-secondary">
-                <i class="fas fa-home"></i> الرئيسية
-            </button>
-            <button onclick="downloadQRCodePDF()" class="qr-btn qr-btn-primary">
-                <i class="fas fa-file-pdf"></i> تحميل PDF
-            </button>
-            <button onclick="window.close()" class="qr-btn qr-btn-danger">
-                <i class="fas fa-times"></i> إغلاق
-            </button>
-        `;
-        qrContainer.appendChild(controlsDiv);
-        
-        window.currentQRCodeInvoice = invoice;
-        window.currentQRCodeHTML = invoiceHTML;
-        
-        return true;
-        
-    } catch (error) {
-        console.error('خطأ في نظام QR Code:', error);
-        
-        qrContainer.innerHTML = `
-            <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
-                <div style="background: white; padding: 40px; border-radius: 20px; text-align: center; max-width: 400px; margin: 20px;">
-                    <i class="fas fa-exclamation-triangle" style="font-size: 4em; color: #e63946; margin-bottom: 20px;"></i>
-                    <h2 style="color: #e63946; margin-bottom: 15px;">عذراً، حدث خطأ</h2>
-                    <p style="color: #666; margin-bottom: 20px;">${error.message}</p>
-                    <p style="color: #666; margin-bottom: 30px;">رقم الفاتورة: <strong>${invoiceNumber}</strong></p>
-                    ${draftNumber ? `<p style="color: #666; margin-bottom: 30px;">رقم المسودة: <strong>${draftNumber}</strong></p>` : ''}
-                    <button onclick="exitQRCodeSystem()" style="background: #4361ee; color: white; border: none; padding: 15px 40px; border-radius: 50px; cursor: pointer; font-size: 1.1em;">
-                        <i class="fas fa-home"></i> العودة للرئيسية
-                    </button>
-                </div>
-            </div>
-        `;
-        return false;
-    }
-}
-
-window.exitQRCodeSystem = function() {
-    if (qrContainer) {
-        qrContainer.remove();
-        qrContainer = null;
-    }
-    isQRCodeMode = false;
-    window.location.href = COMPANY_INFO.baseUrl;
-};
-
-window.downloadQRCodePDF = async function() {
-    if (!window.currentQRCodeInvoice || !window.currentQRCodeHTML) {
-        alert('لا توجد فاتورة للتحميل');
-        return;
-    }
-    
-    const loadingDiv = document.createElement('div');
-    loadingDiv.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #4361ee; color: white; padding: 15px 30px; border-radius: 50px; z-index: 2000000; box-shadow: 0 5px 20px rgba(0,0,0,0.3);';
-    loadingDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري إنشاء PDF...';
-    document.body.appendChild(loadingDiv);
-    
-    try {
-        const tempContainer = document.createElement('div');
-        tempContainer.style.position = 'absolute';
-        tempContainer.style.left = '-9999px';
-        tempContainer.style.top = '-9999px';
-        tempContainer.innerHTML = window.currentQRCodeHTML;
-        document.body.appendChild(tempContainer);
-        
-        const element = tempContainer.firstChild;
-        const fileName = `فاتورة-${window.currentQRCodeInvoice['final-number']}.pdf`;
-        
-        await generateQRCodePDF(element, fileName);
-        
-        document.body.removeChild(tempContainer);
-        loadingDiv.remove();
-        
-    } catch (error) {
-        console.error('خطأ في تحميل PDF:', error);
-        loadingDiv.innerHTML = '❌ فشل التحميل';
-        setTimeout(() => loadingDiv.remove(), 2000);
-    }
-};
 
 // ============================================
 // دوال شريط التقدم
@@ -906,7 +158,7 @@ async function autoConfigureDrive() {
 }
 
 // ============================================
-// دوال المستخدمين
+// دوال المستخدمين (بدون تعديل)
 // ============================================
 async function loadUsersFromDrive() {
     if (!driveConfig.apiKey || !driveConfig.folderId || !driveConfig.usersFileId) return false;
@@ -1387,6 +639,9 @@ window.parseXMLContent = async function(xmlString, source) {
     }
 };
 
+// ============================================
+// دوال تحليل عقدة الفاتورة - كما في الملف الأصلي
+// ============================================
 function parseInvoiceNode(invoice) {
     try {
         const exRate = parseFloat(invoice.getAttribute('flex-string-06') || 48.0215);
@@ -1480,7 +735,7 @@ function parseInvoiceNode(invoice) {
 }
 
 // ============================================
-// دوال البحث المتقدم
+// دوال البحث المتقدم - كما في الملف الأصلي
 // ============================================
 window.applyAdvancedSearch = function() {
     if (!invoicesData.length) { filteredInvoices = []; renderData(); return; }
@@ -1847,8 +1102,10 @@ function clearSelectedInvoices() {
 }
 
 // ============================================
-// دوال تجميع المصاريف للفواتير النقدية
+// دوال تجميع المصاريف - كما في الملف الأصلي تماماً
 // ============================================
+
+// دوال تجميع المصاريف للفواتير النقدية - أصلية
 function groupCashCharges(charges) {
     const sortedCharges = [...charges].sort((a, b) => (a['event-type-id'] || '').localeCompare(b['event-type-id'] || ''));
     const grouped = [], map = new Map();
@@ -1871,9 +1128,7 @@ function groupCashCharges(charges) {
     return grouped;
 }
 
-// ============================================
-// دوال تجميع المصاريف للفواتير الآجلة
-// ============================================
+// دوال تجميع المصاريف للفواتير الآجلة - أصلية
 function groupPostponedCharges(charges) {
     const sortedCharges = [...charges].sort((a, b) => (a['event-type-id'] || '').localeCompare(b['event-type-id'] || ''));
     const grouped = [], map = new Map();
@@ -1898,7 +1153,7 @@ function groupPostponedCharges(charges) {
 }
 
 // ============================================
-// دوال تصدير تفاصيل الحاويات
+// دوال تصدير تفاصيل الحاويات - كما في الملف الأصلي
 // ============================================
 window.exportContainerDetails = async function(groupIndex) {
     const inv = invoicesData[selectedInvoiceIndex];
@@ -1960,7 +1215,7 @@ window.exportContainerDetails = async function(groupIndex) {
 };
 
 // ============================================
-// دوال تصدير Excel للفواتير المحددة (مع طابع الشهيد)
+// دوال تصدير Excel للفواتير المحددة - كما في الملف الأصلي
 // ============================================
 window.exportSelectedInvoicesExcel = async function() {
     if (selectedInvoices.size === 0) {
@@ -2040,7 +1295,7 @@ window.exportSelectedInvoicesExcel = async function() {
 };
 
 // ============================================
-// دوال تصدير PDF للفواتير المحددة
+// دوال تصدير PDF للفواتير المحددة - كما في الملف الأصلي
 // ============================================
 window.exportSelectedInvoices = async function() {
     if (selectedInvoices.size === 0) {
@@ -2208,7 +1463,7 @@ window.exportInvoicePDF = function() {
 };
 
 // ============================================
-// دوال الفاتورة والنموذج الفرعي - مع إضافة QR Code في الجانب الأيسر
+// دوال الفاتورة والنموذج الفرعي - مع إضافة QR Code (بدون تغيير في التجميع)
 // ============================================
 window.showInvoiceDetails = function(index) {
     if (index < 0 || index >= invoicesData.length) return;
@@ -2222,6 +1477,7 @@ window.showInvoiceDetails = function(index) {
     document.getElementById('modalInvoiceNumber').textContent = inv['final-number'] || 'غير محدد';
     const voyageDate = inv['flex-date-02'] ? new Date(inv['flex-date-02']).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : 'غير محدد';
     
+    // استخدام دوال التجميع الأصلية
     const grouped = isPostponed ? groupPostponedCharges(inv.charges) : groupCashCharges(inv.charges);
     
     const invoiceTypeText = isPostponed ? 'آجل' : 'نقدي';
@@ -2473,7 +1729,7 @@ window.showInvoiceDetails = function(index) {
             
             <div class="invoice-company-header" style="display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; padding: 15px 20px; border-radius: 10px; margin-bottom: 15px;">
                 <div style="display: flex; align-items: center; gap: 15px;">
-                    <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2em; border: 2px solid #ffd700;">
+                    <div class="invoice-company-logo" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2em; border: 2px solid #ffd700;">
                         <i class="fas fa-ship"></i>
                     </div>
                     <div>
@@ -2487,31 +1743,32 @@ window.showInvoiceDetails = function(index) {
                     </div>
                 </div>
                 
+                <!-- منطقة QR Code -->
                 <div id="qrcode-container-${inv['final-number']}" style="background: white; padding: 5px; border-radius: 8px; min-width: 110px; text-align: center;"></div>
             </div>
             
             <div class="invoice-header" style="background: linear-gradient(135deg, #4361ee, #3f37c9); color: white; padding: 12px; text-align: center; border-radius: 8px; margin-bottom: 15px;">
                 <h2 style="font-size: 1.1em; margin-bottom: 3px;"><i class="fas fa-file-invoice"></i> فاتورة رسمية - ${invoiceTypeText}</h2>
                 <p style="font-size: 0.8em; margin-top: 3px; color: #f0f0f0;"><i class="fas fa-tag"></i> ${inv['invoice-type-id'] || 'غير محدد'}</p>
-                <p style="margin-top: 3px; font-size: 0.8em;">رقم: ${inv['final-number'] || 'غير محدد'} | مسودة: ${inv['draft-number'] || 'غير محدد'} | تاريخ: ${inv['created'] ? new Date(inv['created']).toLocaleDateString('ar-EG') : '-'}</p>
+                <p style="margin-top: 3px; font-size: 0.8em;">رقم: ${inv['final-number'] || 'غير محدد'} | تاريخ: ${inv['created'] ? new Date(inv['created']).toLocaleDateString('ar-EG') : '-'}</p>
             </div>
             
             <div class="invoice-info-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 15px;">
                 <div class="info-box" style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-right: 4px solid #4361ee;">
-                    <h4 style="color: #4361ee; margin-bottom: 8px; font-size: 0.95em;"><i class="fas fa-building"></i> بيانات العميل</h4>
+                    <h4 style="color: #4361ee; margin-bottom: 8px; font-size: 0.95em; display: flex; align-items: center; gap: 5px;"><i class="fas fa-building"></i> بيانات العميل</h4>
                     <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;"><span>الاسم:</span><span>${inv['payee-customer-id'] || '-'}</span></div>
                     <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;"><span>الدور:</span><span>${inv['payee-customer-role'] || '-'}</span></div>
                     <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;"><span>رقم العقد:</span><span>${inv['contract-customer-id'] || '-'}</span></div>
                 </div>
                 <div class="info-box" style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-right: 4px solid #4361ee;">
-                    <h4 style="color: #4361ee; margin-bottom: 8px; font-size: 0.95em;"><i class="fas fa-ship"></i> بيانات الشحنة</h4>
+                    <h4 style="color: #4361ee; margin-bottom: 8px; font-size: 0.95em; display: flex; align-items: center; gap: 5px;"><i class="fas fa-ship"></i> بيانات الشحنة</h4>
                     <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;"><span>السفينة:</span><span>${inv['key-word1'] || '-'}</span></div>
                     <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;"><span>رقم البوليصة:</span><span>${inv['key-word2'] || '-'}</span></div>
                     <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;"><span>الخط الملاحي:</span><span>${inv['key-word3'] || '-'}</span></div>
                     <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;"><span>تاريخ الرحلة:</span><span><strong>${voyageDate}</strong></span></div>
                 </div>
                 <div class="info-box" style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-right: 4px solid #4361ee;">
-                    <h4 style="color: #4361ee; margin-bottom: 8px; font-size: 0.95em;"><i class="fas fa-info-circle"></i> معلومات إضافية</h4>
+                    <h4 style="color: #4361ee; margin-bottom: 8px; font-size: 0.95em; display: flex; align-items: center; gap: 5px;"><i class="fas fa-info-circle"></i> معلومات إضافية</h4>
                     <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;"><span>الحالة:</span><span>${inv['status'] || '-'}</span></div>
                     <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;"><span>العملة:</span><span>${inv['currency'] || '-'}</span></div>
                     <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;"><span>المنشأة:</span><span>${facilityDisplay}</span></div>
@@ -2520,9 +1777,9 @@ window.showInvoiceDetails = function(index) {
             </div>
             
             <div class="charges-section" style="margin-bottom: 15px;">
-                <h3 style="color: #212529; margin-bottom: 8px; font-size: 1em;"><i class="fas fa-list"></i> تفاصيل المصاريف</h3>
+                <h3 style="color: #212529; margin-bottom: 8px; font-size: 1em; display: flex; align-items: center; gap: 5px;"><i class="fas fa-list"></i> تفاصيل المصاريف</h3>
                 <table class="charges-table" style="width: 100%; border-collapse: collapse; background: white; border-radius: 8px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,0.05);">
-                    <thead style="background: #4361ee; color: white;">
+                    <thead style="background: #4361ee; color: white; -webkit-print-color-adjust: exact; print-color-adjust: exact;">
                         ${tableHeaders}
                     </thead>
                     <tbody>
@@ -3090,6 +2347,591 @@ window.updateFromDrive = async function() {
     if (!currentUser || currentUser.userType !== 'admin') return showNotification('غير مصرح', 'error');
     const success = await loadInvoicesFromDrive();
     showNotification(success ? 'تم التحديث' : 'فشل التحديث', success ? 'success' : 'error');
+};
+
+// ============================================
+// نظام QR Code المستقل - مع استخدام دوال التجميع الأصلية
+// ============================================
+
+let qrContainer = null;
+let isQRCodeMode = false;
+
+/**
+ * إنشاء رابط الفاتورة المباشر
+ */
+function getInvoiceLink(invoiceNumber, draftNumber = '') {
+    let url = `${COMPANY_INFO.baseUrl}?invoice=${encodeURIComponent(invoiceNumber)}`;
+    if (draftNumber) {
+        url += `&draft=${encodeURIComponent(draftNumber)}`;
+    }
+    return url;
+}
+
+/**
+ * إنشاء QR Code للفاتورة وعرضه
+ */
+function generateQRCode(invoiceNumber, draftNumber, containerId, size = 100) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    
+    container.innerHTML = '';
+    
+    const canvas = document.createElement('canvas');
+    canvas.id = `qrcode-${invoiceNumber}`;
+    canvas.style.width = '100%';
+    canvas.style.height = 'auto';
+    canvas.style.maxWidth = size + 'px';
+    container.appendChild(canvas);
+    
+    try {
+        QRCode.toCanvas(canvas, getInvoiceLink(invoiceNumber, draftNumber), {
+            width: size,
+            margin: 1,
+            color: {
+                dark: '#000000',
+                light: '#ffffff'
+            },
+            errorCorrectionLevel: 'H'
+        }, function(error) {
+            if (error) {
+                console.error('❌ خطأ في إنشاء QR Code:', error);
+                canvas.remove();
+                container.innerHTML = `<div style="color:red; font-size:0.8em;">خطأ</div>`;
+            } else {
+                console.log(`✅ تم إنشاء QR Code للفاتورة: ${invoiceNumber}`);
+                
+                const caption = document.createElement('div');
+                caption.style.fontSize = '0.6em';
+                caption.style.marginTop = '2px';
+                caption.style.color = '#666';
+                caption.textContent = 'امسح للوصول';
+                container.appendChild(caption);
+            }
+        });
+    } catch (error) {
+        console.error('❌ خطأ في إنشاء QR Code:', error);
+        canvas.remove();
+        container.innerHTML = `<div style="color:red; font-size:0.8em;">خطأ</div>`;
+    }
+}
+
+/**
+ * إنشاء HTML للفاتورة في نظام QR Code (باستخدام دوال التجميع الأصلية)
+ */
+function createQRCodeInvoiceHTML(invoice) {
+    const finalNum = invoice['final-number'] || '';
+    const isPostponed = finalNum.startsWith('P') || finalNum.startsWith('p');
+    const currency = invoice['currency'] || 'EGP';
+    const exRate = invoice['flex-string-06'] || 48.0215;
+    const voyageDate = invoice['flex-date-02'] ? new Date(invoice['flex-date-02']).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : 'غير محدد';
+    
+    // استخدام دوال التجميع الأصلية حسب نوع الفاتورة
+    const grouped = isPostponed ? groupPostponedCharges(invoice.charges) : groupCashCharges(invoice.charges);
+    
+    const invoiceTypeText = isPostponed ? 'آجل' : 'نقدي';
+    const showMartyr = !(isPostponed && currency === 'USAD');
+    const martyr = showMartyr ? 5 : 0;
+    const baseTotal = invoice['total-total'] || 0;
+    const adjustedTotal = baseTotal + martyr;
+    
+    let displayCurrency;
+    let totalChargesDisplay, totalTaxesDisplay, displayTotal;
+    
+    if (isPostponed && currency === 'USAD') {
+        displayCurrency = 'USAD';
+        totalChargesDisplay = ((invoice['total-charges'] || 0) / exRate).toFixed(2);
+        totalTaxesDisplay = ((invoice['total-taxes'] || 0) / exRate).toFixed(2);
+        displayTotal = (adjustedTotal / exRate).toFixed(2);
+    } else {
+        displayCurrency = 'EGP';
+        totalChargesDisplay = (invoice['total-charges'] || 0).toFixed(2);
+        totalTaxesDisplay = (invoice['total-taxes'] || 0).toFixed(2);
+        displayTotal = adjustedTotal.toFixed(2);
+    }
+
+    // إنشاء صفوف المصاريف بنفس تنسيق الفاتورة الأصلية
+    let chargesRows = '';
+    
+    grouped.forEach((charge, idx) => {
+        const amount = charge.amount;
+        let amountDisplay = (amount / exRate).toFixed(2);
+        const containerCount = charge.containerNumbers?.length || 0;
+        const qtyDisplay = charge.quantity > 1 ? ` (${charge.quantity})` : '';
+
+        let displayStorageDays;
+        if (isPostponed) {
+            if (charge['event-type-id'] === 'REEFER' || charge['event-type-id'] === 'STORAGE') {
+                displayStorageDays = charge.totalStorageDays;
+            } else {
+                displayStorageDays = 1;
+            }
+        } else {
+            displayStorageDays = charge.totalStorageDays;
+        }
+
+        if (isPostponed) {
+            chargesRows += `<tr>
+                <td>${charge.description || '-'}${qtyDisplay}</td>
+                <td>${charge['event-type-id'] || '-'}</td>
+                <td>${charge.quantity || 1}</td>
+                <td>${displayStorageDays}</td>
+                <td>${(charge['rate-billed'] || 0).toFixed(2)}</td>
+                <td><strong>${amountDisplay}</strong></td>
+                <td>${containerCount > 0 ? `📦 ${containerCount}` : ''}</td>
+            </tr>`;
+        } else {
+            const chargeDate = charge['paid-thru-day'] || charge['created'] || '';
+            const formattedDate = chargeDate ? new Date(chargeDate).toLocaleDateString('ar-EG') : '-';
+            
+            chargesRows += `<tr>
+                <td>${charge.description || '-'}${qtyDisplay}</td>
+                <td>${charge['event-type-id'] || '-'}</td>
+                <td>${charge.quantity || 1}</td>
+                <td>${displayStorageDays}</td>
+                <td>${(charge['rate-billed'] || 0).toFixed(2)}</td>
+                <td><strong>${amountDisplay}</strong></td>
+                <td>${formattedDate}</td>
+                <td>${containerCount > 0 ? `📦 ${containerCount}` : ''}</td>
+            </tr>`;
+        }
+
+        // إضافة تفاصيل الحاويات إذا وجدت
+        if (containerCount > 0) {
+            const containerDetails = charge.containerNumbers.map((container, idx) => {
+                const dateInfo = charge.dates && charge.dates[idx] ? charge.dates[idx] : {
+                    from: charge['event-performed-from'] || '-',
+                    to: charge['event-performed-to'] || '-',
+                    days: charge['storage-days'] || 1
+                };
+                return {
+                    containerNumber: container,
+                    eventFrom: dateInfo.from,
+                    eventTo: dateInfo.to,
+                    days: dateInfo.days
+                };
+            });
+            
+            chargesRows += `<tr style="background:#f8f9fa;">
+                <td colspan="${isPostponed ? '7' : '8'}" style="padding:10px;">
+                    <div style="background:white; border-radius:8px; padding:10px; border-right:3px solid #4cc9f0;">
+                        <h4 style="color:#4cc9f0; margin:0 0 8px; font-size:0.9em;">
+                            <i class="fas fa-container-storage"></i> تفاصيل الحاويات
+                        </h4>
+                        <table style="width:100%; border-collapse:collapse; font-size:0.8em;">
+                            <thead>
+                                <tr style="background:#e9ecef;">
+                                    <th>رقم الحاوية</th>
+                                    <th>التاريخ من</th>
+                                    <th>التاريخ إلى</th>
+                                    <th>الأيام</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${containerDetails.map(detail => `
+                                    <tr>
+                                        <td style="padding:5px; border-bottom:1px solid #dee2e6;">📦 ${detail.containerNumber}</td>
+                                        <td style="padding:5px; border-bottom:1px solid #dee2e6;">${detail.eventFrom}</td>
+                                        <td style="padding:5px; border-bottom:1px solid #dee2e6;">${detail.eventTo}</td>
+                                        <td style="padding:5px; border-bottom:1px solid #dee2e6;">${detail.days}</td>
+                                    </tr>
+                                `).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>`;
+        }
+    });
+
+    return `
+        <div class="qr-invoice-container" style="max-width: 1100px; margin: 0 auto; background: white; padding: 20px; font-family: 'Segoe UI', sans-serif; direction: rtl;">
+            <style>
+                .qr-invoice-header { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; padding: 15px; border-radius: 10px; margin-bottom: 15px; display: flex; justify-content: space-between; align-items: center; }
+                .qr-invoice-title { background: #4361ee; color: white; padding: 10px; text-align: center; border-radius: 8px; margin-bottom: 15px; }
+                .qr-info-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; margin-bottom: 15px; }
+                .qr-info-box { background: #f8f9fa; padding: 10px; border-radius: 8px; border-right: 4px solid #4361ee; }
+                .qr-info-row { display: flex; justify-content: space-between; padding: 3px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em; }
+                .qr-charges-table { width: 100%; border-collapse: collapse; margin-bottom: 15px; }
+                .qr-charges-table th { background: #4361ee; color: white; padding: 8px; }
+                .qr-charges-table td { padding: 6px; border-bottom: 1px solid #dee2e6; text-align: center; }
+                .qr-summary { width: 280px; background: #f8f9fa; padding: 10px; border-radius: 8px; margin-right: auto; }
+                .qr-signature { display: flex; justify-content: space-around; margin: 15px 0; padding: 10px 0; border-top: 2px dashed #dee2e6; }
+                .qr-footer { text-align: center; padding: 8px; border-top: 2px solid #e9ecef; color: #6c757d; font-size:0.8em; }
+                .qr-controls { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); display: flex; gap: 15px; z-index: 10001; direction: rtl; background: rgba(255,255,255,0.95); padding: 15px 25px; border-radius: 60px; box-shadow: 0 5px 20px rgba(0,0,0,0.2); backdrop-filter: blur(5px); }
+                .qr-btn { padding: 12px 25px; border: none; border-radius: 50px; cursor: pointer; font-size: 1em; display: flex; align-items: center; gap: 8px; transition: all 0.3s; color: white; }
+                .qr-btn:hover { transform: translateY(-2px); box-shadow: 0 5px 15px rgba(0,0,0,0.2); }
+                .qr-btn-primary { background: #4361ee; }
+                .qr-btn-secondary { background: #6c757d; }
+                .qr-btn-danger { background: #e63946; }
+            </style>
+            
+            <div class="qr-invoice-header">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8em; border: 2px solid #ffd700;">
+                        <i class="fas fa-ship"></i>
+                    </div>
+                    <div>
+                        <h2 style="color: #ffd700; margin: 0; font-size: 1.2em;">${COMPANY_INFO.name}</h2>
+                        <p style="margin: 3px 0; opacity: 0.9; font-size: 0.8em;">${COMPANY_INFO.nameEn}</p>
+                    </div>
+                </div>
+                <div id="qr-pdf-container" style="background: white; padding: 5px; border-radius: 8px; width: 100px; height: 100px; text-align: center;"></div>
+            </div>
+            
+            <div class="qr-invoice-title">
+                <h2 style="font-size: 1.1em; margin:0;">فاتورة ${invoiceTypeText}</h2>
+                <p style="margin:3px 0 0; font-size:0.8em;">
+                    رقم: ${invoice['final-number'] || 'غير محدد'} | مسودة: ${invoice['draft-number'] || 'غير محدد'} | تاريخ: ${invoice['created'] ? new Date(invoice['created']).toLocaleDateString('ar-EG') : '-'}
+                </p>
+            </div>
+            
+            <div class="qr-info-grid">
+                <div class="qr-info-box">
+                    <h4 style="color:#4361ee; margin:0 0 8px; font-size:0.95em;">بيانات العميل</h4>
+                    <div class="qr-info-row"><span>الاسم:</span><span>${invoice['payee-customer-id'] || '-'}</span></div>
+                    <div class="qr-info-row"><span>الدور:</span><span>${invoice['payee-customer-role'] || '-'}</span></div>
+                    <div class="qr-info-row"><span>رقم العقد:</span><span>${invoice['contract-customer-id'] || '-'}</span></div>
+                </div>
+                <div class="qr-info-box">
+                    <h4 style="color:#4361ee; margin:0 0 8px; font-size:0.95em;">بيانات الشحنة</h4>
+                    <div class="qr-info-row"><span>السفينة:</span><span>${invoice['key-word1'] || '-'}</span></div>
+                    <div class="qr-info-row"><span>البوليصة:</span><span>${invoice['key-word2'] || '-'}</span></div>
+                    <div class="qr-info-row"><span>الخط الملاحي:</span><span>${invoice['key-word3'] || '-'}</span></div>
+                    <div class="qr-info-row"><span>تاريخ الرحلة:</span><span><strong>${voyageDate}</strong></span></div>
+                </div>
+                <div class="qr-info-box">
+                    <h4 style="color:#4361ee; margin:0 0 8px; font-size:0.95em;">معلومات إضافية</h4>
+                    <div class="qr-info-row"><span>الحالة:</span><span>${invoice['status'] || '-'}</span></div>
+                    <div class="qr-info-row"><span>العملة:</span><span>${invoice['currency'] || '-'}</span></div>
+                    <div class="qr-info-row"><span>سعر الصرف:</span><span><strong>${exRate.toFixed(4)}</strong></span></div>
+                </div>
+            </div>
+            
+            <table class="qr-charges-table">
+                <thead>
+                    <tr>
+                        ${isPostponed ? 
+                            '<th>الوصف</th><th>النوع</th><th>العدد</th><th>أيام التخزين</th><th>سعر الوحدة</th><th>المبلغ</th><th>الحاويات</th>' :
+                            '<th>الوصف</th><th>النوع</th><th>العدد</th><th>أيام التخزين</th><th>سعر الوحدة</th><th>المبلغ</th><th>تاريخ الصرف</th><th>الحاويات</th>'
+                        }
+                    </tr>
+                </thead>
+                <tbody>
+                    ${chargesRows}
+                </tbody>
+            </table>
+            
+            <div class="qr-summary">
+                <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>إجمالي المصاريف:</span><span>${totalChargesDisplay} ${displayCurrency}</span></div>
+                <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>إجمالي الضرائب:</span><span>${totalTaxesDisplay} ${displayCurrency}</span></div>
+                ${showMartyr ? `<div style="display:flex; justify-content:space-between; padding:3px 0;"><span>طابع الشهيد:</span><span>5 جنيه</span></div>` : ''}
+                <div style="display:flex; justify-content:space-between; padding:5px 0; font-weight:bold; color:#4361ee;"><span>الإجمالي النهائي:</span><span>${displayTotal} ${displayCurrency}</span></div>
+            </div>
+            
+            <div class="qr-signature">
+                <div style="text-align:center;">
+                    <div style="color:#4361ee; font-weight:bold;">معد الفاتورة</div>
+                    <div>${invoice['creator'] || 'غير محدد'}</div>
+                    <div style="font-size:0.7em;">${new Date().toLocaleDateString('ar-EG')}</div>
+                </div>
+                <div style="text-align:center;">
+                    <div style="color:#4361ee; font-weight:bold;">المراجع</div>
+                    <div>${invoice['changer'] || invoice['creator'] || 'غير محدد'}</div>
+                    <div style="font-size:0.7em;">${new Date().toLocaleDateString('ar-EG')}</div>
+                </div>
+                <div style="text-align:center;">
+                    <div style="color:#4361ee; font-weight:bold;">الختم</div>
+                    <div style="font-size:2em; opacity:0.5;"><i class="fas fa-certificate"></i></div>
+                </div>
+            </div>
+            
+            <div class="qr-footer">
+                <p>شكراً لتعاملكم مع ${COMPANY_INFO.name}<br>تاريخ الطباعة: ${new Date().toLocaleDateString('ar-EG')}</p>
+            </div>
+        </div>
+    `;
+}
+
+/**
+ * إنشاء PDF محسن
+ */
+async function generateQRCodePDF(element, fileName) {
+    return new Promise(async (resolve, reject) => {
+        try {
+            if (typeof window.jspdf === 'undefined' || typeof window.html2canvas === 'undefined') {
+                throw new Error('مكتبات PDF غير متوفرة');
+            }
+            
+            await new Promise(resolve => setTimeout(resolve, 500));
+            
+            const canvas = await html2canvas(element, {
+                scale: 1.5,
+                backgroundColor: '#ffffff',
+                logging: false,
+                allowTaint: true,
+                useCORS: true,
+                imageTimeout: 30000,
+                windowWidth: element.scrollWidth,
+                windowHeight: element.scrollHeight
+            });
+            
+            const imgData = canvas.toDataURL('image/jpeg', 0.8);
+            const { jsPDF } = window.jspdf;
+            
+            const pdf = new jsPDF({
+                orientation: canvas.width > canvas.height ? 'l' : 'p',
+                unit: 'mm',
+                format: 'a4',
+                compress: true
+            });
+            
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+            
+            pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+            pdf.save(fileName);
+            
+            resolve(true);
+        } catch (error) {
+            console.error('خطأ في إنشاء PDF:', error);
+            reject(error);
+        }
+    });
+}
+
+/**
+ * تحميل البيانات من Drive بشكل مستقل
+ */
+async function loadQRCodeData() {
+    try {
+        const apiKey = driveConfig.apiKey || 'AIzaSyBy4WRI3zkUwlCvbrXpB8o9ZbFMuH4AdGA';
+        const folderId = driveConfig.folderId || '1FlBXLupfXCICs6xt7xxEE02wr_cjAapC';
+        const fileName = driveConfig.fileName || 'datatxt.txt';
+        let fileId = driveConfig.fileId;
+        
+        if (!fileId) {
+            const searchUrl = `https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(`'${folderId}' in parents and name='${fileName}' and trashed=false`)}&key=${apiKey}&fields=files(id,name)`;
+            const searchRes = await fetch(searchUrl);
+            if (!searchRes.ok) throw new Error('فشل البحث عن الملف');
+            const searchData = await searchRes.json();
+            if (!searchData.files?.length) throw new Error('لم يتم العثور على ملف البيانات');
+            fileId = searchData.files[0].id;
+            driveConfig.fileId = fileId;
+            localStorage.setItem('driveConfig', JSON.stringify(driveConfig));
+        }
+        
+        const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${apiKey}`;
+        const res = await fetch(url);
+        if (!res.ok) throw new Error('فشل تحميل الملف');
+        const content = await res.text();
+        
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(content, "text/xml");
+        const parseError = xmlDoc.querySelector('parsererror');
+        let newInvoices = [];
+
+        if (parseError) {
+            const matches = content.match(/<invoice[\s\S]*?<\/invoice>/g);
+            if (!matches?.length) throw new Error('لا توجد فواتير');
+            const wrapped = parser.parseFromString(`<root>${matches.join('')}</root>`, 'text/xml');
+            const nodes = wrapped.querySelectorAll('invoice');
+            for (let i = 0; i < nodes.length; i++) { 
+                const inv = parseInvoiceNode(nodes[i]); 
+                if (inv) newInvoices.push(inv); 
+            }
+        } else {
+            const nodes = xmlDoc.getElementsByTagName('invoice');
+            for (let i = 0; i < nodes.length; i++) { 
+                const inv = parseInvoiceNode(nodes[i]); 
+                if (inv) newInvoices.push(inv); 
+            }
+        }
+
+        if (!newInvoices.length) throw new Error('لا توجد فواتير');
+        
+        return newInvoices;
+        
+    } catch (error) {
+        console.error('خطأ في تحميل بيانات QR Code:', error);
+        throw error;
+    }
+}
+
+/**
+ * معالجة رابط QR Code
+ */
+async function handleQRCodeLink() {
+    const urlParams = new URLSearchParams(window.location.search);
+    const invoiceNumber = urlParams.get('invoice');
+    const draftNumber = urlParams.get('draft');
+    
+    if (!invoiceNumber) return false;
+    
+    console.log('📱 نظام QR Code المستقل - فتح الفاتورة:', invoiceNumber, draftNumber ? `(مسودة: ${draftNumber})` : '');
+    isQRCodeMode = true;
+    
+    document.getElementById('loginScreen').style.display = 'none';
+    document.getElementById('mainApp').style.display = 'none';
+    
+    qrContainer = document.createElement('div');
+    qrContainer.id = 'qrCodeSystem';
+    qrContainer.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: white;
+        z-index: 1000000;
+        overflow: auto;
+        direction: rtl;
+    `;
+    
+    qrContainer.innerHTML = `
+        <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+            <div style="background: white; padding: 40px; border-radius: 20px; text-align: center; max-width: 400px; margin: 20px;">
+                <i class="fas fa-spinner fa-spin" style="font-size: 4em; color: #4361ee; margin-bottom: 20px;"></i>
+                <h2 style="color: #333; margin-bottom: 15px;">جاري تجهيز الفاتورة</h2>
+                <p style="color: #666; margin-bottom: 10px;">رقم الفاتورة: <strong style="color: #4361ee;">${invoiceNumber}</strong></p>
+                ${draftNumber ? `<p style="color: #666; margin-bottom: 10px;">رقم المسودة: <strong style="color: #4361ee;">${draftNumber}</strong></p>` : ''}
+                <div id="qrStatus" style="margin-top: 20px; padding: 10px; border-radius: 10px; background: #f0f2f5; color: #666;"></div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(qrContainer);
+    
+    const statusDiv = document.getElementById('qrStatus');
+    
+    try {
+        statusDiv.innerHTML = '🔄 جاري تحميل إعدادات النظام...';
+        
+        loadDriveSettings();
+        
+        statusDiv.innerHTML = '📥 جاري تحميل البيانات من Drive...';
+        
+        const data = await loadQRCodeData();
+        
+        if (!data || data.length === 0) {
+            throw new Error('لا توجد بيانات متاحة');
+        }
+        
+        statusDiv.innerHTML = '🔍 جاري البحث عن الفاتورة...';
+        
+        const invoice = data.find(inv => 
+            inv['final-number'] === invoiceNumber || 
+            (draftNumber && inv['draft-number'] === draftNumber)
+        );
+        
+        if (!invoice) {
+            throw new Error('لم يتم العثور على الفاتورة');
+        }
+        
+        statusDiv.innerHTML = '📄 جاري إنشاء الفاتورة...';
+        
+        const invoiceHTML = createQRCodeInvoiceHTML(invoice);
+        qrContainer.innerHTML = invoiceHTML;
+        
+        const qrPdfContainer = qrContainer.querySelector('#qr-pdf-container');
+        if (qrPdfContainer) {
+            await new Promise((resolve) => {
+                const canvas = document.createElement('canvas');
+                QRCode.toCanvas(canvas, getInvoiceLink(invoiceNumber, invoice['draft-number']), {
+                    width: 90,
+                    margin: 1,
+                    color: { dark: '#000000', light: '#ffffff' }
+                }, function(error) {
+                    if (!error) {
+                        qrPdfContainer.innerHTML = '';
+                        qrPdfContainer.appendChild(canvas);
+                    }
+                    resolve();
+                });
+            });
+        }
+        
+        const controlsDiv = document.createElement('div');
+        controlsDiv.className = 'qr-controls';
+        controlsDiv.innerHTML = `
+            <button onclick="exitQRCodeSystem()" class="qr-btn qr-btn-secondary">
+                <i class="fas fa-home"></i> الرئيسية
+            </button>
+            <button onclick="downloadQRCodePDF()" class="qr-btn qr-btn-primary">
+                <i class="fas fa-file-pdf"></i> تحميل PDF
+            </button>
+            <button onclick="window.close()" class="qr-btn qr-btn-danger">
+                <i class="fas fa-times"></i> إغلاق
+            </button>
+        `;
+        qrContainer.appendChild(controlsDiv);
+        
+        window.currentQRCodeInvoice = invoice;
+        window.currentQRCodeHTML = invoiceHTML;
+        
+        return true;
+        
+    } catch (error) {
+        console.error('خطأ في نظام QR Code:', error);
+        
+        qrContainer.innerHTML = `
+            <div style="display: flex; justify-content: center; align-items: center; height: 100vh; flex-direction: column; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">
+                <div style="background: white; padding: 40px; border-radius: 20px; text-align: center; max-width: 400px; margin: 20px;">
+                    <i class="fas fa-exclamation-triangle" style="font-size: 4em; color: #e63946; margin-bottom: 20px;"></i>
+                    <h2 style="color: #e63946; margin-bottom: 15px;">عذراً، حدث خطأ</h2>
+                    <p style="color: #666; margin-bottom: 20px;">${error.message}</p>
+                    <p style="color: #666; margin-bottom: 30px;">رقم الفاتورة: <strong>${invoiceNumber}</strong></p>
+                    ${draftNumber ? `<p style="color: #666; margin-bottom: 30px;">رقم المسودة: <strong>${draftNumber}</strong></p>` : ''}
+                    <button onclick="exitQRCodeSystem()" style="background: #4361ee; color: white; border: none; padding: 15px 40px; border-radius: 50px; cursor: pointer; font-size: 1.1em;">
+                        <i class="fas fa-home"></i> العودة للرئيسية
+                    </button>
+                </div>
+            </div>
+        `;
+        return false;
+    }
+}
+
+window.exitQRCodeSystem = function() {
+    if (qrContainer) {
+        qrContainer.remove();
+        qrContainer = null;
+    }
+    isQRCodeMode = false;
+    window.location.href = COMPANY_INFO.baseUrl;
+};
+
+window.downloadQRCodePDF = async function() {
+    if (!window.currentQRCodeInvoice || !window.currentQRCodeHTML) {
+        alert('لا توجد فاتورة للتحميل');
+        return;
+    }
+    
+    const loadingDiv = document.createElement('div');
+    loadingDiv.style.cssText = 'position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #4361ee; color: white; padding: 15px 30px; border-radius: 50px; z-index: 2000000; box-shadow: 0 5px 20px rgba(0,0,0,0.3);';
+    loadingDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري إنشاء PDF...';
+    document.body.appendChild(loadingDiv);
+    
+    try {
+        const tempContainer = document.createElement('div');
+        tempContainer.style.position = 'absolute';
+        tempContainer.style.left = '-9999px';
+        tempContainer.style.top = '-9999px';
+        tempContainer.innerHTML = window.currentQRCodeHTML;
+        document.body.appendChild(tempContainer);
+        
+        const element = tempContainer.firstChild;
+        const fileName = `فاتورة-${window.currentQRCodeInvoice['final-number']}.pdf`;
+        
+        await generateQRCodePDF(element, fileName);
+        
+        document.body.removeChild(tempContainer);
+        loadingDiv.remove();
+        
+    } catch (error) {
+        console.error('خطأ في تحميل PDF:', error);
+        loadingDiv.innerHTML = '❌ فشل التحميل';
+        setTimeout(() => loadingDiv.remove(), 2000);
+    }
 };
 
 // ============================================
