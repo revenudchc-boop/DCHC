@@ -24,38 +24,13 @@
     "lastLogin": null
   },
   {
-    "id": "msc",
-    "username": "msc",
+    "id": "user_customer",
+    "username": "cus001",
     "email": "customer@example.com",
     "taxNumber": "202487288",
-    "contractCustomerId": "MSC",
+    "contractCustomerId": "user001",
     "userType": "customer",
-    "password": "msc123",
-    "status": "active",
-    "createdAt": "2023-01-01T00:00:00.000Z",
-    "lastLogin": null
-  },
-  
-  {
-    "id": "one",
-    "username": "one",
-    "email": "accountant@dchc-egdam.com",
-    "taxNumber": "374380139",
-    "contractCustomerId": "ONE",
-    "userType": "accountant",
-    "password": "one123",
-    "status": "active",
-    "createdAt": "2023-01-01T00:00:00.000Z",
-    "lastLogin": null
-  },
-  {
-    "id": "zim",
-    "username": "zim",
-    "email": "zim@gmail.com",
-    "taxNumber": "123456789",
-    "contractCustomerId": "zim",
-    "userType": "customer",
-    "password": "zim123",
+    "password": "cust001",
     "status": "active",
     "createdAt": "2023-01-01T00:00:00.000Z",
     "lastLogin": null
