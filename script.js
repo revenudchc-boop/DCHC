@@ -1,5 +1,5 @@
 // ============================================
-// نظام الفواتير المتقدم - النسخة النهائية مع جميع التعديلات
+// نظام الفواتير المتقدم - النسخة النهائية مع تحسين حجم الشعار
 // جميع الحقوق محفوظة لشركة دمياط لتداول الحاويات و البضائع
 // ============================================
 
@@ -48,7 +48,8 @@ let driveConfig = {
     fileName: 'datatxt.txt',
     fileId: '1xZSobMThbWKcZ53OmZEWlbn6mzz5Nsnr',
     usersFileName: 'users.json',
-    usersFileId: '1-ktLLXz1Febs44lB-aqfuNmTRs1GNB0w'
+    usersFileId: '1-ktLLXz1Febs44lB-aqfuNmTRs1GNB0w',
+    logoFileId: '1DugYxs9a21e6J0ynTu6pE0yHXM2wRXSP'
 };
 
 // متغيرات التقارير
@@ -59,6 +60,41 @@ window.driveFilesList = [];
 
 // متغير لتخزين الفواتير المحددة
 let selectedInvoices = new Set();
+
+// متغير لتخزين الشعار
+let companyLogoBase64 = null;
+
+// ============================================
+// دوال تحميل الشعار من Drive
+// ============================================
+
+/**
+ * تحميل الشعار من Google Drive
+ */
+async function loadLogoFromDrive() {
+    if (!driveConfig.apiKey || !driveConfig.logoFileId) return false;
+    
+    try {
+        const url = `https://www.googleapis.com/drive/v3/files/${driveConfig.logoFileId}?alt=media&key=${driveConfig.apiKey}`;
+        const response = await fetch(url);
+        
+        if (!response.ok) throw new Error('فشل تحميل الشعار');
+        
+        const blob = await response.blob();
+        
+        return new Promise((resolve) => {
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                companyLogoBase64 = reader.result;
+                resolve(true);
+            };
+            reader.readAsDataURL(blob);
+        });
+    } catch (error) {
+        console.error('خطأ في تحميل الشعار:', error);
+        return false;
+    }
+}
 
 // ============================================
 // دوال شريط التقدم
@@ -1165,7 +1201,7 @@ function groupPostponedCharges(charges) {
 }
 
 // ============================================
-// دوال تصدير الحاويات - إضافة جديدة
+// دوال تصدير الحاويات
 // ============================================
 
 /**
@@ -1626,7 +1662,7 @@ window.exportInvoicePDF = function() {
 };
 
 // ============================================
-// دوال الفاتورة والنموذج الفرعي - مع جميع التعديلات
+// دوال الفاتورة والنموذج الفرعي - مع صورة الشعار المحسنة
 // ============================================
 window.showInvoiceDetails = function(index) {
     if (index < 0 || index >= invoicesData.length) return;
@@ -1639,7 +1675,7 @@ window.showInvoiceDetails = function(index) {
 
     document.getElementById('modalInvoiceNumber').textContent = inv['final-number'] || 'غير محدد';
     
-    // استخدام finalized-date بدلاً من created مع تكبير الخط وجعله bold
+    // استخدام finalized-date بدلاً من created
     const invoiceDate = inv['finalized-date'] || inv['created'] || '';
     const formattedDate = invoiceDate ? new Date(invoiceDate).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : 'غير محدد';
     
@@ -1801,7 +1837,7 @@ window.showInvoiceDetails = function(index) {
         `<tr><th>الوصف</th><th>النوع</th><th>العدد</th><th>أيام التخزين</th><th>سعر الوحدة</th><th>المبلغ/سعر الصرف</th><th></th></tr>` :
         `<tr><th>الوصف</th><th>النوع</th><th>العدد</th><th>أيام التخزين</th><th>سعر الوحدة</th><th>المبلغ/سعر الصرف</th><th>تاريخ الصرف</th><th></th></tr>`;
 
-    // إضافة كلاس للتاريخ
+    // استايلات محسنة للطباعة مع تحسين الشعار
     const printStyles = `
         <style>
             @media print {
@@ -1823,9 +1859,8 @@ window.showInvoiceDetails = function(index) {
                     margin-bottom: 10px !important;
                 }
                 .invoice-company-logo {
-                    width: 50px !important;
-                    height: 50px !important;
-                    font-size: 1.8em !important;
+                    width: 80px !important;
+                    height: 80px !important;
                 }
                 .invoice-header {
                     padding: 10px !important;
@@ -1894,20 +1929,45 @@ window.showInvoiceDetails = function(index) {
             }
             .invoice-date-bold {
                 font-weight: bold;
-                font-size: 1.1em;
+                font-size: 1.2em;
+            }
+            .company-logo-container {
+                width: 80px;
+                height: 80px;
+                background: white;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                border: 3px solid #ffd700;
+                overflow: hidden;
+                padding: 0;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            }
+            .company-logo-image {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+                border-radius: 50%;
             }
         </style>
     `;
 
-    // تعديل عنوان الفاتورة ليشمل الرقم النهائي والمسودة بخط كبير وعريض
+    // استخدام الشعار من Drive إذا تم تحميله، وإلا استخدام الأيقونة الافتراضية
+    const logoSrc = companyLogoBase64 ? companyLogoBase64 : '';
+
+    // تعديل عنوان الفاتورة مع الشعار المحسن
     let html = `
         <div class="invoice-container" id="invoicePrint" style="max-width: 1100px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
             ${printStyles}
             
             <div class="invoice-company-header" style="display: flex; align-items: center; justify-content: space-between; background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; padding: 15px 20px; border-radius: 10px; margin-bottom: 15px;">
                 <div style="display: flex; align-items: center; gap: 15px;">
-                    <div class="invoice-company-logo" style="width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2em; border: 2px solid #ffd700;">
-                        <i class="fas fa-ship"></i>
+                    <div class="company-logo-container" style="width: 80px; height: 80px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #ffd700; overflow: hidden; padding: 0; box-shadow: 0 4px 10px rgba(0,0,0,0.2);">
+                        ${logoSrc ? 
+                            `<img src="${logoSrc}" alt="DCHC Logo" class="company-logo-image" style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%;">` : 
+                            `<i class="fas fa-ship" style="font-size: 2.5em; color: #1e3c72;"></i>`
+                        }
                     </div>
                     <div>
                         <h2 style="color: #ffd700; margin: 0 0 3px; font-size: 1.2em;">${COMPANY_INFO.name}</h2>
@@ -1915,7 +1975,7 @@ window.showInvoiceDetails = function(index) {
                         <div style="display: flex; flex-wrap: wrap; gap: 10px; font-size: 0.7em;">
                             <span><i class="fas fa-map-marker-alt" style="color: #ffd700;"></i> ${COMPANY_INFO.address}</span>
                             <span><i class="fas fa-phone" style="color: #ffd700;"></i> ${COMPANY_INFO.phone}</span>
-                            <span><i class="fas fa-envelope" style="color: #ffd700;"></i> ${COMPANY_INFO.email}</span>
+                            <span><i class="fas fa-building" style="color: #ffd700;"></i> ضريبي: ${COMPANY_INFO.taxNumber}</span>
                         </div>
                     </div>
                 </div>
@@ -2086,7 +2146,8 @@ window.printInvoice = function() {
             body { font-family: 'Segoe UI', sans-serif; padding: 0; margin: 0; background: white; direction: rtl; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             .invoice-container { max-width: 100%; margin: 0 auto; background: white; padding: 15px; }
             .invoice-company-header { display: flex; align-items: center; gap: 20px; background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
-            .invoice-company-logo { width: 60px; height: 60px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 2em; border: 2px solid #ffd700; }
+            .company-logo-container { width: 80px; height: 80px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #ffd700; overflow: hidden; padding: 0; }
+            .company-logo-image { width: 100%; height: 100%; object-fit: cover; }
             .invoice-header { background: linear-gradient(135deg, #4361ee, #3f37c9); color: white; padding: 12px; text-align: center; border-radius: 8px; margin-bottom: 15px; }
             .invoice-info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
             .info-box { background: #f8f9fa; padding: 10px; border-radius: 8px; border-right: 4px solid #4361ee; font-size: 0.85em; }
@@ -2097,7 +2158,7 @@ window.printInvoice = function() {
             .signature-section { display: flex; justify-content: space-around; margin: 15px 0 10px; padding: 8px 0; border-top: 2px dashed #dee2e6; }
             .invoice-footer { text-align: center; padding: 8px; border-top: 2px solid #e9ecef; color: #6c757d; font-size: 0.75em; }
             .invoice-number-bold { font-weight: bold; font-size: 1.2em; }
-            .invoice-date-bold { font-weight: bold; font-size: 1.1em; }
+            .invoice-date-bold { font-weight: bold; font-size: 1.2em; }
         </style>
     `;
     
@@ -2159,7 +2220,7 @@ window.exportInvoiceExcel = function() {
 };
 
 // ============================================
-// دوال عرض الجدول مع Checkbox وإضافة زر تصدير الحاويات
+// دوال عرض الجدول مع Checkbox
 // ============================================
 function renderTableView(data) {
     if (!document.getElementById('table-style')) {
@@ -2230,7 +2291,7 @@ function renderTableView(data) {
 }
 
 // ============================================
-// دوال نظام التقارير (معدلة لاستخدام finalized-date)
+// دوال نظام التقارير
 // ============================================
 window.showReports = function(type) {
     currentReportType = type;
@@ -2372,7 +2433,7 @@ window.exportReportExcel = function() {
 function loadDriveSettings() {
     const saved = localStorage.getItem('driveConfig');
     if (saved) try { driveConfig = { ...driveConfig, ...JSON.parse(saved) }; } catch { }
-    ['driveApiKey','driveFolderId','driveFileName','driveFileId','driveUsersFileName','driveUsersFileId'].forEach(id => {
+    ['driveApiKey','driveFolderId','driveFileName','driveFileId','driveUsersFileName','driveUsersFileId','logoFileId'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.value = driveConfig[id.replace('drive','').charAt(0).toLowerCase() + id.replace('drive','').slice(1)] || '';
     });
@@ -2397,7 +2458,8 @@ window.saveDriveSettings = function() {
         fileName: document.getElementById('driveFileName').value.trim() || 'datatxt.txt',
         fileId: document.getElementById('driveFileId').value.trim(),
         usersFileName: document.getElementById('driveUsersFileName').value.trim() || 'users.json',
-        usersFileId: document.getElementById('driveUsersFileId').value.trim()
+        usersFileId: document.getElementById('driveUsersFileId').value.trim(),
+        logoFileId: document.getElementById('logoFileId').value.trim() || '1DugYxs9a21e6J0ynTu6pE0yHXM2wRXSP'
     };
     saveDriveSettingsToStorage();
     const d = document.getElementById('driveMessage');
@@ -2417,7 +2479,7 @@ window.testDriveConnection = async function() {
         const data = await res.json();
         const files = data.files || [];
         window.driveFilesList = files;
-        let html = `<div style="margin-top:10px;max-height:300px;overflow-y:auto;">${files.length ? files.map(f => `<div style="padding:10px;margin:5px 0;background:#2d3748;border-radius:5px;border-right:3px solid #4cc9f0;"><div style="display:flex;justify-content:space-between"><div><strong style="color:#ffd700;">${f.name}</strong><div style="font-size:0.85em;color:#a0aec0;">معرف: ${f.id}<br>حجم: ${f.size ? (parseInt(f.size)/1024).toFixed(1) : '?'} KB | تاريخ: ${f.createdTime ? new Date(f.createdTime).toLocaleDateString('ar-EG') : ''}</div></div><div><button onclick="selectDataFile('${f.id}','${f.name}')" class="btn-small" style="background:#4361ee;">كملف بيانات</button><button onclick="selectUsersFile('${f.id}','${f.name}')" class="btn-small" style="background:#0F9D58;margin-right:5px;">كملف مستخدمين</button></div></div></div>`).join('') : '<p style="color:#a0aec0;">لا توجد ملفات</p>'}</div>`;
+        let html = `<div style="margin-top:10px;max-height:300px;overflow-y:auto;">${files.length ? files.map(f => `<div style="padding:10px;margin:5px 0;background:#2d3748;border-radius:5px;border-right:3px solid #4cc9f0;"><div style="display:flex;justify-content:space-between"><div><strong style="color:#ffd700;">${f.name}</strong><div style="font-size:0.85em;color:#a0aec0;">معرف: ${f.id}<br>حجم: ${f.size ? (parseInt(f.size)/1024).toFixed(1) : '?'} KB | تاريخ: ${f.createdTime ? new Date(f.createdTime).toLocaleDateString('ar-EG') : ''}</div></div><div><button onclick="selectDataFile('${f.id}','${f.name}')" class="btn-small" style="background:#4361ee;">كملف بيانات</button><button onclick="selectUsersFile('${f.id}','${f.name}')" class="btn-small" style="background:#0F9D58;margin-right:5px;">كملف مستخدمين</button><button onclick="selectLogoFile('${f.id}','${f.name}')" class="btn-small" style="background:#ffd700; color: #333; margin-right:5px;">كشعار</button></div></div></div>`).join('') : '<p style="color:#a0aec0;">لا توجد ملفات</p>'}</div>`;
         document.getElementById('driveTestResult').innerHTML = `✅ اتصال ناجح!<br>📁 عدد الملفات: ${files.length}<br><br>${html}`;
         document.getElementById('driveTestResult').style.display = 'block';
         document.getElementById('driveMessage').innerHTML = '✅ تم الاختبار - انقر على ملف لاختياره';
@@ -2444,6 +2506,13 @@ window.selectUsersFile = function(fileId, fileName) {
     document.getElementById('driveUsersFileName').value = fileName;
     driveConfig.usersFileId = fileId; driveConfig.usersFileName = fileName;
     document.getElementById('driveTestResult').innerHTML = `✅ تم اختيار ملف المستخدمين: <strong>${fileName}</strong><br>المعرف: ${fileId}`;
+};
+
+window.selectLogoFile = function(fileId, fileName) {
+    if (!currentUser || currentUser.userType !== 'admin') return showNotification('غير مصرح', 'error');
+    document.getElementById('logoFileId').value = fileId;
+    driveConfig.logoFileId = fileId;
+    document.getElementById('driveTestResult').innerHTML = `✅ تم اختيار ملف الشعار: <strong>${fileName}</strong><br>المعرف: ${fileId}`;
 };
 
 window.findDataFileId = window.findUsersFileId = async function(isUsers = false) {
@@ -2540,7 +2609,7 @@ window.updateFromDrive = async function() {
 };
 
 // ============================================
-// نظام QR Code المستقل (مع تعديلات التاريخ ورقم البوليصة)
+// نظام QR Code المستقل (مع تعديلات الشعار)
 // ============================================
 
 let qrContainer = null;
@@ -2683,6 +2752,8 @@ function createQRCodeInvoiceHTML(invoice) {
         }
     });
 
+    const logoSrc = companyLogoBase64 ? companyLogoBase64 : '';
+
     return `
         <div class="qr-invoice-container" style="max-width: 1100px; margin: 0 auto; background: white; padding: 20px; font-family: 'Segoe UI', sans-serif; direction: rtl;">
             <style>
@@ -2705,16 +2776,41 @@ function createQRCodeInvoiceHTML(invoice) {
                 .qr-btn-danger { background: #e63946; }
                 .invoice-number-bold { font-weight: bold; font-size: 1.1em; }
                 .invoice-date-bold { font-weight: bold; font-size: 1.1em; }
+                .qr-logo-container {
+                    width: 70px;
+                    height: 70px;
+                    background: white;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    border: 3px solid #ffd700;
+                    overflow: hidden;
+                    padding: 0;
+                }
+                .qr-logo-image {
+                    width: 100%;
+                    height: 100%;
+                    object-fit: cover;
+                    border-radius: 50%;
+                }
             </style>
             
             <div class="qr-invoice-header">
                 <div style="display: flex; align-items: center; gap: 15px;">
-                    <div style="width: 50px; height: 50px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.8em; border: 2px solid #ffd700;">
-                        <i class="fas fa-ship"></i>
+                    <div class="qr-logo-container">
+                        ${logoSrc ? 
+                            `<img src="${logoSrc}" alt="DCHC Logo" class="qr-logo-image">` : 
+                            `<i class="fas fa-ship" style="font-size: 2em; color: #1e3c72;"></i>`
+                        }
                     </div>
                     <div>
                         <h2 style="color: #ffd700; margin: 0; font-size: 1.2em;">${COMPANY_INFO.name}</h2>
                         <p style="margin: 3px 0; opacity: 0.9; font-size: 0.8em;">${COMPANY_INFO.nameEn}</p>
+                        <div style="display: flex; flex-wrap: wrap; gap: 8px; font-size: 0.7em;">
+                            <span><i class="fas fa-phone" style="color: #ffd700;"></i> ${COMPANY_INFO.phone}</span>
+                            <span><i class="fas fa-building" style="color: #ffd700;"></i> ضريبي: ${COMPANY_INFO.taxNumber}</span>
+                        </div>
                     </div>
                 </div>
                 <div id="qr-pdf-container" style="background: white; padding: 5px; border-radius: 8px; width: 100px; height: 100px; text-align: center;"></div>
@@ -3087,6 +3183,9 @@ window.downloadQRCodePDF = async function() {
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('بدء تشغيل النظام...');
     loadDriveSettings();
+    
+    // تحميل الشعار من Drive
+    await loadLogoFromDrive();
     
     const isQRCode = await handleQRCodeLink();
     
