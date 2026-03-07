@@ -1,5 +1,5 @@
 // ============================================
-// نظام الفواتير المتقدم - النسخة النهائية مع إصلاح PDF وإخفاء تفاصيل الحاويات
+// نظام الفواتير المتقدم - النسخة النهائية مع جميع التعديلات
 // جميع الحقوق محفوظة لشركة دمياط لتداول الحاويات و البضائع
 // ============================================
 
@@ -7,7 +7,7 @@
 const COMPANY_INFO = {
     name: 'شركة دمياط لتداول الحاويات و البضائع',
     nameEn: 'Damietta Container & Cargo Handling Company',
-    address: 'دمياط - المنطقة الحرة - ماء دمياط',
+    address: 'دمياط - المنطقة الحرة - ميناء دمياط',
     phone: '0572290103',
     email: 'revenue@dchc-egdam.com',
     taxNumber: '100/221/823',
@@ -158,7 +158,7 @@ async function autoConfigureDrive() {
 }
 
 // ============================================
-// دوال المستخدمين (بدون تعديل)
+// دوال المستخدمين
 // ============================================
 async function loadUsersFromDrive() {
     if (!driveConfig.apiKey || !driveConfig.folderId || !driveConfig.usersFileId) return false;
@@ -480,7 +480,7 @@ function initDatabase() {
                 if (db.objectStoreNames.contains('invoices')) db.deleteObjectStore('invoices');
                 if (db.objectStoreNames.contains('settings')) db.deleteObjectStore('settings');
                 const store = db.createObjectStore('invoices', { keyPath: 'id', autoIncrement: true });
-                ['final-number', 'draft-number', 'payee-customer-id', 'contract-customer-id', 'created'].forEach(idx => store.createIndex(idx, idx, { unique: false }));
+                ['final-number', 'draft-number', 'payee-customer-id', 'contract-customer-id', 'created', 'finalized-date'].forEach(idx => store.createIndex(idx, idx, { unique: false }));
                 db.createObjectStore('settings', { keyPath: 'key' });
             };
         } catch { useLocalStorageFallback(); resolve(); }
@@ -735,7 +735,7 @@ function parseInvoiceNode(invoice) {
 }
 
 // ============================================
-// دوال البحث المتقدم
+// دوال البحث المتقدم - معدلة لاستخدام finalized-date
 // ============================================
 window.applyAdvancedSearch = function() {
     if (!invoicesData.length) { filteredInvoices = []; renderData(); return; }
@@ -788,10 +788,20 @@ window.applyAdvancedSearch = function() {
             if (invType === 'postponed' && !(num.startsWith('P') || num.startsWith('p'))) return false;
         }
         if (from || to) {
-            const invDate = new Date(inv['created'] || inv['finalized-date']);
+            const invDateStr = inv['finalized-date'] || inv['created'] || '';
+            const invDate = new Date(invDateStr);
             if (isNaN(invDate)) return true;
-            if (from && invDate < new Date(from)) return false;
-            if (to && invDate > new Date(to + 'T23:59:59')) return false;
+            
+            if (from) {
+                const fromDate = new Date(from);
+                fromDate.setHours(0, 0, 0, 0);
+                if (invDate < fromDate) return false;
+            }
+            if (to) {
+                const toDate = new Date(to);
+                toDate.setHours(23, 59, 59, 999);
+                if (invDate > toDate) return false;
+            }
         }
         return true;
     });
@@ -1082,9 +1092,11 @@ function updateSelectedCount() {
     const countSpan = document.getElementById('selectedCount');
     const pdfBtn = document.getElementById('exportSelectedBtn');
     const excelBtn = document.getElementById('exportSelectedExcelBtn');
+    const containersBtn = document.getElementById('exportContainersBtn');
     if (countSpan) countSpan.textContent = count;
     if (pdfBtn) pdfBtn.disabled = count === 0;
     if (excelBtn) excelBtn.disabled = count === 0;
+    if (containersBtn) containersBtn.disabled = count === 0;
 }
 
 function updateSelectAllCheckbox() {
@@ -1102,10 +1114,10 @@ function clearSelectedInvoices() {
 }
 
 // ============================================
-// دوال تجميع المصاريف - كما في الملف الأصلي تماماً
+// دوال تجميع المصاريف
 // ============================================
 
-// دوال تجميع المصاريف للفواتير النقدية - أصلية
+// دوال تجميع المصاريف للفواتير النقدية
 function groupCashCharges(charges) {
     const sortedCharges = [...charges].sort((a, b) => (a['event-type-id'] || '').localeCompare(b['event-type-id'] || ''));
     const grouped = [], map = new Map();
@@ -1128,7 +1140,7 @@ function groupCashCharges(charges) {
     return grouped;
 }
 
-// دوال تجميع المصاريف للفواتير الآجلة - أصلية
+// دوال تجميع المصاريف للفواتير الآجلة
 function groupPostponedCharges(charges) {
     const sortedCharges = [...charges].sort((a, b) => (a['event-type-id'] || '').localeCompare(b['event-type-id'] || ''));
     const grouped = [], map = new Map();
@@ -1153,7 +1165,157 @@ function groupPostponedCharges(charges) {
 }
 
 // ============================================
-// دوال تصدير تفاصيل الحاويات
+// دوال تصدير الحاويات - إضافة جديدة
+// ============================================
+
+/**
+ * تصدير تفاصيل الحاويات للفواتير المحددة
+ */
+window.exportSelectedContainers = async function() {
+    if (selectedInvoices.size === 0) {
+        showNotification('لم يتم تحديد أي فواتير', 'warning');
+        return;
+    }
+    
+    const selectedIndices = Array.from(selectedInvoices).sort((a, b) => a - b);
+    showProgress(`جاري تجهيز بيانات الحاويات من ${selectedIndices.length} فاتورة...`, 30);
+    
+    try {
+        // تجميع كل الحاويات من جميع الفواتير المحددة
+        let allContainers = [];
+        let containerCounter = 0;
+        
+        selectedIndices.forEach(index => {
+            const inv = invoicesData[index];
+            const finalNum = inv['final-number'] || '';
+            const isPostponed = finalNum.startsWith('P') || finalNum.startsWith('p');
+            const grouped = isPostponed ? groupPostponedCharges(inv.charges) : groupCashCharges(inv.charges);
+            
+            grouped.forEach(charge => {
+                if (charge.containerNumbers?.length > 0) {
+                    charge.containerNumbers.forEach((container, idx) => {
+                        const dateInfo = charge.dates && charge.dates[idx] ? charge.dates[idx] : {
+                            from: charge['event-performed-from'] || '-',
+                            to: charge['event-performed-to'] || '-',
+                            days: charge['storage-days'] || 1
+                        };
+                        
+                        allContainers.push({
+                            'رقم': ++containerCounter,
+                            'رقم الفاتورة': inv['final-number'] || '-',
+                            'رقم المسودة': inv['draft-number'] || '-',
+                            'العميل': inv['payee-customer-id'] || '-',
+                            'السفينة': inv['key-word1'] || '-',
+                            'البوليصة': inv['key-word2'] || '-',
+                            'الوصف': charge.description || '-',
+                            'نوع المصروف': charge['event-type-id'] || '-',
+                            'رقم الحاوية': container,
+                            'التاريخ من': dateInfo.from,
+                            'التاريخ إلى': dateInfo.to,
+                            'عدد الأيام': dateInfo.days,
+                            'سعر الوحدة': (charge['rate-billed'] || 0).toFixed(2),
+                            'المبلغ': (charge.amount || 0).toFixed(2),
+                            'العملة': (isPostponed && inv['currency'] === 'USAD') ? 'USAD' : 'EGP'
+                        });
+                    });
+                }
+            });
+        });
+        
+        if (allContainers.length === 0) {
+            showNotification('لا توجد حاويات في الفواتير المحددة', 'info');
+            hideProgress();
+            return;
+        }
+        
+        showProgress('جاري إنشاء ملف Excel...', 70);
+        
+        // إنشاء بيانات Excel
+        const excelData = [
+            ['تقرير تفاصيل الحاويات'],
+            ['تاريخ التقرير: ' + new Date().toLocaleDateString('ar-EG')],
+            ['عدد الفواتير: ' + selectedIndices.length],
+            ['عدد الحاويات: ' + allContainers.length],
+            [],
+            ['م', 'رقم الفاتورة', 'رقم المسودة', 'العميل', 'السفينة', 'البوليصة', 'الوصف', 'نوع المصروف', 'رقم الحاوية', 'التاريخ من', 'التاريخ إلى', 'عدد الأيام', 'سعر الوحدة', 'المبلغ', 'العملة']
+        ];
+        
+        allContainers.forEach(c => {
+            excelData.push([
+                c['رقم'].toString(),
+                c['رقم الفاتورة'],
+                c['رقم المسودة'],
+                c['العميل'],
+                c['السفينة'],
+                c['البوليصة'],
+                c['الوصف'],
+                c['نوع المصروف'],
+                c['رقم الحاوية'],
+                c['التاريخ من'],
+                c['التاريخ إلى'],
+                c['عدد الأيام'].toString(),
+                c['سعر الوحدة'],
+                c['المبلغ'],
+                c['العملة']
+            ]);
+        });
+        
+        // إضافة ملخص
+        excelData.push([]);
+        excelData.push(['ملخص']);
+        excelData.push(['إجمالي عدد الحاويات:', allContainers.length]);
+        
+        // حساب إجمالي المبالغ
+        const totalAmount = allContainers.reduce((sum, c) => sum + parseFloat(c['المبلغ']), 0);
+        excelData.push(['إجمالي المبالغ:', totalAmount.toFixed(2)]);
+        
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(excelData);
+        
+        // ضبط عرض الأعمدة
+        ws['!cols'] = [
+            { wch: 5 },   // م
+            { wch: 15 },  // رقم الفاتورة
+            { wch: 15 },  // رقم المسودة
+            { wch: 25 },  // العميل
+            { wch: 20 },  // السفينة
+            { wch: 15 },  // البوليصة
+            { wch: 30 },  // الوصف
+            { wch: 15 },  // نوع المصروف
+            { wch: 20 },  // رقم الحاوية
+            { wch: 15 },  // التاريخ من
+            { wch: 15 },  // التاريخ إلى
+            { wch: 10 },  // عدد الأيام
+            { wch: 15 },  // سعر الوحدة
+            { wch: 15 },  // المبلغ
+            { wch: 8 }    // العملة
+        ];
+        
+        XLSX.utils.book_append_sheet(wb, ws, 'تفاصيل الحاويات');
+        
+        // اسم الملف
+        let fileName;
+        if (selectedIndices.length === 1) {
+            fileName = `حاويات-${invoicesData[selectedIndices[0]]['final-number'] || 'فاتورة'}.xlsx`;
+        } else {
+            const firstNum = invoicesData[selectedIndices[0]]['final-number'] || 'بدون';
+            const lastNum = invoicesData[selectedIndices[selectedIndices.length - 1]]['final-number'] || 'بدون';
+            fileName = `حاويات-${firstNum}-إلى-${lastNum}.xlsx`;
+        }
+        
+        XLSX.writeFile(wb, fileName);
+        showNotification(`تم تصدير ${allContainers.length} حاوية بنجاح`, 'success');
+        
+    } catch (error) {
+        console.error('خطأ في تصدير الحاويات:', error);
+        showNotification('حدث خطأ في التصدير: ' + error.message, 'error');
+    } finally {
+        setTimeout(hideProgress, 1500);
+    }
+};
+
+// ============================================
+// دوال تصدير تفاصيل الحاويات (للفاتورة الواحدة)
 // ============================================
 window.exportContainerDetails = async function(groupIndex) {
     const inv = invoicesData[selectedInvoiceIndex];
@@ -1175,6 +1337,7 @@ window.exportContainerDetails = async function(groupIndex) {
         [],
         ['معلومات الفاتورة:'],
         ['رقم الفاتورة:', inv['final-number'] || '-'],
+        ['رقم المسودة:', inv['draft-number'] || '-'],
         ['العميل:', inv['payee-customer-id'] || '-'],
         ['السفينة:', inv['key-word1'] || '-'],
         ['رقم البوليصة:', inv['key-word2'] || '-'],
@@ -1463,7 +1626,7 @@ window.exportInvoicePDF = function() {
 };
 
 // ============================================
-// دوال الفاتورة والنموذج الفرعي - مع إضافة QR Code
+// دوال الفاتورة والنموذج الفرعي - مع جميع التعديلات
 // ============================================
 window.showInvoiceDetails = function(index) {
     if (index < 0 || index >= invoicesData.length) return;
@@ -1475,6 +1638,11 @@ window.showInvoiceDetails = function(index) {
     const exRate = inv['flex-string-06'] || 48.0215;
 
     document.getElementById('modalInvoiceNumber').textContent = inv['final-number'] || 'غير محدد';
+    
+    // استخدام finalized-date بدلاً من created مع تكبير الخط وجعله bold
+    const invoiceDate = inv['finalized-date'] || inv['created'] || '';
+    const formattedDate = invoiceDate ? new Date(invoiceDate).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : 'غير محدد';
+    
     const voyageDate = inv['flex-date-02'] ? new Date(inv['flex-date-02']).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : 'غير محدد';
     
     const grouped = isPostponed ? groupPostponedCharges(inv.charges) : groupCashCharges(inv.charges);
@@ -1537,7 +1705,7 @@ window.showInvoiceDetails = function(index) {
             </tr>`;
         } else {
             const chargeDate = charge['paid-thru-day'] || charge['created'] || '';
-            const formattedDate = chargeDate ? new Date(chargeDate).toLocaleDateString('ar-EG') : '-';
+            const formattedChargeDate = chargeDate ? new Date(chargeDate).toLocaleDateString('ar-EG') : '-';
             
             chargesRows += `<tr onclick="toggleContainers(${idx})" style="cursor: pointer;">
                 <td>${charge.description || '-'}${qtyDisplay}</td>
@@ -1546,7 +1714,7 @@ window.showInvoiceDetails = function(index) {
                 <td>${displayStorageDays}</td>
                 <td>${(charge['rate-billed'] || 0).toFixed(2)}</td>
                 <td><strong>${amountDisplay}</strong></td>
-                <td>${formattedDate}</td>
+                <td>${formattedChargeDate}</td>
                 <td>${containerCount > 0 ? `<i id="icon-${idx}" class="fas fa-chevron-down"></i> <span style="font-size:0.8em;">${containerCount}</span>` : ''}</td>
             </tr>`;
         }
@@ -1633,6 +1801,7 @@ window.showInvoiceDetails = function(index) {
         `<tr><th>الوصف</th><th>النوع</th><th>العدد</th><th>أيام التخزين</th><th>سعر الوحدة</th><th>المبلغ/سعر الصرف</th><th></th></tr>` :
         `<tr><th>الوصف</th><th>النوع</th><th>العدد</th><th>أيام التخزين</th><th>سعر الوحدة</th><th>المبلغ/سعر الصرف</th><th>تاريخ الصرف</th><th></th></tr>`;
 
+    // إضافة كلاس للتاريخ
     const printStyles = `
         <style>
             @media print {
@@ -1719,9 +1888,18 @@ window.showInvoiceDetails = function(index) {
                     font-size: 0.7em !important;
                 }
             }
+            .invoice-number-bold {
+                font-weight: bold;
+                font-size: 1.2em;
+            }
+            .invoice-date-bold {
+                font-weight: bold;
+                font-size: 1.1em;
+            }
         </style>
     `;
 
+    // تعديل عنوان الفاتورة ليشمل الرقم النهائي والمسودة بخط كبير وعريض
     let html = `
         <div class="invoice-container" id="invoicePrint" style="max-width: 1100px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
             ${printStyles}
@@ -1748,7 +1926,11 @@ window.showInvoiceDetails = function(index) {
             <div class="invoice-header" style="background: linear-gradient(135deg, #4361ee, #3f37c9); color: white; padding: 12px; text-align: center; border-radius: 8px; margin-bottom: 15px;">
                 <h2 style="font-size: 1.1em; margin-bottom: 3px;"><i class="fas fa-file-invoice"></i> فاتورة رسمية - ${invoiceTypeText}</h2>
                 <p style="font-size: 0.8em; margin-top: 3px; color: #f0f0f0;"><i class="fas fa-tag"></i> ${inv['invoice-type-id'] || 'غير محدد'}</p>
-                <p style="margin-top: 3px; font-size: 0.8em;">رقم: ${inv['final-number'] || 'غير محدد'} | تاريخ: ${inv['created'] ? new Date(inv['created']).toLocaleDateString('ar-EG') : '-'}</p>
+                <p style="margin-top: 3px; font-size: 0.8em;">
+                    <span class="invoice-number-bold">${inv['final-number'] || 'غير محدد'}</span>
+                    ${inv['draft-number'] ? `| <span class="invoice-number-bold">${inv['draft-number']}</span>` : ''} 
+                    | تاريخ: <span class="invoice-date-bold">${formattedDate}</span>
+                </p>
             </div>
             
             <div class="invoice-info-grid" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 15px;">
@@ -1761,7 +1943,10 @@ window.showInvoiceDetails = function(index) {
                 <div class="info-box" style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-right: 4px solid #4361ee;">
                     <h4 style="color: #4361ee; margin-bottom: 8px; font-size: 0.95em; display: flex; align-items: center; gap: 5px;"><i class="fas fa-ship"></i> بيانات الشحنة</h4>
                     <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;"><span>السفينة:</span><span>${inv['key-word1'] || '-'}</span></div>
-                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;"><span>رقم البوليصة:</span><span>${inv['key-word2'] || '-'}</span></div>
+                    <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;">
+                        <span>${isPostponed ? 'IB ID / OB ID' : 'رقم البوليصة'}:</span>
+                        <span>${inv['key-word2'] || '-'}</span>
+                    </div>
                     <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;"><span>الخط الملاحي:</span><span>${inv['key-word3'] || '-'}</span></div>
                     <div class="info-row" style="display: flex; justify-content: space-between; padding: 4px 0; border-bottom: 1px dashed #dee2e6; font-size:0.85em;"><span>تاريخ الرحلة:</span><span><strong>${voyageDate}</strong></span></div>
                 </div>
@@ -1911,6 +2096,8 @@ window.printInvoice = function() {
             .summary-box { width: 280px; background: #f8f9fa; padding: 10px; border-radius: 8px; font-size: 0.85em; }
             .signature-section { display: flex; justify-content: space-around; margin: 15px 0 10px; padding: 8px 0; border-top: 2px dashed #dee2e6; }
             .invoice-footer { text-align: center; padding: 8px; border-top: 2px solid #e9ecef; color: #6c757d; font-size: 0.75em; }
+            .invoice-number-bold { font-weight: bold; font-size: 1.2em; }
+            .invoice-date-bold { font-weight: bold; font-size: 1.1em; }
         </style>
     `;
     
@@ -1972,7 +2159,7 @@ window.exportInvoiceExcel = function() {
 };
 
 // ============================================
-// دوال عرض الجدول مع Checkbox
+// دوال عرض الجدول مع Checkbox وإضافة زر تصدير الحاويات
 // ============================================
 function renderTableView(data) {
     if (!document.getElementById('table-style')) {
@@ -1983,14 +2170,14 @@ function renderTableView(data) {
             .invoice-checkbox, #selectAllCheckbox { width: 18px; height: 18px; cursor: pointer; }
             .table-toolbar button:disabled { opacity: 0.5; cursor: not-allowed; }
             .data-table tbody tr:hover { background-color: #f5f5f5; }
-            .export-buttons { display: flex; gap: 10px; }
+            .export-buttons { display: flex; gap: 10px; flex-wrap: wrap; }
         `;
         document.head.appendChild(style);
     }
     
     let html = `
         <div class="table-container">
-            <div class="table-toolbar" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding:10px; background:#f8f9fa; border-radius:8px;">
+            <div class="table-toolbar" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding:10px; background:#f8f9fa; border-radius:8px; flex-wrap: wrap; gap: 10px;">
                 <div>
                     <button class="btn btn-secondary" onclick="selectAllInvoices()" style="margin-left:10px;"><i class="fas fa-check-double"></i> تحديد الكل</button>
                     <button class="btn btn-secondary" onclick="deselectAllInvoices()"><i class="fas fa-times"></i> إلغاء الكل</button>
@@ -1999,12 +2186,15 @@ function renderTableView(data) {
                     <span id="selectedCount" style="margin-left:15px; font-weight:bold;">0</span> فاتورة محددة
                     <button class="btn btn-primary" onclick="exportSelectedInvoices()" id="exportSelectedBtn" disabled><i class="fas fa-file-pdf"></i> PDF</button>
                     <button class="btn btn-success" onclick="exportSelectedInvoicesExcel()" id="exportSelectedExcelBtn" disabled><i class="fas fa-file-excel"></i> Excel</button>
+                    <button class="btn btn-info" onclick="exportSelectedContainers()" id="exportContainersBtn" disabled style="background: #4cc9f0; color: white;">
+                        <i class="fas fa-container-storage"></i> تصدير الحاويات
+                    </button>
                 </div>
             </div>
             <table class="data-table">
                 <thead><tr>
                     <th style="width:40px;"><input type="checkbox" onclick="toggleAllCheckboxes(this)" id="selectAllCheckbox"></th>
-                    <th>الرقم النهائي</th><th>رقم المسودة</th><th>العميل</th><th>السفينة</th><th>رقم البوليصة</th><th>تاريخ الرحله</th><th>الإجمالي (EGP)</th><th>المبلغ بالعملة</th>
+                    <th>الرقم النهائي</th><th>رقم المسودة</th><th>العميل</th><th>السفينة</th><th>${currentInvoiceType === INVOICE_TYPES.POSTPONED ? 'IB ID / OB ID' : 'رقم البوليصة'}</th><th>تاريخ الرحله</th><th>الإجمالي (EGP)</th><th>المبلغ بالعملة</th>
                 </tr></thead>
                 <tbody>`;
     
@@ -2040,7 +2230,7 @@ function renderTableView(data) {
 }
 
 // ============================================
-// دوال نظام التقارير
+// دوال نظام التقارير (معدلة لاستخدام finalized-date)
 // ============================================
 window.showReports = function(type) {
     currentReportType = type;
@@ -2066,9 +2256,10 @@ function generateDailyReport() {
     if (!filteredInvoices.length) { document.getElementById('reportContent').innerHTML = '<div class="no-data">لا توجد بيانات</div>'; return; }
     const daily = new Map();
     filteredInvoices.forEach(inv => {
-        const date = inv['created'] ? new Date(inv['created']).toLocaleDateString('ar-EG') : 'غير محدد';
-        if (!daily.has(date)) daily.set(date, { count:0, total:0, taxes:0 });
-        const d = daily.get(date);
+        const date = inv['finalized-date'] || inv['created'] || '';
+        const formattedDate = date ? new Date(date).toLocaleDateString('ar-EG') : 'غير محدد';
+        if (!daily.has(formattedDate)) daily.set(formattedDate, { count:0, total:0, taxes:0 });
+        const d = daily.get(formattedDate);
         d.count++; d.total += inv['total-total'] || 0; d.taxes += inv['total-taxes'] || 0;
     });
     const sorted = Array.from(daily.entries()).sort((a,b) => new Date(b[0]) - new Date(a[0]));
@@ -2086,7 +2277,8 @@ function generateMonthlyReport() {
     if (!filteredInvoices.length) { document.getElementById('reportContent').innerHTML = '<div class="no-data">لا توجد بيانات</div>'; return; }
     const monthly = new Map();
     filteredInvoices.forEach(inv => {
-        const date = inv['created'] ? new Date(inv['created']) : new Date();
+        const dateStr = inv['finalized-date'] || inv['created'] || '';
+        const date = dateStr ? new Date(dateStr) : new Date();
         const key = `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}`;
         const name = date.toLocaleDateString('ar-EG', { year:'numeric', month:'long' });
         if (!monthly.has(key)) monthly.set(key, { name, count:0, total:0, taxes:0 });
@@ -2348,7 +2540,7 @@ window.updateFromDrive = async function() {
 };
 
 // ============================================
-// نظام QR Code المستقل - مع إخفاء تفاصيل الحاويات
+// نظام QR Code المستقل (مع تعديلات التاريخ ورقم البوليصة)
 // ============================================
 
 let qrContainer = null;
@@ -2414,7 +2606,7 @@ function generateQRCode(invoiceNumber, draftNumber, containerId, size = 100) {
 }
 
 /**
- * إنشاء HTML مبسط للفاتورة في نظام QR Code (بدون تفاصيل الحاويات)
+ * إنشاء HTML مبسط للفاتورة في نظام QR Code
  */
 function createQRCodeInvoiceHTML(invoice) {
     const finalNum = invoice['final-number'] || '';
@@ -2422,8 +2614,9 @@ function createQRCodeInvoiceHTML(invoice) {
     const currency = invoice['currency'] || 'EGP';
     const exRate = invoice['flex-string-06'] || 48.0215;
     const voyageDate = invoice['flex-date-02'] ? new Date(invoice['flex-date-02']).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : 'غير محدد';
+    const invoiceDate = invoice['finalized-date'] || invoice['created'] || '';
+    const formattedDate = invoiceDate ? new Date(invoiceDate).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : 'غير محدد';
     
-    // استخدام دوال التجميع الأصلية
     const grouped = isPostponed ? groupPostponedCharges(invoice.charges) : groupCashCharges(invoice.charges);
     
     const invoiceTypeText = isPostponed ? 'آجل' : 'نقدي';
@@ -2447,10 +2640,9 @@ function createQRCodeInvoiceHTML(invoice) {
         displayTotal = adjustedTotal.toFixed(2);
     }
 
-    // إنشاء صفوف المصاريف - بدون تفاصيل الحاويات
     let chargesRows = '';
     
-    grouped.forEach((charge, idx) => {
+    grouped.forEach(charge => {
         const amount = charge.amount;
         let amountDisplay = (amount / exRate).toFixed(2);
         const qtyDisplay = charge.quantity > 1 ? ` (${charge.quantity})` : '';
@@ -2477,7 +2669,7 @@ function createQRCodeInvoiceHTML(invoice) {
             </tr>`;
         } else {
             const chargeDate = charge['paid-thru-day'] || charge['created'] || '';
-            const formattedDate = chargeDate ? new Date(chargeDate).toLocaleDateString('ar-EG') : '-';
+            const formattedChargeDate = chargeDate ? new Date(chargeDate).toLocaleDateString('ar-EG') : '-';
             
             chargesRows += `<tr>
                 <td>${charge.description || '-'}${qtyDisplay}</td>
@@ -2486,7 +2678,7 @@ function createQRCodeInvoiceHTML(invoice) {
                 <td>${displayStorageDays}</td>
                 <td>${(charge['rate-billed'] || 0).toFixed(2)}</td>
                 <td>${amountDisplay}</td>
-                <td>${formattedDate}</td>
+                <td>${formattedChargeDate}</td>
             </tr>`;
         }
     });
@@ -2511,6 +2703,8 @@ function createQRCodeInvoiceHTML(invoice) {
                 .qr-btn-primary { background: #4361ee; }
                 .qr-btn-secondary { background: #6c757d; }
                 .qr-btn-danger { background: #e63946; }
+                .invoice-number-bold { font-weight: bold; font-size: 1.1em; }
+                .invoice-date-bold { font-weight: bold; font-size: 1.1em; }
             </style>
             
             <div class="qr-invoice-header">
@@ -2529,7 +2723,9 @@ function createQRCodeInvoiceHTML(invoice) {
             <div class="qr-invoice-title">
                 <h2 style="font-size: 1.1em; margin:0;">فاتورة ${invoiceTypeText}</h2>
                 <p style="margin:3px 0 0; font-size:0.8em;">
-                    رقم: ${invoice['final-number'] || 'غير محدد'} | مسودة: ${invoice['draft-number'] || 'غير محدد'} | تاريخ: ${invoice['created'] ? new Date(invoice['created']).toLocaleDateString('ar-EG') : '-'}
+                    <span class="invoice-number-bold">${invoice['final-number'] || 'غير محدد'}</span>
+                    ${invoice['draft-number'] ? `| <span class="invoice-number-bold">${invoice['draft-number']}</span>` : ''} 
+                    | تاريخ: <span class="invoice-date-bold">${formattedDate}</span>
                 </p>
             </div>
             
@@ -2543,7 +2739,10 @@ function createQRCodeInvoiceHTML(invoice) {
                 <div class="qr-info-box">
                     <h4 style="color:#4361ee; margin:0 0 8px; font-size:0.95em;">بيانات الشحنة</h4>
                     <div class="qr-info-row"><span>السفينة:</span><span>${invoice['key-word1'] || '-'}</span></div>
-                    <div class="qr-info-row"><span>البوليصة:</span><span>${invoice['key-word2'] || '-'}</span></div>
+                    <div class="qr-info-row">
+                        <span>${isPostponed ? 'IB ID / OB ID' : 'رقم البوليصة'}:</span>
+                        <span>${invoice['key-word2'] || '-'}</span>
+                    </div>
                     <div class="qr-info-row"><span>الخط الملاحي:</span><span>${invoice['key-word3'] || '-'}</span></div>
                     <div class="qr-info-row"><span>تاريخ الرحلة:</span><span><strong>${voyageDate}</strong></span></div>
                 </div>
@@ -2610,7 +2809,6 @@ async function generateQRCodePDF(element, fileName) {
                 throw new Error('مكتبات PDF غير متوفرة');
             }
             
-            // التأكد من أن العنصر جاهز
             await new Promise(resolve => setTimeout(resolve, 500));
             
             const canvas = await html2canvas(element, {
