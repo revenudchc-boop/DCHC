@@ -2225,7 +2225,7 @@ window.showInvoiceDetails = function(index) {
 };
 
 // ============================================
-// دوال إضافية للتحكم في الأزرار
+// دوال إضافية للتحكم في الأزرار - مع تعديل الطباعة
 // ============================================
 window.closeModal = function() {
     const modal = document.getElementById('invoiceModal');
@@ -2235,7 +2235,6 @@ window.closeModal = function() {
 window.navigateInvoice = function(direction) {
     if (selectedInvoiceIndex === -1) return;
     
-    // ========== التعديل هنا: استخدام filteredInvoices بدلاً من invoicesData ==========
     // البحث عن الفاتورة الحالية في قائمة الفواتير المفلترة
     const currentInvoice = invoicesData[selectedInvoiceIndex];
     const currentFilteredIndex = filteredInvoices.findIndex(inv => 
@@ -2265,15 +2264,12 @@ window.navigateInvoice = function(direction) {
         if (newOriginalIndex !== -1) {
             showInvoiceDetails(newOriginalIndex);
         } else {
-            // إذا لم يتم العثور على الفاتورة في القائمة الكاملة (خطأ نادر)
             console.error('لم يتم العثور على الفاتورة في القائمة الكاملة');
             alert(direction === 'prev' ? 'لا توجد فواتير سابقة' : 'لا توجد فواتير تالية');
         }
     } else {
-        // لا توجد فواتير في الاتجاه المطلوب
         alert(direction === 'prev' ? 'هذه أول فاتورة' : 'هذه آخر فاتورة');
     }
-    // ========== نهاية التعديل ==========
 };
 
 window.toggleContainers = function(index) {
@@ -2290,52 +2286,229 @@ window.toggleContainers = function(index) {
     }
 };
 
+// ========== دالة الطباعة المعدلة ==========
 window.printInvoice = function() {
     const content = document.getElementById('invoicePrint');
     if (!content) return alert('لا توجد فاتورة للطباعة');
     
+    // الحصول على رقم الفاتورة لإنشاء QR code
+    const inv = invoicesData[selectedInvoiceIndex];
+    const invoiceNumber = inv['final-number'] || '';
+    const draftNumber = inv['draft-number'] || '';
+    
+    // إنشاء نافذة الطباعة
     const printWindow = window.open('', '_blank', 'width=1200,height=800');
     
+    // نسخ محتوى الفاتورة
+    const contentHTML = content.outerHTML;
+    
+    // إنشاء QR code في النافذة الجديدة
+    const qrContainerId = `qrcode-container-${invoiceNumber}`;
+    
+    // استايلات محسنة للطباعة
     const printStyles = `
         <style>
             @page { size: A4; margin: 0.5cm; }
-            body { font-family: 'Segoe UI', sans-serif; padding: 0; margin: 0; background: white; direction: rtl; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            .invoice-container { max-width: 100%; margin: 0 auto; background: white; padding: 15px; }
-            .invoice-company-header { display: flex; align-items: center; gap: 20px; background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; padding: 15px; border-radius: 8px; margin-bottom: 15px; }
-            .company-logo-container { width: 80px; height: 80px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #ffd700; overflow: hidden; padding: 0; }
-            .company-logo-image { width: 100%; height: 100%; object-fit: cover; }
-            .invoice-header { background: linear-gradient(135deg, #4361ee, #3f37c9); color: white; padding: 12px; text-align: center; border-radius: 8px; margin-bottom: 15px; }
-            .invoice-info-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-bottom: 15px; }
-            .info-box { background: #f8f9fa; padding: 10px; border-radius: 8px; border-right: 4px solid #4361ee; font-size: 0.85em; }
-            .charges-table { width: 100%; border-collapse: collapse; font-size: 0.8em; }
-            .charges-table th { background: #4361ee; color: white; padding: 6px 4px; }
-            .charges-table td { padding: 5px 4px; border-bottom: 1px solid #e9ecef; }
-            .summary-box { width: 280px; background: #f8f9fa; padding: 10px; border-radius: 8px; font-size: 0.85em; }
-            .signature-section { display: flex; justify-content: space-around; margin: 15px 0 10px; padding: 8px 0; border-top: 2px dashed #dee2e6; }
-            .invoice-footer { text-align: center; padding: 8px; border-top: 2px solid #e9ecef; color: #6c757d; font-size: 0.75em; }
-            .invoice-number-bold { font-weight: bold; font-size: 1.2em; }
-            .invoice-date-bold { font-weight: bold; font-size: 1.2em; }
+            body { 
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+                padding: 0; 
+                margin: 0; 
+                background: white; 
+                direction: rtl; 
+                -webkit-print-color-adjust: exact; 
+                print-color-adjust: exact; 
+            }
+            .invoice-container { 
+                max-width: 100%; 
+                margin: 0 auto; 
+                background: white; 
+                padding: 15px; 
+            }
+            .invoice-company-header { 
+                display: flex; 
+                align-items: center; 
+                justify-content: space-between;
+                background: linear-gradient(135deg, #1e3c72, #2a5298); 
+                color: white; 
+                padding: 15px 20px; 
+                border-radius: 10px; 
+                margin-bottom: 15px; 
+            }
+            .company-logo-container { 
+                width: 80px; 
+                height: 80px; 
+                background: white; 
+                border-radius: 50%; 
+                display: flex; 
+                align-items: center; 
+                justify-content: center; 
+                border: 3px solid #ffd700; 
+                overflow: hidden; 
+                padding: 0; 
+                box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+            }
+            .company-logo-image { 
+                width: 100%; 
+                height: 100%; 
+                object-fit: cover; 
+                border-radius: 50%; 
+            }
+            .invoice-header { 
+                background: linear-gradient(135deg, #4361ee, #3f37c9); 
+                color: white; 
+                padding: 12px; 
+                text-align: center; 
+                border-radius: 8px; 
+                margin-bottom: 15px; 
+            }
+            .invoice-info-grid { 
+                display: grid; 
+                grid-template-columns: repeat(3, 1fr); 
+                gap: 12px; 
+                margin-bottom: 15px; 
+            }
+            .info-box { 
+                background: #f8f9fa; 
+                padding: 12px; 
+                border-radius: 8px; 
+                border-right: 4px solid #4361ee; 
+                font-size: 0.85em; 
+            }
+            .charges-table { 
+                width: 100%; 
+                border-collapse: collapse; 
+                font-size: 0.8em; 
+                background: white;
+                border-radius: 8px;
+                overflow: hidden;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+            }
+            .charges-table th { 
+                background: #4361ee; 
+                color: white; 
+                padding: 8px 4px; 
+                text-align: center;
+            }
+            .charges-table td { 
+                padding: 6px 4px; 
+                border-bottom: 1px solid #e9ecef; 
+                text-align: center;
+            }
+            .summary-box { 
+                width: 280px; 
+                background: #f8f9fa; 
+                padding: 12px; 
+                border-radius: 8px; 
+                font-size: 0.85em; 
+            }
+            .signature-section { 
+                display: flex; 
+                justify-content: space-around; 
+                margin: 20px 0 15px; 
+                padding: 10px 0; 
+                border-top: 2px dashed #dee2e6; 
+            }
+            .invoice-footer { 
+                text-align: center; 
+                padding: 10px; 
+                border-top: 2px solid #e9ecef; 
+                color: #6c757d; 
+                font-size: 0.75em; 
+            }
+            .invoice-number-bold, .invoice-date-bold { 
+                font-weight: bold; 
+                font-size: 1.1em; 
+            }
+            .containers-detail-table {
+                width: 100%;
+                border-collapse: collapse;
+                background: white;
+                border-radius: 8px;
+                overflow: hidden;
+                margin-top: 10px;
+            }
+            .containers-detail-table th {
+                background: #4cc9f0;
+                color: white;
+                padding: 8px;
+            }
+            .containers-detail-table td {
+                padding: 6px;
+                border-bottom: 1px solid #e9ecef;
+            }
         </style>
     `;
-    
+
+    // كتابة محتوى نافذة الطباعة مع تضمين مكتبة QR Code
     printWindow.document.write(`
         <html dir="rtl">
         <head>
             <title>طباعة الفاتورة - ${COMPANY_INFO.name}</title>
             <meta charset="UTF-8">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+            <script src="https://cdn.jsdelivr.net/npm/qrcode@1.5.1/build/qrcode.min.js"></script>
             ${printStyles}
         </head>
         <body>
-            ${content.outerHTML}
+            ${contentHTML}
+            <script>
+                // انتظار تحميل الصفحة ثم إنشاء QR code
+                setTimeout(function() {
+                    try {
+                        const container = document.getElementById('${qrContainerId}');
+                        if (container) {
+                            // مسح محتوى الحاوية
+                            container.innerHTML = '';
+                            
+                            // إنشاء canvas جديد
+                            const canvas = document.createElement('canvas');
+                            canvas.id = 'qrcode-${invoiceNumber}';
+                            canvas.style.width = '100%';
+                            canvas.style.height = 'auto';
+                            canvas.style.maxWidth = '100px';
+                            container.appendChild(canvas);
+                            
+                            // إنشاء QR code
+                            QRCode.toCanvas(canvas, '${COMPANY_INFO.baseUrl}?invoice=${encodeURIComponent(invoiceNumber)}${draftNumber ? '&draft=' + encodeURIComponent(draftNumber) : ''}', {
+                                width: 100,
+                                margin: 1,
+                                color: { dark: '#000000', light: '#ffffff' },
+                                errorCorrectionLevel: 'H'
+                            }, function(error) {
+                                if (error) {
+                                    console.error('خطأ في إنشاء QR Code في الطباعة:', error);
+                                    container.innerHTML = '<div style="color:red; font-size:0.8em;">خطأ</div>';
+                                } else {
+                                    console.log('✅ تم إنشاء QR Code في نافذة الطباعة');
+                                    const caption = document.createElement('div');
+                                    caption.style.fontSize = '0.6em';
+                                    caption.style.marginTop = '2px';
+                                    caption.style.color = '#666';
+                                    caption.textContent = 'امسح للوصول';
+                                    container.appendChild(caption);
+                                }
+                            });
+                        }
+                    } catch (e) {
+                        console.error('خطأ في إنشاء QR code:', e);
+                    }
+                }, 500);
+            <\/script>
         </body>
         </html>
     `);
     
     printWindow.document.close();
     printWindow.focus();
-    setTimeout(() => printWindow.print(), 500);
+    
+    // انتظار تحميل المحتوى ثم الطباعة
+    setTimeout(() => {
+        printWindow.print();
+        // إغلاق النافذة بعد الطباعة (اختياري)
+        // printWindow.close();
+    }, 1000);
 };
+// ========== نهاية دالة الطباعة المعدلة ==========
 
 window.exportInvoiceExcel = function() {
     const inv = invoicesData[selectedInvoiceIndex];
