@@ -717,19 +717,30 @@ function parseInvoiceNode(invoice) {
             'creator': invoice.getAttribute('creator') || '',
             'changed': invoice.getAttribute('changed') || '',
             'changer': invoice.getAttribute('changer') || '',
-            'charges': [], 'containers': []
+            'charges': [],
+            'containers': []
         };
 
         const charges = invoice.getElementsByTagName('charge');
         for (let j = 0; j < charges.length; j++) {
             const charge = charges[j];
+            
             let storageDays = 1;
             const from = charge.getAttribute('event-performed-from');
             const to = charge.getAttribute('event-performed-to');
+            
             if (from && to) {
                 const d1 = new Date(from), d2 = new Date(to);
-                if (!isNaN(d1) && !isNaN(d2)) storageDays = Math.ceil(Math.abs(d2 - d1) / (1000 * 60 * 60 * 24)) + 1;
+                if (!isNaN(d1) && !isNaN(d2)) {
+                    const diffTime = Math.abs(d2 - d1);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    storageDays = diffDays + 1;
+                }
             }
+            
+            // قراءة الكمية من XML
+            const quantityBilled = parseFloat(charge.getAttribute('quantity-billed') || 1);
+            
             const chargeObj = {
                 'event-type-id': charge.getAttribute('event-type-id') || '',
                 'entity-id': charge.getAttribute('entity-id') || '',
@@ -740,28 +751,32 @@ function parseInvoiceNode(invoice) {
                 'paid-thru-day': charge.getAttribute('paid-thru-day') || '',
                 'extract-class': charge.getAttribute('extract-class') || '',
                 'rate-billed': parseFloat(charge.getAttribute('rate-billed') || 0),
-                'quantity-billed': 1,
+                'quantity-billed': quantityBilled,
                 'amount': parseFloat(charge.getAttribute('amount') || 0),
                 'is-flat-rate': charge.getAttribute('is-flat-rate') || '',
                 'flat-rate-amount': parseFloat(charge.getAttribute('flat-rate-amount') || 0),
                 'exchange-rate': parseFloat(charge.getAttribute('exchange-rate') || exRate),
                 'created': charge.getAttribute('created') || '',
                 'storage-days': storageDays,
-                'quantity': 1,
+                'quantity': quantityBilled, // الآن يأخذ القيمة الحقيقية
                 'containerNumbers': [],
                 'taxes': []
             };
+            
             if (chargeObj['entity-id']) {
                 chargeObj.containerNumbers.push(chargeObj['entity-id']);
                 obj.containers.push(chargeObj['entity-id']);
             }
+            
             const taxes = charge.getElementsByTagName('tax');
             for (let k = 0; k < taxes.length; k++) {
                 const tax = taxes[k];
                 chargeObj.taxes.push({ amount: parseFloat(tax.getAttribute('amount') || 0), created: tax.getAttribute('created') || '' });
             }
+            
             obj.charges.push(chargeObj);
         }
+        
         obj.containers = [...new Set(obj.containers)];
         return obj;
     } catch (error) {
@@ -1153,7 +1168,9 @@ function clearSelectedInvoices() {
 // دوال تجميع المصاريف
 // ============================================
 
-// دوال تجميع المصاريف للفواتير النقدية
+// ============================================
+// دوال تجميع المصاريف للفواتير النقدية (العدد = عدد البنود)
+// ============================================
 function groupCashCharges(charges) {
     const sortedCharges = [...charges].sort((a, b) => (a['event-type-id'] || '').localeCompare(b['event-type-id'] || ''));
     const grouped = [], map = new Map();
@@ -1162,7 +1179,7 @@ function groupCashCharges(charges) {
         const storageDays = c['storage-days'] || 1;
         if (map.has(key)) {
             const ex = map.get(key);
-            ex.quantity += 1;
+            ex.quantity += 1; // كل بند يضيف 1
             ex.amount += (c.amount || 0);
             if (c.containerNumbers?.length) c.containerNumbers.forEach(cont => { if (!ex.containerNumbers.includes(cont)) ex.containerNumbers.push(cont); });
             if (c['event-performed-from'] || c['event-performed-to']) ex.dates.push({ from: c['event-performed-from'] || '-', to: c['event-performed-to'] || '-', days: storageDays });
@@ -1176,7 +1193,9 @@ function groupCashCharges(charges) {
     return grouped;
 }
 
-// دوال تجميع المصاريف للفواتير الآجلة
+// ============================================
+// دوال تجميع المصاريف للفواتير الآجلة (العدد = مجموع الكميات)
+// ============================================
 function groupPostponedCharges(charges) {
     const sortedCharges = [...charges].sort((a, b) => (a['event-type-id'] || '').localeCompare(b['event-type-id'] || ''));
     const grouped = [], map = new Map();
@@ -1185,13 +1204,13 @@ function groupPostponedCharges(charges) {
         const storageDays = c['storage-days'] || 1;
         if (map.has(key)) {
             const ex = map.get(key);
-            ex.quantity += 1;
+            ex.quantity += c.quantity; // جمع الكميات الفعلية
             ex.totalStorageDays += storageDays;
             ex.amount += (c.amount || 0);
             if (c.containerNumbers?.length) c.containerNumbers.forEach(cont => { if (!ex.containerNumbers.includes(cont)) ex.containerNumbers.push(cont); });
             if (c['event-performed-from'] || c['event-performed-to']) ex.dates.push({ from: c['event-performed-from'] || '-', to: c['event-performed-to'] || '-', days: storageDays });
         } else {
-            const newC = { ...c, quantity: 1, containerNumbers: [...(c.containerNumbers || [])], totalStorageDays: storageDays, dates: [] };
+            const newC = { ...c, containerNumbers: [...(c.containerNumbers || [])], totalStorageDays: storageDays, dates: [] };
             if (c['event-performed-from'] || c['event-performed-to']) newC.dates.push({ from: c['event-performed-from'] || '-', to: c['event-performed-to'] || '-', days: storageDays });
             map.set(key, newC);
             grouped.push(newC);
@@ -1199,7 +1218,6 @@ function groupPostponedCharges(charges) {
     });
     return grouped;
 }
-
 // ============================================
 // دوال تصدير الحاويات
 // ============================================
