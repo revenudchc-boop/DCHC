@@ -1699,6 +1699,7 @@ window.showInvoiceDetails = function(index) {
     
     const voyageDate = inv['flex-date-02'] ? new Date(inv['flex-date-02']).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : 'غير محدد';
     
+    // استخدام دوال التجميع حسب نوع الفاتورة
     const grouped = isPostponed ? groupPostponedCharges(inv.charges) : groupCashCharges(inv.charges);
     
     const invoiceTypeText = isPostponed ? 'آجل' : 'نقدي';
@@ -1734,7 +1735,6 @@ window.showInvoiceDetails = function(index) {
         const amount = charge.amount;
         let amountDisplay = (amount / exRate).toFixed(2);
         const containerCount = charge.containerNumbers?.length || 0;
-        const qtyDisplay = charge.quantity > 1 ? ` (${charge.quantity})` : '';
 
         let displayStorageDays;
         if (isPostponed) {
@@ -1747,22 +1747,29 @@ window.showInvoiceDetails = function(index) {
             displayStorageDays = charge.totalStorageDays;
         }
 
+        // ========== التعديل النهائي للفاتورة الآجلة ==========
         if (isPostponed) {
+            // التحقق مما إذا كانت الخدمة من نوع REEFER أو STORAGE
+            const isReeferOrStorage = charge['event-type-id'] === 'REEFER' || charge['event-type-id'] === 'STORAGE';
+            // إذا كانت REEFER/STORAGE، اعرض 1، وإلا اعرض الكمية المجمعة
+            const displayQuantity = isReeferOrStorage ? 1 : (charge.quantity || 1);
+            
             chargesRows += `<tr onclick="toggleContainers(${idx})" style="cursor: pointer;">
-                <td>${charge.description || '-'}${qtyDisplay}</td>
+                <td>${charge.description || '-'}</td>
                 <td>${charge['event-type-id'] || '-'}</td>
-                <td>${charge.quantity || 1}</td>
+                <td><strong>${displayQuantity}</strong></td> <!-- 1 لـ REEFER/STORAGE، وإلا الكمية المجمعة -->
                 <td>${displayStorageDays}</td>
                 <td>${(charge['rate-billed'] || 0).toFixed(2)}</td>
                 <td><strong>${amountDisplay}</strong></td>
                 <td>${containerCount > 0 ? `<i id="icon-${idx}" class="fas fa-chevron-down"></i> <span style="font-size:0.8em;">${containerCount}</span>` : ''}</td>
             </tr>`;
         } else {
+            // الفواتير النقدية كما هي بدون تغيير
             const chargeDate = charge['paid-thru-day'] || charge['created'] || '';
             const formattedChargeDate = chargeDate ? new Date(chargeDate).toLocaleDateString('ar-EG') : '-';
             
             chargesRows += `<tr onclick="toggleContainers(${idx})" style="cursor: pointer;">
-                <td>${charge.description || '-'}${qtyDisplay}</td>
+                <td>${charge.description || '-'}</td>
                 <td>${charge['event-type-id'] || '-'}</td>
                 <td>${charge.quantity || 1}</td>
                 <td>${displayStorageDays}</td>
@@ -1772,6 +1779,7 @@ window.showInvoiceDetails = function(index) {
                 <td>${containerCount > 0 ? `<i id="icon-${idx}" class="fas fa-chevron-down"></i> <span style="font-size:0.8em;">${containerCount}</span>` : ''}</td>
             </tr>`;
         }
+        // ========== نهاية التعديل ==========
 
         if (containerCount > 0) {
             const containerDetails = charge.containerNumbers.map((container, idx) => {
@@ -1851,8 +1859,9 @@ window.showInvoiceDetails = function(index) {
 
     let exchangeRateRow = `<div class="info-row"><span>سعر الصرف:</span><span><strong>${exRate.toFixed(4)}</strong></span></div>`;
 
+    // تحديث عناوين الجدول - تعديل العنوان ليعكس المعنى المناسب
     const tableHeaders = isPostponed ? 
-        `<tr><th>الوصف</th><th>النوع</th><th>العدد</th><th>أيام التخزين</th><th>سعر الوحدة</th><th>المبلغ/سعر الصرف</th><th></th></tr>` :
+        `<tr><th>الوصف</th><th>النوع</th><th>العدد / الكمية</th><th>أيام التخزين</th><th>سعر الوحدة</th><th>المبلغ/سعر الصرف</th><th></th></tr>` :
         `<tr><th>الوصف</th><th>النوع</th><th>العدد</th><th>أيام التخزين</th><th>سعر الوحدة</th><th>المبلغ/سعر الصرف</th><th>تاريخ الصرف</th><th></th></tr>`;
 
     // استايلات محسنة للطباعة مع تحسين الشعار
@@ -2119,7 +2128,6 @@ window.showInvoiceDetails = function(index) {
         }
     }, 100);
 };
-
 // ============================================
 // دوال إضافية للتحكم في الأزرار
 // ============================================
