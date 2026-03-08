@@ -1704,8 +1704,17 @@ window.showInvoiceDetails = function(index) {
     
     const invoiceTypeText = isPostponed ? 'آجل' : 'نقدي';
     
-    const showMartyr = !(isPostponed && currency === 'USAD');
-    const martyr = showMartyr ? 5 : 0;
+    // ========== تعديل طابع الشهيد: يطبق فقط على الفواتير النقدية ==========
+    // الفواتير الآجلة لا يضاف لها طابع الشهيد مطلقاً
+    let martyr = 0;
+    let showMartyr = false;
+    
+    if (!isPostponed) {
+        // فقط للفواتير النقدية
+        showMartyr = true;
+        martyr = 5;
+    }
+    // ========== نهاية التعديل ==========
     
     const baseTotal = inv['total-total'] || 0;
     const adjustedTotal = baseTotal + martyr;
@@ -1837,8 +1846,19 @@ window.showInvoiceDetails = function(index) {
         }
     });
 
+    // ========== تعديل الملخص: حذف طابع الشهيد من الفواتير الآجلة ==========
     let summaryHtml = '';
-    if (showMartyr) {
+    if (isPostponed) {
+        // الفاتورة الآجلة: عرض بدون طابع الشهيد
+        summaryHtml = `
+            <div class="summary-box">
+                <div class="summary-row"><span>إجمالي المصاريف:</span><span>${totalChargesDisplay.toFixed(2)} ${displayCurrency}</span></div>
+                <div class="summary-row"><span>إجمالي الضرائب:</span><span>${totalTaxesDisplay.toFixed(2)} ${displayCurrency}</span></div>
+                <div class="summary-row total"><span>الإجمالي النهائي:</span><span>${displayTotal.toFixed(2)} ${displayCurrency}</span></div>
+            </div>
+        `;
+    } else {
+        // الفاتورة النقدية: عرض مع طابع الشهيد
         summaryHtml = `
             <div class="summary-box">
                 <div class="summary-row"><span>إجمالي المصاريف:</span><span>${totalChargesDisplay.toFixed(2)} ${displayCurrency}</span></div>
@@ -1847,15 +1867,8 @@ window.showInvoiceDetails = function(index) {
                 <div class="summary-row total"><span>الإجمالي النهائي:</span><span>${displayTotal.toFixed(2)} ${displayCurrency}</span></div>
             </div>
         `;
-    } else {
-        summaryHtml = `
-            <div class="summary-box">
-                <div class="summary-row"><span>إجمالي المصاريف:</span><span>${totalChargesDisplay.toFixed(2)} ${displayCurrency}</span></div>
-                <div class="summary-row"><span>إجمالي الضرائب:</span><span>${totalTaxesDisplay.toFixed(2)} ${displayCurrency}</span></div>
-                <div class="summary-row total"><span>الإجمالي النهائي:</span><span>${displayTotal.toFixed(2)} ${displayCurrency}</span></div>
-            </div>
-        `;
     }
+    // ========== نهاية تعديل الملخص ==========
 
     let exchangeRateRow = `<div class="info-row"><span>سعر الصرف:</span><span><strong>${exRate.toFixed(4)}</strong></span></div>`;
 
