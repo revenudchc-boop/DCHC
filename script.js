@@ -680,14 +680,52 @@ window.parseXMLContent = async function(xmlString, source) {
 // ============================================
 function parseInvoiceNode(invoice) {
     try {
-        const exRate = parseFloat(invoice.getAttribute('flex-string-06') || 48.0215);
+        // قراءة رقم الفاتورة النهائي لتحديد النوع
+        const finalNum = invoice.getAttribute('final-number') || '';
+        const isPostponed = finalNum.startsWith('P') || finalNum.startsWith('p');
+        
+        // قراءة قيمة سعر الصرف من flex-string-06
+        const exRateAttr = invoice.getAttribute('flex-string-06') || '';
+        const currency = invoice.getAttribute('currency') || 'EGP';
+        
+        let exRate;
+        
+        // ========== تعديل معالجة سعر الصرف - للفواتير الآجلة فقط ==========
+        if (isPostponed) {
+            // الفواتير الآجلة: نتحقق من وجود سعر صرف صالح
+            if (exRateAttr && exRateAttr !== 'N/A' && !isNaN(parseFloat(exRateAttr))) {
+                // يوجد سعر صرف صالح في الملف - نستخدمه كما هو
+                exRate = parseFloat(exRateAttr);
+                console.log(`فاتورة آجلة ${finalNum}: استخدام سعر الصرف الموجود = ${exRate}`);
+            } else {
+                // لا يوجد سعر صرف صالح في الملف
+                if (currency === 'EGP') {
+                    // عملة EGP ولا يوجد سعر صرف - نستخدم 1
+                    exRate = 1;
+                    console.log(`فاتورة آجلة ${finalNum}: لا يوجد سعر صرف، عملة EGP → استخدام 1`);
+                } else {
+                    // عملة USAD ولا يوجد سعر صرف - نستخدم القيمة الافتراضية
+                    exRate = 48.0215;
+                    console.log(`فاتورة آجلة ${finalNum}: لا يوجد سعر صرف، عملة USAD → استخدام الافتراضي 48.0215`);
+                }
+            }
+        } else {
+            // الفواتير النقدية: نستخدم القيمة الأصلية كما هي
+            if (exRateAttr && exRateAttr !== 'N/A' && !isNaN(parseFloat(exRateAttr))) {
+                exRate = parseFloat(exRateAttr);
+            } else {
+                exRate = 48.0215; // القيمة الافتراضية
+            }
+        }
+        // ========== نهاية التعديل ==========
+        
         const obj = {
             'draft-number': invoice.getAttribute('draft-number') || '',
-            'final-number': invoice.getAttribute('final-number') || '',
+            'final-number': finalNum,
             'finalized-date': invoice.getAttribute('finalized-date') || '',
             'status': invoice.getAttribute('status') || '',
             'invoice-type-id': invoice.getAttribute('invoice-type-id') || '',
-            'currency': invoice.getAttribute('currency') || '',
+            'currency': currency,
             'payee-customer-id': invoice.getAttribute('payee-customer-id') || '',
             'payee-customer-role': invoice.getAttribute('payee-customer-role') || '',
             'contract-customer-id': invoice.getAttribute('contract-customer-id') || '',
@@ -741,6 +779,31 @@ function parseInvoiceNode(invoice) {
             // قراءة الكمية من XML
             const quantityBilled = parseFloat(charge.getAttribute('quantity-billed') || 1);
             
+            // ========== تعديل سعر الصرف في بنود المصاريف - للفواتير الآجلة فقط ==========
+            let chargeExRate;
+            
+            if (isPostponed) {
+                // للفواتير الآجلة
+                const chargeExRateAttr = charge.getAttribute('exchange-rate');
+                
+                if (chargeExRateAttr && chargeExRateAttr !== 'N/A' && !isNaN(parseFloat(chargeExRateAttr))) {
+                    // يوجد سعر صرف خاص بالبند - نستخدمه
+                    chargeExRate = parseFloat(chargeExRateAttr);
+                } else {
+                    // لا يوجد سعر صرف خاص بالبند - نستخدم سعر صرف الفاتورة
+                    chargeExRate = exRate;
+                }
+            } else {
+                // للفواتير النقدية، نستخدم القيمة الأصلية
+                const chargeExRateAttr = charge.getAttribute('exchange-rate');
+                if (chargeExRateAttr && chargeExRateAttr !== 'N/A' && !isNaN(parseFloat(chargeExRateAttr))) {
+                    chargeExRate = parseFloat(chargeExRateAttr);
+                } else {
+                    chargeExRate = exRate;
+                }
+            }
+            // ========== نهاية التعديل ==========
+            
             const chargeObj = {
                 'event-type-id': charge.getAttribute('event-type-id') || '',
                 'entity-id': charge.getAttribute('entity-id') || '',
@@ -755,10 +818,10 @@ function parseInvoiceNode(invoice) {
                 'amount': parseFloat(charge.getAttribute('amount') || 0),
                 'is-flat-rate': charge.getAttribute('is-flat-rate') || '',
                 'flat-rate-amount': parseFloat(charge.getAttribute('flat-rate-amount') || 0),
-                'exchange-rate': parseFloat(charge.getAttribute('exchange-rate') || exRate),
+                'exchange-rate': chargeExRate,
                 'created': charge.getAttribute('created') || '',
                 'storage-days': storageDays,
-                'quantity': quantityBilled, // الآن يأخذ القيمة الحقيقية
+                'quantity': quantityBilled,
                 'containerNumbers': [],
                 'taxes': []
             };
@@ -1689,7 +1752,21 @@ window.showInvoiceDetails = function(index) {
     const finalNum = inv['final-number'] || '';
     const isPostponed = finalNum.startsWith('P') || finalNum.startsWith('p');
     const currency = inv['currency'] || 'EGP';
-    const exRate = inv['flex-string-06'] || 48.0215;
+    
+    // ========== معالجة سعر الصرف - للفواتير الآجلة فقط ==========
+    let exRate = inv['flex-string-06'] || 48.0215;
+    
+    if (isPostponed) {
+        // الفواتير الآجلة: نتحقق من صحة سعر الصرف
+        const exRateAttr = inv['flex-string-06'];
+        
+        // إذا كان سعر الصرف غير صالح (N/A أو 0) والعملة EGP، نستخدم 1
+        if ((exRateAttr === 'N/A' || exRateAttr === 0 || exRateAttr === '0' || !exRateAttr) && currency === 'EGP') {
+            exRate = 1;
+            console.log(`فاتورة آجلة ${finalNum}: لا يوجد سعر صرف صالح، عملة EGP → استخدام 1`);
+        }
+    }
+    // ========== نهاية معالجة سعر الصرف ==========
 
     document.getElementById('modalInvoiceNumber').textContent = inv['final-number'] || 'غير محدد';
     
@@ -1705,7 +1782,6 @@ window.showInvoiceDetails = function(index) {
     const invoiceTypeText = isPostponed ? 'آجل' : 'نقدي';
     
     // ========== تعديل طابع الشهيد: يطبق فقط على الفواتير النقدية ==========
-    // الفواتير الآجلة لا يضاف لها طابع الشهيد مطلقاً
     let martyr = 0;
     let showMartyr = false;
     
@@ -2109,6 +2185,7 @@ window.showInvoiceDetails = function(index) {
         generateQRCode(inv['final-number'], inv['draft-number'], `qrcode-container-${inv['final-number']}`, 100);
     }, 100);
     
+    // ========== إعادة تعيين أحداث الأزرار لضمان عملها بشكل صحيح ==========
     setTimeout(() => {
         const closeBtn = document.querySelector('#invoiceModal .close-button');
         if (closeBtn) {
@@ -2119,10 +2196,14 @@ window.showInvoiceDetails = function(index) {
         const nextBtn = document.querySelector('[onclick="navigateInvoice(\'next\')"]');
         
         if (prevBtn) {
-            prevBtn.onclick = function() { window.navigateInvoice('prev'); };
+            prevBtn.onclick = function() { 
+                window.navigateInvoice('prev'); 
+            };
         }
         if (nextBtn) {
-            nextBtn.onclick = function() { window.navigateInvoice('next'); };
+            nextBtn.onclick = function() { 
+                window.navigateInvoice('next'); 
+            };
         }
         
         const printBtn = document.querySelector('[onclick="printInvoice()"]');
@@ -2140,7 +2221,9 @@ window.showInvoiceDetails = function(index) {
             excelBtn.onclick = function() { window.exportInvoiceExcel(); };
         }
     }, 100);
+    // ========== نهاية إعادة تعيين الأحداث ==========
 };
+
 // ============================================
 // دوال إضافية للتحكم في الأزرار
 // ============================================
@@ -2151,12 +2234,46 @@ window.closeModal = function() {
 
 window.navigateInvoice = function(direction) {
     if (selectedInvoiceIndex === -1) return;
-    const newIndex = direction === 'prev' ? selectedInvoiceIndex - 1 : selectedInvoiceIndex + 1;
-    if (newIndex >= 0 && newIndex < invoicesData.length) {
-        showInvoiceDetails(newIndex);
+    
+    // ========== التعديل هنا: استخدام filteredInvoices بدلاً من invoicesData ==========
+    // البحث عن الفاتورة الحالية في قائمة الفواتير المفلترة
+    const currentInvoice = invoicesData[selectedInvoiceIndex];
+    const currentFilteredIndex = filteredInvoices.findIndex(inv => 
+        inv['final-number'] === currentInvoice['final-number'] && 
+        inv['draft-number'] === currentInvoice['draft-number']
+    );
+    
+    if (currentFilteredIndex === -1) return;
+    
+    // حساب الفهرس الجديد في قائمة الفواتير المفلترة
+    let newFilteredIndex;
+    if (direction === 'prev') {
+        newFilteredIndex = currentFilteredIndex - 1;
     } else {
+        newFilteredIndex = currentFilteredIndex + 1;
+    }
+    
+    // التحقق من أن الفهرس الجديد ضمن حدود قائمة الفواتير المفلترة
+    if (newFilteredIndex >= 0 && newFilteredIndex < filteredInvoices.length) {
+        // العثور على الفاتورة في القائمة الكاملة وعرضها
+        const targetInvoice = filteredInvoices[newFilteredIndex];
+        const newOriginalIndex = invoicesData.findIndex(inv => 
+            inv['final-number'] === targetInvoice['final-number'] && 
+            inv['draft-number'] === targetInvoice['draft-number']
+        );
+        
+        if (newOriginalIndex !== -1) {
+            showInvoiceDetails(newOriginalIndex);
+        } else {
+            // إذا لم يتم العثور على الفاتورة في القائمة الكاملة (خطأ نادر)
+            console.error('لم يتم العثور على الفاتورة في القائمة الكاملة');
+            alert(direction === 'prev' ? 'لا توجد فواتير سابقة' : 'لا توجد فواتير تالية');
+        }
+    } else {
+        // لا توجد فواتير في الاتجاه المطلوب
         alert(direction === 'prev' ? 'هذه أول فاتورة' : 'هذه آخر فاتورة');
     }
+    // ========== نهاية التعديل ==========
 };
 
 window.toggleContainers = function(index) {
