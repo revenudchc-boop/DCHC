@@ -1,5 +1,5 @@
 // ============================================
-// نظام الفواتير المتقدم - النسخة النهائية مع تحسين حجم الشعار
+// نظام الفواتير المتقدم - النسخة النهائية مع تحسين الترتيب وإضافة فواصل الألف
 // جميع الحقوق محفوظة لشركة دمياط لتداول الحاويات و البضائع
 // ============================================
 
@@ -63,6 +63,62 @@ let selectedInvoices = new Set();
 
 // متغير لتخزين الشعار
 let companyLogoBase64 = null;
+
+// ============================================
+// دوال تنسيق الأرقام
+// ============================================
+
+/**
+ * إضافة فواصل الألف للأرقام
+ */
+function formatNumberWithCommas(number) {
+    if (number === null || number === undefined || isNaN(number)) return '0';
+    
+    // تحويل الرقم إلى نص وتقسيمه إلى أجزاء
+    let parts = number.toString().split('.');
+    
+    // إضافة فواصل الألف للجزء الصحيح
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+    
+    // إرجاع الرقم مع الفواصل
+    return parts.join('.');
+}
+
+/**
+ * عرض المبلغ المنسق مع العملة
+ */
+function formatAmount(amount, currency = 'EGP', showCommas = true) {
+    if (amount === null || amount === undefined || isNaN(amount)) amount = 0;
+    
+    let formattedAmount = amount.toFixed(2);
+    if (showCommas) {
+        formattedAmount = formatNumberWithCommas(formattedAmount);
+    }
+    
+    return `${formattedAmount} ${currency}`;
+}
+
+// ============================================
+// دوال تحليل الرقم النهائي للترتيب
+// ============================================
+
+function parseFinalNumber(finalNumber) {
+    if (!finalNumber) return { type: '', year: 0, number: 0 };
+    
+    // تحليل النمط: C25-22491 أو P25-12345
+    const match = finalNumber.match(/^([CP])(\d+)-(\d+)$/i);
+    
+    if (match) {
+        return {
+            type: match[1].toUpperCase(), // C أو P
+            year: parseInt(match[2], 10),  // السنة كرقم
+            number: parseInt(match[3], 10) // الرقم التسلسلي كرقم
+        };
+    }
+    
+    // إذا لم يطابق النمط، نعيد القيم الافتراضية
+    return { type: '', year: 0, number: 0 };
+}
 
 // ============================================
 // دوال تحميل الشعار من Drive
@@ -617,7 +673,7 @@ function updateDataSource() {
     const count = invoicesData.length;
     const lastUpdate = localStorage.getItem('lastUpdate') || 'غير معروف';
     const date = lastUpdate !== 'غير معروف' ? ` (آخر تحديث: ${new Date(lastUpdate).toLocaleString('ar-EG')})` : '';
-    el.innerHTML = `${db ? '📦' : '💾'} ${count} فاتورة - ${db ? 'قاعدة بيانات محلية' : 'تخزين مؤقت'}${date}`;
+    el.innerHTML = `${db ? '📦' : '💾'} ${formatNumberWithCommas(count)} فاتورة - ${db ? 'قاعدة بيانات محلية' : 'تخزين مؤقت'}${date}`;
 }
 
 // ============================================
@@ -666,7 +722,7 @@ window.parseXMLContent = async function(xmlString, source) {
         invoicesData = newInvoices;
         showProgress('تم التحديث', 100);
         currentUser?.isGuest ? filterInvoicesByGuest(currentUser.taxNumber, currentUser.blNumber) : filterInvoicesByUser();
-        document.getElementById('fileStatus').innerHTML = `<i class="fas fa-check-circle"></i> ✅ تم تحديث ${invoicesData.length} فاتورة من ${source}`;
+        document.getElementById('fileStatus').innerHTML = `<i class="fas fa-check-circle"></i> ✅ تم تحديث ${formatNumberWithCommas(invoicesData.length)} فاتورة من ${source}`;
         updateDataSource();
     } catch (error) {
         document.getElementById('fileStatus').innerHTML = `<i class="fas fa-exclamation-circle"></i> ❌ خطأ: ${error.message}`;
@@ -690,7 +746,7 @@ function parseInvoiceNode(invoice) {
         
         let exRate;
         
-        // ========== تعديل معالجة سعر الصرف - للفواتير الآجلة فقط ==========
+        // تعديل معالجة سعر الصرف - للفواتير الآجلة فقط
         if (isPostponed) {
             // الفواتير الآجلة: نتحقق من وجود سعر صرف صالح
             if (exRateAttr && exRateAttr !== 'N/A' && !isNaN(parseFloat(exRateAttr))) {
@@ -717,7 +773,6 @@ function parseInvoiceNode(invoice) {
                 exRate = 48.0215; // القيمة الافتراضية
             }
         }
-        // ========== نهاية التعديل ==========
         
         const obj = {
             'draft-number': invoice.getAttribute('draft-number') || '',
@@ -779,7 +834,7 @@ function parseInvoiceNode(invoice) {
             // قراءة الكمية من XML
             const quantityBilled = parseFloat(charge.getAttribute('quantity-billed') || 1);
             
-            // ========== تعديل سعر الصرف في بنود المصاريف - للفواتير الآجلة فقط ==========
+            // تعديل سعر الصرف في بنود المصاريف - للفواتير الآجلة فقط
             let chargeExRate;
             
             if (isPostponed) {
@@ -802,7 +857,6 @@ function parseInvoiceNode(invoice) {
                     chargeExRate = exRate;
                 }
             }
-            // ========== نهاية التعديل ==========
             
             const chargeObj = {
                 'event-type-id': charge.getAttribute('event-type-id') || '',
@@ -924,7 +978,7 @@ window.applyAdvancedSearch = function() {
     currentPage = 1;
     clearSelectedInvoices();
     renderData();
-    showNotification(`تم العثور على ${filteredInvoices.length} فاتورة`, filteredInvoices.length ? 'success' : 'info');
+    showNotification(`تم العثور على ${formatNumberWithCommas(filteredInvoices.length)} فاتورة`, filteredInvoices.length ? 'success' : 'info');
 };
 
 window.resetAdvancedSearch = function() {
@@ -989,7 +1043,7 @@ function filterInvoicesByGuest(taxNumber, blNumber) {
         else if (taxNumber) msg += ` للضريبي ${taxNumber}`;
         else if (blNumber) msg += ` للبوليصة ${blNumber}`;
         showNotification(msg, 'warning');
-    } else showNotification(`تم العثور على ${filteredInvoices.length} فاتورة`, 'success');
+    } else showNotification(`تم العثور على ${formatNumberWithCommas(filteredInvoices.length)} فاتورة`, 'success');
 }
 
 function renderData() {
@@ -1011,7 +1065,9 @@ function renderData() {
     updateSummary();
     renderPagination(totalPages);
 }
-
+// ============================================
+// دوال عرض البطاقات
+// ============================================
 function renderCardsView(data) {
     let html = '<div class="cards-container">';
     data.forEach(inv => {
@@ -1023,8 +1079,18 @@ function renderCardsView(data) {
         const exRate = inv['flex-string-06'] || 48.0215;
         const totalOriginal = inv['total-total'] || 0;
         let displayAmount, displayCurrency;
-        if (currency === 'USAD') { displayAmount = (totalOriginal / exRate).toFixed(2); displayCurrency = 'USAD'; }
-        else { displayAmount = totalOriginal.toFixed(2); displayCurrency = 'EGP'; }
+        
+        if (currency === 'USAD') { 
+            displayAmount = (totalOriginal / exRate).toFixed(2); 
+            displayCurrency = 'USAD'; 
+        } else { 
+            displayAmount = totalOriginal.toFixed(2); 
+            displayCurrency = 'EGP'; 
+        }
+        
+        // تنسيق المبلغ مع فواصل الألف
+        const formattedDisplayAmount = formatNumberWithCommas(displayAmount);
+        
         html += `
             <div class="invoice-card" onclick="showInvoiceDetails(${idx})" style="cursor: pointer;">
                 <div class="card-header">
@@ -1044,7 +1110,7 @@ function renderCardsView(data) {
                 </div>
                 <div class="card-footer">
                     <span>الإجمالي:</span>
-                    <span class="card-total">${displayAmount} ${displayCurrency}</span>
+                    <span class="card-total">${formattedDisplayAmount} ${displayCurrency}</span>
                 </div>
             </div>`;
     });
@@ -1054,10 +1120,47 @@ function renderCardsView(data) {
 
 function sortInvoices(invoices, field, order) {
     return [...invoices].sort((a, b) => {
-        let va = a[field] || '', vb = b[field] || '';
-        if (typeof va === 'number' && typeof vb === 'number') return order === 'asc' ? va - vb : vb - va;
-        va = String(va).toLowerCase(); vb = String(vb).toLowerCase();
-        return order === 'asc' ? va.localeCompare(vb, 'ar') : vb.localeCompare(va, 'ar');
+        let va = a[field] || '';
+        let vb = b[field] || '';
+        
+        // معالجة خاصة للرقم النهائي
+        if (field === 'final-number') {
+            const parsedA = parseFinalNumber(va);
+            const parsedB = parseFinalNumber(vb);
+            
+            // مقارنة حسب:
+            // 1. النوع (C أو P)
+            // 2. السنة
+            // 3. الرقم التسلسلي
+            
+            if (parsedA.type !== parsedB.type) {
+                return order === 'asc' 
+                    ? parsedA.type.localeCompare(parsedB.type)
+                    : parsedB.type.localeCompare(parsedA.type);
+            }
+            
+            if (parsedA.year !== parsedB.year) {
+                return order === 'asc' 
+                    ? parsedA.year - parsedB.year
+                    : parsedB.year - parsedA.year;
+            }
+            
+            return order === 'asc'
+                ? parsedA.number - parsedB.number
+                : parsedB.number - parsedA.number;
+        }
+        
+        // للأنواع الرقمية الأخرى
+        if (typeof va === 'number' && typeof vb === 'number') {
+            return order === 'asc' ? va - vb : vb - va;
+        }
+        
+        // للأنواع النصية الأخرى
+        va = String(va).toLowerCase();
+        vb = String(vb).toLowerCase();
+        return order === 'asc' 
+            ? va.localeCompare(vb, 'ar') 
+            : vb.localeCompare(va, 'ar');
     });
 }
 
@@ -1110,12 +1213,15 @@ function updateSummary() {
         else { totalEGP += total; taxEGP += taxes; totalEGPWithoutTax += (total - taxes); }
     });
 
+    // عرض الأرقام بدون فواصل الألف وبدون كلمات جنيه/دولار
     document.getElementById('invoiceCount').textContent = count;
-    document.getElementById('totalSum').textContent = totalEGP.toFixed(2);
-    document.getElementById('taxSum').textContent = taxEGP.toFixed(2);
-    document.getElementById('totalUSD').textContent = totalUSD.toFixed(2);
-    document.getElementById('totalEGPWithoutTax').textContent = totalEGPWithoutTax.toFixed(2);
-    document.getElementById('totalMartyr').textContent = totalMartyr.toFixed(2);
+    document.getElementById('totalSum').innerHTML = totalEGP.toFixed(2);
+    document.getElementById('taxSum').innerHTML = taxEGP.toFixed(2);
+    document.getElementById('totalUSD').innerHTML = totalUSD.toFixed(2);
+    document.getElementById('totalEGPWithoutTax').innerHTML = totalEGPWithoutTax.toFixed(2);
+    document.getElementById('totalMartyr').innerHTML = totalMartyr.toFixed(2);
+    
+    // تحديث الإحصائيات في الهيدر
     document.getElementById('totalInvoicesHeader').textContent = count;
     document.getElementById('totalCustomers').textContent = new Set(filteredInvoices.map(i => i['payee-customer-id'])).size;
     document.getElementById('totalVessels').textContent = new Set(filteredInvoices.map(i => i['key-word1']).filter(v => v)).size;
@@ -1281,6 +1387,7 @@ function groupPostponedCharges(charges) {
     });
     return grouped;
 }
+
 // ============================================
 // دوال تصدير الحاويات
 // ============================================
@@ -1753,7 +1860,7 @@ window.showInvoiceDetails = function(index) {
     const isPostponed = finalNum.startsWith('P') || finalNum.startsWith('p');
     const currency = inv['currency'] || 'EGP';
     
-    // ========== معالجة سعر الصرف - للفواتير الآجلة فقط ==========
+    // معالجة سعر الصرف - للفواتير الآجلة فقط
     let exRate = inv['flex-string-06'] || 48.0215;
     
     if (isPostponed) {
@@ -1766,7 +1873,6 @@ window.showInvoiceDetails = function(index) {
             console.log(`فاتورة آجلة ${finalNum}: لا يوجد سعر صرف صالح، عملة EGP → استخدام 1`);
         }
     }
-    // ========== نهاية معالجة سعر الصرف ==========
 
     document.getElementById('modalInvoiceNumber').textContent = inv['final-number'] || 'غير محدد';
     
@@ -1781,7 +1887,7 @@ window.showInvoiceDetails = function(index) {
     
     const invoiceTypeText = isPostponed ? 'آجل' : 'نقدي';
     
-    // ========== تعديل طابع الشهيد: يطبق فقط على الفواتير النقدية ==========
+    // تعديل طابع الشهيد: يطبق فقط على الفواتير النقدية
     let martyr = 0;
     let showMartyr = false;
     
@@ -1790,7 +1896,6 @@ window.showInvoiceDetails = function(index) {
         showMartyr = true;
         martyr = 5;
     }
-    // ========== نهاية التعديل ==========
     
     const baseTotal = inv['total-total'] || 0;
     const adjustedTotal = baseTotal + martyr;
@@ -1832,7 +1937,6 @@ window.showInvoiceDetails = function(index) {
             displayStorageDays = charge.totalStorageDays;
         }
 
-        // ========== التعديل النهائي للفاتورة الآجلة ==========
         if (isPostponed) {
             // التحقق مما إذا كانت الخدمة من نوع REEFER أو STORAGE
             const isReeferOrStorage = charge['event-type-id'] === 'REEFER' || charge['event-type-id'] === 'STORAGE';
@@ -1842,10 +1946,10 @@ window.showInvoiceDetails = function(index) {
             chargesRows += `<tr onclick="toggleContainers(${idx})" style="cursor: pointer;">
                 <td>${charge.description || '-'}</td>
                 <td>${charge['event-type-id'] || '-'}</td>
-                <td><strong>${displayQuantity}</strong></td> <!-- 1 لـ REEFER/STORAGE، وإلا الكمية المجمعة -->
+                <td><strong>${displayQuantity}</strong></td>
                 <td>${displayStorageDays}</td>
                 <td>${(charge['rate-billed'] || 0).toFixed(2)}</td>
-                <td><strong>${amountDisplay}</strong></td>
+                <td><strong>${formatNumberWithCommas(amountDisplay)}</strong></td>
                 <td>${containerCount > 0 ? `<i id="icon-${idx}" class="fas fa-chevron-down"></i> <span style="font-size:0.8em;">${containerCount}</span>` : ''}</td>
             </tr>`;
         } else {
@@ -1859,12 +1963,11 @@ window.showInvoiceDetails = function(index) {
                 <td>${charge.quantity || 1}</td>
                 <td>${displayStorageDays}</td>
                 <td>${(charge['rate-billed'] || 0).toFixed(2)}</td>
-                <td><strong>${amountDisplay}</strong></td>
+                <td><strong>${formatNumberWithCommas(amountDisplay)}</strong></td>
                 <td>${formattedChargeDate}</td>
                 <td>${containerCount > 0 ? `<i id="icon-${idx}" class="fas fa-chevron-down"></i> <span style="font-size:0.8em;">${containerCount}</span>` : ''}</td>
             </tr>`;
         }
-        // ========== نهاية التعديل ==========
 
         if (containerCount > 0) {
             const containerDetails = charge.containerNumbers.map((container, idx) => {
@@ -1922,33 +2025,32 @@ window.showInvoiceDetails = function(index) {
         }
     });
 
-    // ========== تعديل الملخص: حذف طابع الشهيد من الفواتير الآجلة ==========
+    // تعديل الملخص
     let summaryHtml = '';
     if (isPostponed) {
         // الفاتورة الآجلة: عرض بدون طابع الشهيد
         summaryHtml = `
             <div class="summary-box">
-                <div class="summary-row"><span>إجمالي المصاريف:</span><span>${totalChargesDisplay.toFixed(2)} ${displayCurrency}</span></div>
-                <div class="summary-row"><span>إجمالي الضرائب:</span><span>${totalTaxesDisplay.toFixed(2)} ${displayCurrency}</span></div>
-                <div class="summary-row total"><span>الإجمالي النهائي:</span><span>${displayTotal.toFixed(2)} ${displayCurrency}</span></div>
+                <div class="summary-row"><span>إجمالي المصاريف:</span><span>${formatNumberWithCommas(totalChargesDisplay.toFixed(2))} ${displayCurrency}</span></div>
+                <div class="summary-row"><span>إجمالي الضرائب:</span><span>${formatNumberWithCommas(totalTaxesDisplay.toFixed(2))} ${displayCurrency}</span></div>
+                <div class="summary-row total"><span>الإجمالي النهائي:</span><span>${formatNumberWithCommas(displayTotal.toFixed(2))} ${displayCurrency}</span></div>
             </div>
         `;
     } else {
         // الفاتورة النقدية: عرض مع طابع الشهيد
         summaryHtml = `
             <div class="summary-box">
-                <div class="summary-row"><span>إجمالي المصاريف:</span><span>${totalChargesDisplay.toFixed(2)} ${displayCurrency}</span></div>
-                <div class="summary-row"><span>إجمالي الضرائب:</span><span>${totalTaxesDisplay.toFixed(2)} ${displayCurrency}</span></div>
-                <div class="summary-row"><span>طابع الشهيد:</span><span>${martyr.toFixed(2)} جنيه</span></div>
-                <div class="summary-row total"><span>الإجمالي النهائي:</span><span>${displayTotal.toFixed(2)} ${displayCurrency}</span></div>
+                <div class="summary-row"><span>إجمالي المصاريف:</span><span>${formatNumberWithCommas(totalChargesDisplay.toFixed(2))} ${displayCurrency}</span></div>
+                <div class="summary-row"><span>إجمالي الضرائب:</span><span>${formatNumberWithCommas(totalTaxesDisplay.toFixed(2))} ${displayCurrency}</span></div>
+                <div class="summary-row"><span>طابع الشهيد:</span><span>${formatNumberWithCommas(martyr.toFixed(2))} جنيه</span></div>
+                <div class="summary-row total"><span>الإجمالي النهائي:</span><span>${formatNumberWithCommas(displayTotal.toFixed(2))} ${displayCurrency}</span></div>
             </div>
         `;
     }
-    // ========== نهاية تعديل الملخص ==========
 
     let exchangeRateRow = `<div class="info-row"><span>سعر الصرف:</span><span><strong>${exRate.toFixed(4)}</strong></span></div>`;
 
-    // تحديث عناوين الجدول - تعديل العنوان ليعكس المعنى المناسب
+    // تحديث عناوين الجدول
     const tableHeaders = isPostponed ? 
         `<tr><th>الوصف</th><th>النوع</th><th>العدد / الكمية</th><th>أيام التخزين</th><th>سعر الوحدة</th><th>المبلغ/سعر الصرف</th><th></th></tr>` :
         `<tr><th>الوصف</th><th>النوع</th><th>العدد</th><th>أيام التخزين</th><th>سعر الوحدة</th><th>المبلغ/سعر الصرف</th><th>تاريخ الصرف</th><th></th></tr>`;
@@ -2185,7 +2287,7 @@ window.showInvoiceDetails = function(index) {
         generateQRCode(inv['final-number'], inv['draft-number'], `qrcode-container-${inv['final-number']}`, 100);
     }, 100);
     
-    // ========== إعادة تعيين أحداث الأزرار لضمان عملها بشكل صحيح ==========
+    // إعادة تعيين أحداث الأزرار لضمان عملها بشكل صحيح
     setTimeout(() => {
         const closeBtn = document.querySelector('#invoiceModal .close-button');
         if (closeBtn) {
@@ -2221,7 +2323,6 @@ window.showInvoiceDetails = function(index) {
             excelBtn.onclick = function() { window.exportInvoiceExcel(); };
         }
     }, 100);
-    // ========== نهاية إعادة تعيين الأحداث ==========
 };
 
 // ============================================
@@ -2235,27 +2336,34 @@ window.closeModal = function() {
 window.navigateInvoice = function(direction) {
     if (selectedInvoiceIndex === -1) return;
     
-    // البحث عن الفاتورة الحالية في قائمة الفواتير المفلترة
+    // الحصول على الفاتورة الحالية
     const currentInvoice = invoicesData[selectedInvoiceIndex];
-    const currentFilteredIndex = filteredInvoices.findIndex(inv => 
+    
+    // ترتيب الفواتير المفلترة بنفس طريقة الترتيب في العرض
+    const sortedFiltered = sortInvoices(filteredInvoices, currentSortField, sortOrder);
+    
+    // البحث عن الفهرس في القائمة المرتبة
+    const currentSortedIndex = sortedFiltered.findIndex(inv => 
         inv['final-number'] === currentInvoice['final-number'] && 
         inv['draft-number'] === currentInvoice['draft-number']
     );
     
-    if (currentFilteredIndex === -1) return;
+    if (currentSortedIndex === -1) return;
     
-    // حساب الفهرس الجديد في قائمة الفواتير المفلترة
-    let newFilteredIndex;
+    // حساب الفهرس الجديد
+    let newSortedIndex;
     if (direction === 'prev') {
-        newFilteredIndex = currentFilteredIndex - 1;
+        newSortedIndex = currentSortedIndex - 1;
     } else {
-        newFilteredIndex = currentFilteredIndex + 1;
+        newSortedIndex = currentSortedIndex + 1;
     }
     
-    // التحقق من أن الفهرس الجديد ضمن حدود قائمة الفواتير المفلترة
-    if (newFilteredIndex >= 0 && newFilteredIndex < filteredInvoices.length) {
-        // العثور على الفاتورة في القائمة الكاملة وعرضها
-        const targetInvoice = filteredInvoices[newFilteredIndex];
+    // التحقق من أن الفهرس الجديد ضمن الحدود
+    if (newSortedIndex >= 0 && newSortedIndex < sortedFiltered.length) {
+        // الحصول على الفاتورة المستهدفة من القائمة المرتبة
+        const targetInvoice = sortedFiltered[newSortedIndex];
+        
+        // العثور على الفهرس الأصلي في invoicesData
         const newOriginalIndex = invoicesData.findIndex(inv => 
             inv['final-number'] === targetInvoice['final-number'] && 
             inv['draft-number'] === targetInvoice['draft-number']
@@ -2263,12 +2371,14 @@ window.navigateInvoice = function(direction) {
         
         if (newOriginalIndex !== -1) {
             showInvoiceDetails(newOriginalIndex);
-        } else {
-            console.error('لم يتم العثور على الفاتورة في القائمة الكاملة');
-            alert(direction === 'prev' ? 'لا توجد فواتير سابقة' : 'لا توجد فواتير تالية');
         }
     } else {
-        alert(direction === 'prev' ? 'هذه أول فاتورة' : 'هذه آخر فاتورة');
+        // إظهار رسالة مناسبة
+        if (direction === 'prev') {
+            showNotification('هذه أول فاتورة', 'info');
+        } else {
+            showNotification('هذه آخر فاتورة', 'info');
+        }
     }
 };
 
@@ -2286,7 +2396,7 @@ window.toggleContainers = function(index) {
     }
 };
 
-// ========== دالة الطباعة المعدلة ==========
+// دالة الطباعة المعدلة
 window.printInvoice = function() {
     const content = document.getElementById('invoicePrint');
     if (!content) return alert('لا توجد فاتورة للطباعة');
@@ -2508,7 +2618,6 @@ window.printInvoice = function() {
         // printWindow.close();
     }, 1000);
 };
-// ========== نهاية دالة الطباعة المعدلة ==========
 
 window.exportInvoiceExcel = function() {
     const inv = invoicesData[selectedInvoiceIndex];
@@ -2609,8 +2718,8 @@ function renderTableView(data) {
             <td>${inv['key-word1'] || '-'}</td>
             <td>${inv['key-word2'] || '-'}</td>
             <td>${inv['flex-date-02'] ? new Date(inv['flex-date-02']).toLocaleDateString('ar-EG') : '-'}</td>
-            <td>${totalOriginal.toFixed(2)}</td>
-            <td>${displayAmount} ${displayCurrency}</td>
+            <td>${formatNumberWithCommas(totalOriginal.toFixed(2))}</td>
+            <td>${formatNumberWithCommas(displayAmount)} ${displayCurrency}</td>
         </tr>`;
     });
     
@@ -2655,9 +2764,9 @@ function generateDailyReport() {
     const sorted = Array.from(daily.entries()).sort((a,b) => new Date(b[0]) - new Date(a[0]));
     const totalAmount = Array.from(daily.values()).reduce((s,d) => s + d.total, 0);
     let html = `<div class="report-card"><h3><i class="fas fa-calendar-day"></i> إحصائيات يومية</h3>
-        <div class="report-stats">${[['عدد الأيام',sorted.length],['إجمالي الفواتير',filteredInvoices.length],['المتوسط اليومي',(totalAmount/(sorted.length||1)).toFixed(2)+' جنيه'],['إجمالي المبالغ',totalAmount.toFixed(2)+' جنيه']].map(([l,v])=>`<div class="stat-item"><div class="stat-label">${l}</div><div class="stat-value">${v}</div></div>`).join('')}</div>`;
+        <div class="report-stats">${[['عدد الأيام',sorted.length],['إجمالي الفواتير',filteredInvoices.length],['المتوسط اليومي',formatNumberWithCommas((totalAmount/(sorted.length||1)).toFixed(2))+' جنيه'],['إجمالي المبالغ',formatNumberWithCommas(totalAmount.toFixed(2))+' جنيه']].map(([l,v])=>`<div class="stat-item"><div class="stat-label">${l}</div><div class="stat-value">${v}</div></div>`).join('')}</div>`;
     html += '<h4>تفاصيل يومية</h4><table class="report-table"><thead><tr><th>التاريخ</th><th>عدد الفواتير</th><th>إجمالي المبالغ</th><th>الضرائب</th><th>المتوسط</th></tr></thead><tbody>';
-    sorted.forEach(([date,data]) => html += `<tr><td>${date}</td><td>${data.count}</td><td>${data.total.toFixed(2)}</td><td>${data.taxes.toFixed(2)}</td><td>${(data.total/data.count).toFixed(2)}</td></tr>`);
+    sorted.forEach(([date,data]) => html += `<tr><td>${date}</td><td>${data.count}</td><td>${formatNumberWithCommas(data.total.toFixed(2))}</td><td>${formatNumberWithCommas(data.taxes.toFixed(2))}</td><td>${formatNumberWithCommas((data.total/data.count).toFixed(2))}</td></tr>`);
     html += '</tbody></table></div>';
     document.getElementById('reportContent').innerHTML = html;
 }
@@ -2678,9 +2787,9 @@ function generateMonthlyReport() {
     const sorted = Array.from(monthly.entries()).sort((a,b) => b[0].localeCompare(a[0]));
     const totalAmount = Array.from(monthly.values()).reduce((s,d) => s + d.total, 0);
     let html = `<div class="report-card"><h3><i class="fas fa-calendar-alt"></i> إحصائيات شهرية</h3>
-        <div class="report-stats">${[['عدد الأشهر',sorted.length],['إجمالي الفواتير',filteredInvoices.length],['المتوسط الشهري',(totalAmount/(sorted.length||1)).toFixed(2)+' جنيه'],['إجمالي المبالغ',totalAmount.toFixed(2)+' جنيه']].map(([l,v])=>`<div class="stat-item"><div class="stat-label">${l}</div><div class="stat-value">${v}</div></div>`).join('')}</div>`;
+        <div class="report-stats">${[['عدد الأشهر',sorted.length],['إجمالي الفواتير',filteredInvoices.length],['المتوسط الشهري',formatNumberWithCommas((totalAmount/(sorted.length||1)).toFixed(2))+' جنيه'],['إجمالي المبالغ',formatNumberWithCommas(totalAmount.toFixed(2))+' جنيه']].map(([l,v])=>`<div class="stat-item"><div class="stat-label">${l}</div><div class="stat-value">${v}</div></div>`).join('')}</div>`;
     html += '<table class="report-table"><thead><tr><th>الشهر</th><th>عدد الفواتير</th><th>إجمالي المبالغ</th><th>الضرائب</th><th>المتوسط</th></tr></thead><tbody>';
-    sorted.forEach(([_,data]) => html += `<tr><td>${data.name}</td><td>${data.count}</td><td>${data.total.toFixed(2)}</td><td>${data.taxes.toFixed(2)}</td><td>${(data.total/data.count).toFixed(2)}</td></tr>`);
+    sorted.forEach(([_,data]) => html += `<tr><td>${data.name}</td><td>${data.count}</td><td>${formatNumberWithCommas(data.total.toFixed(2))}</td><td>${formatNumberWithCommas(data.taxes.toFixed(2))}</td><td>${formatNumberWithCommas((data.total/data.count).toFixed(2))}</td></tr>`);
     html += '</tbody></table></div>';
     document.getElementById('reportContent').innerHTML = html;
 }
@@ -2698,9 +2807,9 @@ function generateCustomerReport() {
     const sorted = Array.from(cust.entries()).sort((a,b) => b[1].total - a[1].total);
     const totalAmount = sorted.reduce((s,[_,d]) => s + d.total, 0);
     let html = `<div class="report-card"><h3><i class="fas fa-users"></i> إحصائيات العملاء</h3>
-        <div class="report-stats">${[['عدد العملاء',sorted.length],['إجمالي الفواتير',filteredInvoices.length],['أعلى عميل',sorted.length?sorted[0][0].substring(0,20):'لا يوجد'],['إجمالي المبالغ',totalAmount.toFixed(2)+' جنيه']].map(([l,v])=>`<div class="stat-item"><div class="stat-label">${l}</div><div class="stat-value">${v}</div></div>`).join('')}</div>`;
+        <div class="report-stats">${[['عدد العملاء',sorted.length],['إجمالي الفواتير',filteredInvoices.length],['أعلى عميل',sorted.length?sorted[0][0].substring(0,20):'لا يوجد'],['إجمالي المبالغ',formatNumberWithCommas(totalAmount.toFixed(2))+' جنيه']].map(([l,v])=>`<div class="stat-item"><div class="stat-label">${l}</div><div class="stat-value">${v}</div></div>`).join('')}</div>`;
     html += '<table class="report-table"><thead><tr><th>العميل</th><th>عدد الفواتير</th><th>إجمالي المبالغ</th><th>الضرائب</th><th>المتوسط</th></tr></thead><tbody>';
-    sorted.forEach(([customer,data]) => html += `<tr><td>${customer.substring(0,30)}</td><td>${data.count}</td><td>${data.total.toFixed(2)}</td><td>${data.taxes.toFixed(2)}</td><td>${(data.total/data.count).toFixed(2)}</td></tr>`);
+    sorted.forEach(([customer,data]) => html += `<tr><td>${customer.substring(0,30)}</td><td>${data.count}</td><td>${formatNumberWithCommas(data.total.toFixed(2))}</td><td>${formatNumberWithCommas(data.taxes.toFixed(2))}</td><td>${formatNumberWithCommas((data.total/data.count).toFixed(2))}</td></tr>`);
     html += '</tbody></table></div>';
     document.getElementById('reportContent').innerHTML = html;
 }
@@ -2718,9 +2827,9 @@ function generateVesselReport() {
     const sorted = Array.from(vessel.entries()).sort((a,b) => b[1].total - a[1].total);
     const totalAmount = sorted.reduce((s,[_,d]) => s + d.total, 0);
     let html = `<div class="report-card"><h3><i class="fas fa-ship"></i> إحصائيات السفن</h3>
-        <div class="report-stats">${[['عدد السفن',sorted.length],['إجمالي الفواتير',filteredInvoices.length],['أكثر سفينة',sorted.length?sorted[0][0]:'لا يوجد'],['إجمالي المبالغ',totalAmount.toFixed(2)+' جنيه']].map(([l,v])=>`<div class="stat-item"><div class="stat-label">${l}</div><div class="stat-value">${v}</div></div>`).join('')}</div>`;
+        <div class="report-stats">${[['عدد السفن',sorted.length],['إجمالي الفواتير',filteredInvoices.length],['أكثر سفينة',sorted.length?sorted[0][0]:'لا يوجد'],['إجمالي المبالغ',formatNumberWithCommas(totalAmount.toFixed(2))+' جنيه']].map(([l,v])=>`<div class="stat-item"><div class="stat-label">${l}</div><div class="stat-value">${v}</div></div>`).join('')}</div>`;
     html += '<table class="report-table"><thead><tr><th>السفينة</th><th>عدد الفواتير</th><th>إجمالي المبالغ</th><th>الضرائب</th><th>المتوسط</th></tr></thead><tbody>';
-    sorted.forEach(([vessel,data]) => html += `<tr><td>${vessel}</td><td>${data.count}</td><td>${data.total.toFixed(2)}</td><td>${data.taxes.toFixed(2)}</td><td>${(data.total/data.count).toFixed(2)}</td></tr>`);
+    sorted.forEach(([vessel,data]) => html += `<tr><td>${vessel}</td><td>${data.count}</td><td>${formatNumberWithCommas(data.total.toFixed(2))}</td><td>${formatNumberWithCommas(data.taxes.toFixed(2))}</td><td>${formatNumberWithCommas((data.total/data.count).toFixed(2))}</td></tr>`);
     html += '</tbody></table></div>';
     document.getElementById('reportContent').innerHTML = html;
 }
@@ -2922,7 +3031,7 @@ async function loadInvoicesFromDrive() {
         invoicesData = newInvoices;
         showProgress('تم التحميل', 100);
         currentUser?.isGuest ? filterInvoicesByGuest(currentUser.taxNumber, currentUser.blNumber) : filterInvoicesByUser();
-        document.getElementById('fileStatus').innerHTML = `<i class="fas fa-check-circle"></i> ✅ تم تحميل ${invoicesData.length} فاتورة من Drive`;
+        document.getElementById('fileStatus').innerHTML = `<i class="fas fa-check-circle"></i> ✅ تم تحميل ${formatNumberWithCommas(invoicesData.length)} فاتورة من Drive`;
         updateDataSource();
         return true;
     } catch (error) {
@@ -3063,7 +3172,7 @@ function createQRCodeInvoiceHTML(invoice) {
                 <td>${charge.quantity || 1}</td>
                 <td>${displayStorageDays}</td>
                 <td>${(charge['rate-billed'] || 0).toFixed(2)}</td>
-                <td>${amountDisplay}</td>
+                <td>${formatNumberWithCommas(amountDisplay)}</td>
             </tr>`;
         } else {
             const chargeDate = charge['paid-thru-day'] || charge['created'] || '';
@@ -3075,7 +3184,7 @@ function createQRCodeInvoiceHTML(invoice) {
                 <td>${charge.quantity || 1}</td>
                 <td>${displayStorageDays}</td>
                 <td>${(charge['rate-billed'] || 0).toFixed(2)}</td>
-                <td>${amountDisplay}</td>
+                <td>${formatNumberWithCommas(amountDisplay)}</td>
                 <td>${formattedChargeDate}</td>
             </tr>`;
         }
@@ -3194,10 +3303,10 @@ function createQRCodeInvoiceHTML(invoice) {
             </table>
             
             <div class="qr-summary">
-                <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>إجمالي المصاريف:</span><span>${totalChargesDisplay} ${displayCurrency}</span></div>
-                <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>إجمالي الضرائب:</span><span>${totalTaxesDisplay} ${displayCurrency}</span></div>
+                <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>إجمالي المصاريف:</span><span>${formatNumberWithCommas(totalChargesDisplay)} ${displayCurrency}</span></div>
+                <div style="display:flex; justify-content:space-between; padding:3px 0;"><span>إجمالي الضرائب:</span><span>${formatNumberWithCommas(totalTaxesDisplay)} ${displayCurrency}</span></div>
                 ${showMartyr ? `<div style="display:flex; justify-content:space-between; padding:3px 0;"><span>طابع الشهيد:</span><span>5 جنيه</span></div>` : ''}
-                <div style="display:flex; justify-content:space-between; padding:5px 0; font-weight:bold; color:#4361ee;"><span>الإجمالي النهائي:</span><span>${displayTotal} ${displayCurrency}</span></div>
+                <div style="display:flex; justify-content:space-between; padding:5px 0; font-weight:bold; color:#4361ee;"><span>الإجمالي النهائي:</span><span>${formatNumberWithCommas(displayTotal)} ${displayCurrency}</span></div>
             </div>
             
             <div class="qr-signature">
