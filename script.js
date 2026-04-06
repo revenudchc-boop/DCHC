@@ -18,7 +18,8 @@ const COMPANY_INFO = {
 // أنواع الفواتير
 const INVOICE_TYPES = {
     CASH: 'cash',
-    POSTPONED: 'postponed'
+    POSTPONED: 'postponed',
+	CREDIT: 'credit'
 };
 let currentInvoiceType = INVOICE_TYPES.CASH;
 
@@ -35,6 +36,20 @@ let exchangeRate = 48.0215;
 let expandedContainers = new Set();
 let db = null;
 let autoSaveEnabled = true;
+// أضف هذه الأسطر مع باقي المتغيرات العامة
+let currentDisplayType = 'invoice'; // 'invoice' أو 'credit'
+let currentCreditData = null; // تخزين بيانات إشعار الخصم الحالي
+// أضف هذا السطر مع المتغيرات العامة (قبل تعريف creditData)
+let currentCreditSerial = null;
+// بيانات إشعارات الخصم
+let creditData = [];
+let filteredCreditData = [];
+let currentCreditPage = 1;
+let itemsPerPageCredit = 25;
+let currentCreditSortField = 'date';
+let currentCreditSortOrder = 'desc';
+let viewModeCredit = 'cards';
+let selectedCreditNotes = new Set();
 
 // نظام المستخدمين
 let users = [];
@@ -49,7 +64,9 @@ let driveConfig = {
     fileId: '1xZSobMThbWKcZ53OmZEWlbn6mzz5Nsnr',
     usersFileName: 'users.json',
     usersFileId: '1-ktLLXz1Febs44lB-aqfuNmTRs1GNB0w',
-    logoFileId: '1DugYxs9a21e6J0ynTu6pE0yHXM2wRXSP'
+    logoFileId: '1DugYxs9a21e6J0ynTu6pE0yHXM2wRXSP',
+    creditFileName: 'creditdata.txt',                // ← تم التغيير
+    creditFileId: '1WU9R9Yby0_QoJeulIgYRuCQk9XV-N_e1' // ← تم الإضافة
 };
 
 // متغيرات التقارير
@@ -239,13 +256,30 @@ async function findUsersFileIdAuto() {
     } catch { return false; }
 }
 
+async function findCreditFileIdAuto() {
+    if (!driveConfig.apiKey || !driveConfig.folderId) return false;
+    const fileName = driveConfig.creditFileName || 'creditdata.txt';  // القيمة الافتراضية الجديدة
+    try {
+        const query = encodeURIComponent(`'${driveConfig.folderId}' in parents and name='${fileName}' and trashed=false`);
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&key=${driveConfig.apiKey}&fields=files(id,name)`);
+        if (!res.ok) return false;
+        const data = await res.json();
+        if (data.files?.length) {
+            driveConfig.creditFileId = data.files[0].id;
+            return true;
+        }
+        return false;
+    } catch { return false; }
+}
+
 async function autoConfigureDrive() {
     console.log('بدء الإعداد التلقائي لـ Drive...');
     showProgress('جاري إعداد Google Drive...', 20);
     const dataFound = await findDataFileIdAuto();
     const usersFound = await findUsersFileIdAuto();
-    if (dataFound || usersFound) saveDriveSettingsToStorage();
-    showProgress(dataFound || usersFound ? 'تم إعداد Drive' : 'استخدم الإعدادات الافتراضية', 100);
+    const creditFound = await findCreditFileIdAuto();   // إضافة هذا السطر
+    if (dataFound || usersFound || creditFound) saveDriveSettingsToStorage();
+    showProgress(dataFound || usersFound || creditFound ? 'تم إعداد Drive' : 'استخدم الإعدادات الافتراضية', 100);
     setTimeout(hideProgress, 1500);
 }
 
@@ -297,11 +331,11 @@ function loadUsersFromBackup() {
 
 function loadDefaultUsers() {
     users = [
-        { id: 'user_admin', username: 'admin', email: 'admin@dchc-egdam.com', taxNumber: 'ADMIN001', contractCustomerId: 'ADMIN001', userType: 'admin', password: 'admin123', status: 'active', createdAt: new Date().toISOString(), lastLogin: null },
-        { id: 'user_accountant', username: 'accountant', email: 'accountant@dchc-egdam.com', taxNumber: 'ACC001', contractCustomerId: 'ACC001', userType: 'accountant', password: 'acc123', status: 'active', createdAt: new Date().toISOString(), lastLogin: null },
-        { id: 'msc', username: 'msc', email: 'customer@example.com', taxNumber: '202487288', contractCustomerId: 'MSC', userType: 'customer', password: 'msc123', status: 'active', createdAt: new Date().toISOString(), lastLogin: null },
-        { id: 'one', username: 'one', email: 'accountant@dchc-egdam.com', taxNumber: '374380139', contractCustomerId: 'ONE', userType: 'accountant', password: 'one123', status: 'active', createdAt: new Date().toISOString(), lastLogin: null },
-        { id: 'zim', username: 'zim', email: 'zim@gmail.com', taxNumber: '123456789', contractCustomerId: 'zim', userType: 'customer', password: 'zim123', status: 'active', createdAt: new Date().toISOString(), lastLogin: null }
+        { id: 'user_admin', username: 'admin', email: 'admin@dchc-egdam.com', taxNumber: 'ADMIN001', contractCustomerId: 'ADMIN001', customerIds: [], userType: 'admin', password: 'admin123', status: 'active', createdAt: new Date().toISOString(), lastLogin: null },
+        { id: 'user_accountant', username: 'accountant', email: 'accountant@dchc-egdam.com', taxNumber: 'ACC001', contractCustomerId: 'ACC001', customerIds: [], userType: 'accountant', password: 'acc123', status: 'active', createdAt: new Date().toISOString(), lastLogin: null },
+        { id: 'msc', username: 'msc', email: 'customer@example.com', taxNumber: '202487288', contractCustomerId: 'MSC', customerIds: ['MSC', '202487288'], userType: 'customer', password: 'msc123', status: 'active', createdAt: new Date().toISOString(), lastLogin: null },
+        { id: 'one', username: 'one', email: 'accountant@dchc-egdam.com', taxNumber: '374380139', contractCustomerId: 'ONE', customerIds: ['ONE', '374380139'], userType: 'accountant', password: 'one123', status: 'active', createdAt: new Date().toISOString(), lastLogin: null },
+        { id: 'zim', username: 'zim', email: 'zim@gmail.com', taxNumber: '123456789', contractCustomerId: 'zim', customerIds: ['zim', '123456789'], userType: 'customer', password: 'zim123', status: 'active', createdAt: new Date().toISOString(), lastLogin: null }
     ];
     showNotification('تم استخدام المستخدمين الافتراضيين', 'warning');
 }
@@ -338,17 +372,23 @@ window.refreshUsersFromDrive = async function() {
 function renderUsersTable() {
     const tbody = document.getElementById('usersTableBody');
     if (!tbody) return;
-    tbody.innerHTML = users.map(u => `<tr>
-        <td>${u.username}</td><td>${u.email}</td><td>${u.taxNumber || '-'}</td><td>${u.contractCustomerId || '-'}</td>
-        <td>${{ admin: 'مدير', accountant: 'محاسب', customer: 'عميل' }[u.userType] || u.userType}</td>
-        <td><span class="status-badge ${u.status}">${u.status === 'active' ? 'نشط' : 'غير نشط'}</span></td>
-        <td>${u.lastLogin ? new Date(u.lastLogin).toLocaleString('ar-EG') : 'لم يسجل'}</td>
-        <td>
-            <button class="action-btn edit" onclick="editUser('${u.id}')"><i class="fas fa-edit"></i></button>
-            <button class="action-btn reset" onclick="resetUserPassword('${u.id}')"><i class="fas fa-key"></i></button>
-            <button class="action-btn delete" onclick="deleteUser('${u.id}')"><i class="fas fa-trash"></i></button>
-        </td>
-    </tr>`).join('');
+    tbody.innerHTML = users.map(u => `
+        <tr>
+            <td>${u.username}</td>
+            <td>${u.email}</td>
+            <td>${u.taxNumber || '-'}</td>
+            <td>${u.contractCustomerId || '-'}</td>
+            <td>${(u.customerIds || []).join(', ') || '-'}</td>
+            <td>${{ admin: 'مدير', accountant: 'محاسب', customer: 'عميل' }[u.userType] || u.userType}</td>
+            <td><span class="status-badge ${u.status}">${u.status === 'active' ? 'نشط' : 'غير نشط'}</span></td>
+            <td>${u.lastLogin ? new Date(u.lastLogin).toLocaleString('ar-EG') : 'لم يسجل'}</td>
+            <td>
+                <button class="action-btn edit" onclick="editUser('${u.id}')"><i class="fas fa-edit"></i></button>
+                <button class="action-btn reset" onclick="resetUserPassword('${u.id}')"><i class="fas fa-key"></i></button>
+                <button class="action-btn delete" onclick="deleteUser('${u.id}')"><i class="fas fa-trash"></i></button>
+            </td>
+        </tr>
+    `).join('');
 }
 
 window.showUserManagement = async function() {
@@ -367,7 +407,7 @@ window.showAddUserForm = function() {
     if (!currentUser || currentUser.userType !== 'admin') return alert('غير مصرح');
     currentEditingUserId = null;
     document.getElementById('userFormTitle').textContent = 'إضافة مستخدم جديد';
-    ['editUsername', 'editEmail', 'editTaxNumber', 'editContractCustomerId', 'editPassword'].forEach(id => document.getElementById(id).value = '');
+    ['editUsername', 'editEmail', 'editTaxNumber', 'editContractCustomerId', 'editPassword', 'editCustomerIds'].forEach(id => document.getElementById(id).value = '');
     document.getElementById('editUserType').value = 'customer';
     document.getElementById('editStatus').value = 'active';
     document.getElementById('userForm').style.display = 'block';
@@ -383,6 +423,7 @@ window.editUser = function(userId) {
     document.getElementById('editEmail').value = user.email;
     document.getElementById('editTaxNumber').value = user.taxNumber || '';
     document.getElementById('editContractCustomerId').value = user.contractCustomerId || '';
+    document.getElementById('editCustomerIds').value = (user.customerIds || []).join(', ');
     document.getElementById('editUserType').value = user.userType;
     document.getElementById('editPassword').value = '';
     document.getElementById('editStatus').value = user.status;
@@ -400,6 +441,7 @@ window.saveUserFromForm = async function() {
     const email = document.getElementById('editEmail').value.trim();
     const taxNumber = document.getElementById('editTaxNumber').value.trim();
     const contractCustomerId = document.getElementById('editContractCustomerId').value.trim();
+    const customerIdsRaw = document.getElementById('editCustomerIds').value.trim();
     const userType = document.getElementById('editUserType').value;
     const password = document.getElementById('editPassword').value;
     const status = document.getElementById('editStatus').value;
@@ -407,10 +449,35 @@ window.saveUserFromForm = async function() {
     if (!username || !email) return alert('الرجاء إدخال اسم المستخدم والبريد الإلكتروني');
     if (!currentEditingUserId && !password) return alert('الرجاء إدخال كلمة مرور');
 
+    // تحويل قائمة المعرفات إلى مصفوفة
+    let customerIds = [];
+    if (customerIdsRaw) {
+        customerIds = customerIdsRaw.split(',').map(id => id.trim()).filter(id => id !== '');
+    }
+    // إضافة contractCustomerId إلى القائمة إذا لم يكن موجوداً (للحفاظ على التوافق)
+    if (contractCustomerId && !customerIds.includes(contractCustomerId)) {
+        customerIds.push(contractCustomerId);
+    }
+
     if (currentEditingUserId) {
         const u = users.find(u => u.id === currentEditingUserId);
-        if (u) { u.username = username; u.email = email; u.taxNumber = taxNumber; u.contractCustomerId = contractCustomerId; u.userType = userType; if (password) u.password = password; u.status = status; }
-    } else users.push({ id: 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9), username, email, taxNumber, contractCustomerId, userType, password, status, createdAt: new Date().toISOString(), lastLogin: null });
+        if (u) { 
+            u.username = username; 
+            u.email = email; 
+            u.taxNumber = taxNumber; 
+            u.contractCustomerId = contractCustomerId; 
+            u.customerIds = customerIds;
+            u.userType = userType; 
+            if (password) u.password = password; 
+            u.status = status; 
+        }
+    } else {
+        users.push({ 
+            id: 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9), 
+            username, email, taxNumber, contractCustomerId, customerIds, userType, password, status, 
+            createdAt: new Date().toISOString(), lastLogin: null 
+        });
+    }
 
     const saved = await saveUsersToDrive();
     localStorage.setItem('backupUsers', JSON.stringify(users));
@@ -535,6 +602,9 @@ function updateUserInterface() {
     document.querySelector('label[for="fileInput"]').style.display = isAdmin ? 'inline-flex' : 'none';
     document.querySelector('.btn-drive').style.display = isAdmin ? 'inline-flex' : 'none';
     document.getElementById('dbControls').style.display = isAdmin ? 'flex' : 'none';
+
+    // ✅ بناء واجهة البحث المتقدم لكل المستخدمين (الدالة الداخلية ستقرر القائمة أو النص)
+    buildInvoiceSearchUI();
 }
 
 window.showChangePassword = function() {
@@ -679,10 +749,83 @@ function updateDataSource() {
 // ============================================
 // دوال التبديل بين أنواع الفواتير
 // ============================================
-window.switchInvoiceType = function(type) {
+// ============================================
+// دوال التبديل بين أنواع الفواتير
+// ============================================
+// ============================================
+// دوال التبديل بين أنواع الفواتير
+// ============================================
+window.switchInvoiceType = async function(type) {
+    console.log('التبويب المحدد:', type);
     currentInvoiceType = type;
-    document.querySelectorAll('.type-tab').forEach((btn, i) => btn.classList.toggle('active', (i === 0 && type === INVOICE_TYPES.CASH) || (i === 1 && type === INVOICE_TYPES.POSTPONED)));
-    filterInvoicesByUser();
+    
+    // تحديث مظهر الأزرار
+    document.querySelectorAll('.type-tab').forEach((btn, i) => {
+        if (type === INVOICE_TYPES.CASH && i === 0) btn.classList.add('active');
+        else if (type === INVOICE_TYPES.POSTPONED && i === 1) btn.classList.add('active');
+        else if (type === INVOICE_TYPES.CREDIT && i === 2) btn.classList.add('active');
+        else btn.classList.remove('active');
+    });
+
+    // ========== حالة إشعارات الخصم ==========
+    if (type === INVOICE_TYPES.CREDIT) {
+        // إخفاء عناصر الفواتير
+        const advancedSearch = document.querySelector('.advanced-search');
+        if (advancedSearch) advancedSearch.style.display = 'block'; // نجعله مرئياً لكن نغير محتواه
+        const fileLabel = document.querySelector('label[for="fileInput"]');
+        const driveBtn = document.querySelector('.btn-drive');
+        if (fileLabel) fileLabel.style.display = 'none';
+        if (driveBtn) driveBtn.style.display = 'none';
+        
+        // بناء واجهة البحث الخاصة بإشعارات الخصم
+        buildCreditSearchUI();
+        
+        // مزامنة وضع العرض
+        viewModeCredit = viewMode;
+        
+        // عرض رسالة تحميل
+        document.getElementById('dataViewContainer').innerHTML = '<div class="no-data"><i class="fas fa-spinner fa-spin"></i><p>جاري تحميل إشعارات الخصم...</p></div>';
+        document.getElementById('pagination').innerHTML = '';
+        
+        // تحميل البيانات إذا لزم الأمر
+        if (creditData.length === 0) {
+            const success = await loadCreditDataFromDrive();
+            if (success) {
+                filterCreditData();
+            } else {
+                document.getElementById('dataViewContainer').innerHTML = '<div class="no-data"><i class="fas fa-exclamation-triangle"></i><p>فشل تحميل إشعارات الخصم. تأكد من اتصال Drive ووجود الملف.</p></div>';
+                updateCreditSummary();
+            }
+        } else {
+            filterCreditData();
+        }
+    } 
+    // ========== حالة الفواتير (نقدي/آجل) ==========
+    else {
+        // إظهار عناصر الفواتير
+        const advancedSearch = document.querySelector('.advanced-search');
+        if (advancedSearch) advancedSearch.style.display = 'block';
+        
+        // بناء واجهة البحث الخاصة بالفواتير
+        buildInvoiceSearchUI();
+        
+        // إظهار أزرار رفع الملفات للمدير فقط
+        if (currentUser?.userType === 'admin') {
+            const fileLabel = document.querySelector('label[for="fileInput"]');
+            const driveBtn = document.querySelector('.btn-drive');
+            if (fileLabel) fileLabel.style.display = 'inline-flex';
+            if (driveBtn) driveBtn.style.display = 'inline-flex';
+        } else {
+            const fileLabel = document.querySelector('label[for="fileInput"]');
+            const driveBtn = document.querySelector('.btn-drive');
+            if (fileLabel) fileLabel.style.display = 'none';
+            if (driveBtn) driveBtn.style.display = 'none';
+        }
+        
+        // إعادة تعيين الصفحة وعرض البيانات
+        currentPage = 1;
+        filterInvoicesByUser();
+    }
 };
 
 // ============================================
@@ -902,14 +1045,118 @@ function parseInvoiceNode(invoice) {
     }
 }
 
+function parseCreditNode(creditElement) {
+    try {
+        // قراءة السمات الأساسية
+        const customer = creditElement.getAttribute('customer-name') || '';
+        const customerId = creditElement.getAttribute('customer-id') || '';
+        const draftNumber = creditElement.getAttribute('draft-number') || '';
+        const finalNumber = creditElement.getAttribute('final-number') || '';
+        
+        // قراءة رقم الفاتورة الأصلية (قد يكون في credit أو في credit-item)
+        let invoiceFinalNumber = creditElement.getAttribute('invoice-final-number') || '';
+        if (!invoiceFinalNumber) {
+            const firstItem = creditElement.querySelector('credit-item');
+            if (firstItem) {
+                invoiceFinalNumber = firstItem.getAttribute('invoice-final-number') || '';
+            }
+        }
+        
+        const date = creditElement.getAttribute('date') || '';
+        const currency = creditElement.getAttribute('currency') || 'EGP';
+        const totalCredit = parseFloat(creditElement.getAttribute('total-credit') || 0);
+        const totalTaxCredit = parseFloat(creditElement.getAttribute('total-tax-credit') || 0);
+        const status = creditElement.getAttribute('status') || '';
+        const notes = creditElement.getAttribute('notes') || '';
+
+        // قراءة سعر الصرف
+        let exchangeRate = null;
+        const creditExchangeRate = creditElement.getAttribute('exchange-rate');
+        if (creditExchangeRate && creditExchangeRate !== 'N/A' && !isNaN(parseFloat(creditExchangeRate))) {
+            exchangeRate = parseFloat(creditExchangeRate);
+        } else {
+            const firstCreditItem = creditElement.querySelector('credit-item');
+            if (firstCreditItem) {
+                const itemRate = firstCreditItem.getAttribute('exchange-rate');
+                if (itemRate && itemRate !== 'N/A' && !isNaN(parseFloat(itemRate))) {
+                    exchangeRate = parseFloat(itemRate);
+                }
+            }
+        }
+        if (exchangeRate === null) exchangeRate = 1;
+
+        // حساب المبلغ والضريبة بعد سعر الصرف (للعرض فقط)
+        let displayTotalCredit = totalCredit;
+        let displayTotalTax = totalTaxCredit;
+        if (currency === 'USAD' && exchangeRate !== 1 && exchangeRate !== 0) {
+            displayTotalCredit = totalCredit / exchangeRate;
+            displayTotalTax = totalTaxCredit / exchangeRate;
+        }
+
+        const serial = draftNumber || finalNumber || (Math.random().toString(36).substr(2, 8));
+
+        // تجميع البنود
+        const items = [];
+        const creditItems = creditElement.getElementsByTagName('credit-item');
+        for (let j = 0; j < creditItems.length; j++) {
+            const item = creditItems[j];
+            let amountCredited = parseFloat(item.getAttribute('amount-credited') || 0);
+            let taxCredited = parseFloat(item.getAttribute('tax-credited') || 0);
+            let displayAmount = amountCredited;
+            let displayTax = taxCredited;
+            if (currency === 'USAD' && exchangeRate !== 1 && exchangeRate !== 0) {
+                displayAmount = amountCredited / exchangeRate;
+                displayTax = taxCredited / exchangeRate;
+            }
+            items.push({
+                amountCredited: amountCredited,
+                quantity: parseFloat(item.getAttribute('quantity') || 0),
+                rateCredited: parseFloat(item.getAttribute('rate-credited') || 0),
+                exchangeRate: exchangeRate,
+                invoiceDraftNumber: item.getAttribute('invoice-draft-number') || '',
+                invoiceFinalNumber: item.getAttribute('invoice-final-number') || '',
+                taxCredited: taxCredited,
+                displayAmount: displayAmount,
+                displayTax: displayTax
+            });
+        }
+
+        return {
+            serial: serial,
+            customer: customer,
+            customerId: customerId,
+            draftNumber: draftNumber,
+            finalNumber: finalNumber,
+            invoiceFinalNumber: invoiceFinalNumber,
+            date: date ? date.split('T')[0] : '',
+            currency: currency,
+            amount: totalCredit,
+            displayAmount: displayTotalCredit,
+            tax: totalTaxCredit,
+            displayTax: displayTotalTax,
+            exchangeRate: exchangeRate,
+            status: status,
+            notes: notes,
+            items: items,
+            preparedBy: 'النظام',
+            reviewedBy: 'النظام'
+        };
+    } catch (error) {
+        console.error('خطأ في تحليل عنصر credit:', error);
+        return null;
+    }
+}
+
 // ============================================
 // دوال البحث المتقدم - معدلة لاستخدام finalized-date
 // ============================================
 window.applyAdvancedSearch = function() {
     if (!invoicesData.length) { filteredInvoices = []; renderData(); return; }
     
-    const [final, draft, cust, vessel, bl, cont, status, from, to, invType] = [
-        'searchFinalNumber', 'searchDraftNumber', 'searchCustomer', 'searchVessel', 'searchBlNumber', 'searchContainer', 'searchStatus', 'searchDateFrom', 'searchDateTo', 'searchInvoiceType'
+    const [final, draft, cust, vessel, bl, cont, status, from, to, invType, contractCustomerId] = [
+        'searchFinalNumber', 'searchDraftNumber', 'searchCustomer', 'searchVessel', 
+        'searchBlNumber', 'searchContainer', 'searchStatus', 'searchDateFrom', 
+        'searchDateTo', 'searchInvoiceType', 'searchContractCustomerId'
     ].map(id => document.getElementById(id)?.value.toLowerCase().trim() || '');
 
     let tempInvoices = [...invoicesData];
@@ -928,27 +1175,41 @@ window.applyAdvancedSearch = function() {
             if (blNumber) match = match && (inv['key-word2'] || '').toLowerCase().includes(blNumber.toLowerCase());
             return match;
         });
-    } else if (currentUser && currentUser.userType !== 'admin' && !currentUser.isGuest) {
-        const tax = currentUser.taxNumber || '';
-        const contractId = currentUser.contractCustomerId || '';
-        tempInvoices = tempInvoices.filter(inv => {
-            const num = inv['final-number'] || '';
-            const isPostponed = num.startsWith('P') || num.startsWith('p');
-            if (isPostponed) return contractId && (inv['contract-customer-id'] || '').trim().toLowerCase() === contractId.trim().toLowerCase();
-            else return (inv['payee-customer-id'] || '').toLowerCase().includes(tax.toLowerCase()) || (inv['contract-customer-id'] || '').toLowerCase().includes(tax.toLowerCase());
-        });
+    } 
+    else if (currentUser && currentUser.userType !== 'admin' && !currentUser.isGuest) {
+        let allowedIds = [];
+        if (currentUser.contractCustomerId) allowedIds.push(currentUser.contractCustomerId);
+        if (currentUser.customerIds && Array.isArray(currentUser.customerIds)) {
+            allowedIds = allowedIds.concat(currentUser.customerIds);
+        }
+        allowedIds = [...new Set(allowedIds.map(id => id.toLowerCase()))];
+        
+        if (allowedIds.length === 0) {
+            tempInvoices = [];
+        } else {
+            tempInvoices = tempInvoices.filter(inv => {
+                const payeeId = (inv['payee-customer-id'] || '').toLowerCase();
+                const contractId = (inv['contract-customer-id'] || '').toLowerCase();
+                return allowedIds.some(id => payeeId === id || contractId === id);
+            });
+        }
     }
 
     const searched = tempInvoices.filter(inv => {
         if (final && !(inv['final-number'] || '').toLowerCase().includes(final)) return false;
         if (draft && !(inv['draft-number'] || '').toLowerCase().includes(draft)) return false;
-        if (cust && !(inv['payee-customer-id'] || '').toLowerCase().includes(cust)) return false;
+        if (cust) {
+            const payeeMatch = (inv['payee-customer-id'] || '').toLowerCase().includes(cust);
+            const contractMatch = (inv['contract-customer-id'] || '').toLowerCase().includes(cust);
+            if (!payeeMatch && !contractMatch) return false;
+        }
         if (vessel && !(inv['key-word1'] || '').toLowerCase().includes(vessel)) return false;
         if (bl && !(inv['key-word2'] || '').toLowerCase().includes(bl)) return false;
         if (cont) {
             const found = inv.charges.some(c => (c['entity-id'] || '').toLowerCase().includes(cont));
             if (!found) return false;
         }
+        if (contractCustomerId && !(inv['contract-customer-id'] || '').toLowerCase().includes(contractCustomerId)) return false;
         if (status && inv['status'] !== status) return false;
         if (invType) {
             const num = inv['final-number'] || '';
@@ -959,7 +1220,6 @@ window.applyAdvancedSearch = function() {
             const invDateStr = inv['finalized-date'] || inv['created'] || '';
             const invDate = new Date(invDateStr);
             if (isNaN(invDate)) return true;
-            
             if (from) {
                 const fromDate = new Date(from);
                 fromDate.setHours(0, 0, 0, 0);
@@ -982,8 +1242,19 @@ window.applyAdvancedSearch = function() {
 };
 
 window.resetAdvancedSearch = function() {
-    ['searchFinalNumber', 'searchDraftNumber', 'searchCustomer', 'searchVessel', 'searchBlNumber', 'searchContainer', 'searchStatus', 'searchDateFrom', 'searchDateTo', 'searchInvoiceType']
-        .forEach(id => document.getElementById(id).value = '');
+    const searchFields = ['searchFinalNumber', 'searchDraftNumber', 'searchCustomer', 'searchVessel', 
+                          'searchBlNumber', 'searchContainer', 'searchStatus', 'searchDateFrom', 
+                          'searchDateTo', 'searchInvoiceType', 'searchContractCustomerId'];
+    searchFields.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) {
+            if (el.tagName === 'SELECT') {
+                el.value = '';
+            } else {
+                el.value = '';
+            }
+        }
+    });
     currentUser?.isGuest ? filterInvoicesByGuest(currentUser.taxNumber, currentUser.blNumber) : filterInvoicesByUser();
     clearSelectedInvoices();
     showNotification('تم إعادة ضبط البحث', 'info');
@@ -999,16 +1270,34 @@ function filterInvoicesByUser() {
     if (currentUser?.isGuest) return filterInvoicesByGuest(currentUser.taxNumber, currentUser.blNumber);
 
     if (currentUser && currentUser.userType !== 'admin' && !currentUser.isGuest) {
-        const tax = currentUser.taxNumber || '';
-        const contractId = currentUser.contractCustomerId || '';
+        // تجميع جميع المعرفات المرتبطة بالمستخدم
+        let allowedIds = [];
+        if (currentUser.contractCustomerId) allowedIds.push(currentUser.contractCustomerId);
+        if (currentUser.customerIds && Array.isArray(currentUser.customerIds)) {
+            allowedIds = allowedIds.concat(currentUser.customerIds);
+        }
+        // إزالة التكرار
+        allowedIds = [...new Set(allowedIds)];
+
+        if (allowedIds.length === 0) {
+            // إذا لم توجد معرفات، لا نعرض شيئاً
+            filteredInvoices = [];
+            renderData();
+            return;
+        }
+
         temp = temp.filter(inv => {
-            const num = inv['final-number'] || '';
-            const isPostponed = num.startsWith('P') || num.startsWith('p');
-            if (isPostponed) return contractId && (inv['contract-customer-id'] || '').trim().toLowerCase() === contractId.trim().toLowerCase();
-            else return (inv['payee-customer-id'] || '').toLowerCase().includes(tax.toLowerCase()) || (inv['contract-customer-id'] || '').toLowerCase().includes(tax.toLowerCase());
+            const payeeId = inv['payee-customer-id'] || '';
+            const contractId = inv['contract-customer-id'] || '';
+            // التحقق مما إذا كان أي من معرفات الفاتورة موجوداً في القائمة المسموحة
+            return allowedIds.some(id => 
+                payeeId.toLowerCase() === id.toLowerCase() || 
+                contractId.toLowerCase() === id.toLowerCase()
+            );
         });
     }
 
+    // تصفية حسب نوع الفاتورة (نقدي/آجل)
     temp = temp.filter(inv => {
         const num = inv['final-number'] || '';
         return currentInvoiceType === INVOICE_TYPES.CASH ? (num.startsWith('C') || num.startsWith('c')) : (num.startsWith('P') || num.startsWith('p'));
@@ -1047,6 +1336,11 @@ function filterInvoicesByGuest(taxNumber, blNumber) {
 }
 
 function renderData() {
+    // تأكد من أن showInvoiceDetails معرفة
+    if (typeof showInvoiceDetails !== 'function') {
+        console.error('showInvoiceDetails is not defined!');
+        return;
+    }
     if (filteredInvoices.length === 0) {
         document.getElementById('dataViewContainer').innerHTML = '<div class="no-data"><i class="fas fa-inbox fa-3x"></i><p>لا توجد بيانات للعرض</p></div>';
         updateSummary();
@@ -1072,6 +1366,10 @@ function renderCardsView(data) {
     let html = '<div class="cards-container">';
     data.forEach(inv => {
         const idx = invoicesData.indexOf(inv);
+        if (idx === -1) {
+            console.warn('فاتورة غير موجودة في invoicesData:', inv);
+            return;
+        }
         const voyageDate = inv['flex-date-02'] ? new Date(inv['flex-date-02']).toLocaleDateString('ar-EG') : 'غير محدد';
         const finalNum = inv['final-number'] || '';
         const invoiceTypeDisplay = finalNum.startsWith('P') || finalNum.startsWith('p') ? 'أجل' : 'نقدي';
@@ -1079,20 +1377,16 @@ function renderCardsView(data) {
         const exRate = inv['flex-string-06'] || 48.0215;
         const totalOriginal = inv['total-total'] || 0;
         let displayAmount, displayCurrency;
-        
-        if (currency === 'USAD') { 
-            displayAmount = (totalOriginal / exRate).toFixed(2); 
-            displayCurrency = 'USAD'; 
-        } else { 
-            displayAmount = totalOriginal.toFixed(2); 
-            displayCurrency = 'EGP'; 
+        if (currency === 'USAD') {
+            displayAmount = (totalOriginal / exRate).toFixed(2);
+            displayCurrency = 'USAD';
+        } else {
+            displayAmount = totalOriginal.toFixed(2);
+            displayCurrency = 'EGP';
         }
-        
-        // تنسيق المبلغ مع فواصل الألف
         const formattedDisplayAmount = formatNumberWithCommas(displayAmount);
-        
         html += `
-            <div class="invoice-card" onclick="showInvoiceDetails(${idx})" style="cursor: pointer;">
+            <div class="invoice-card" onclick="window.showInvoiceDetails(${idx})" style="cursor: pointer;">
                 <div class="card-header">
                     <h3>${inv['final-number'] || '-'} <span style="font-size:0.7em; background:rgba(255,255,255,0.2); padding:2px 6px; border-radius:4px;">${currency}</span></h3>
                     <span class="card-badge">${invoiceTypeDisplay}</span>
@@ -1169,22 +1463,53 @@ window.toggleSortOrder = function() {
     const icon = document.querySelector('#sortToggle i');
     if (icon) icon.className = sortOrder === 'asc' ? 'fas fa-sort-amount-down-alt' : 'fas fa-sort-amount-up-alt';
     clearSelectedInvoices();
-    renderData();
+    
+    if (currentInvoiceType === INVOICE_TYPES.CREDIT) {
+        currentCreditSortOrder = sortOrder;
+        renderCreditData();
+    } else {
+        renderData();
+    }
 };
 
 window.changeItemsPerPage = function() {
     const select = document.getElementById('itemsPerPage');
-    itemsPerPage = select.value === 'all' ? Infinity : parseInt(select.value);
+    const newValue = select.value === 'all' ? Infinity : parseInt(select.value);
+    itemsPerPage = newValue;
     currentPage = 1;
     clearSelectedInvoices();
-    renderData();
+    
+    if (currentInvoiceType === INVOICE_TYPES.CREDIT) {
+        itemsPerPageCredit = newValue;
+        currentCreditPage = 1;
+        renderCreditData();
+    } else {
+        renderData();
+    }
 };
 
 window.setViewMode = function(mode) {
+    // تحديث كلا المتغيرين
     viewMode = mode;
+    viewModeCredit = mode;
+    
     clearSelectedInvoices();
-    document.querySelectorAll('.btn-view').forEach((btn, i) => btn.classList.toggle('active', (i === 0 && mode === 'table') || (i === 1 && mode === 'cards')));
-    renderData();
+    
+    // تحديث مظهر الأزرار
+    document.querySelectorAll('.btn-view').forEach((btn, i) => {
+        if ((i === 0 && mode === 'table') || (i === 1 && mode === 'cards')) {
+            btn.classList.add('active');
+        } else {
+            btn.classList.remove('active');
+        }
+    });
+    
+    // إعادة العرض حسب النوع الحالي
+    if (currentInvoiceType === INVOICE_TYPES.CREDIT) {
+        renderCreditData();  // ستستخدم viewModeCredit الجديدة
+    } else {
+        renderData();       // ستستخدم viewMode الجديدة
+    }
 };
 
 window.toggleAdvancedSearch = function() {
@@ -1256,8 +1581,9 @@ window.changePage = function(page) {
 // دوال التحكم في التحديد
 // ============================================
 window.handleRowClick = function(index, event) {
+    console.log('handleRowClick called with index:', index);
     if (event.target.type === 'checkbox') return;
-    showInvoiceDetails(index);
+    window.showInvoiceDetails(index);
 };
 
 window.updateSelectedInvoices = function(index, isSelected) {
@@ -1716,6 +2042,14 @@ async function exportSingleInvoice() {
         return;
     }
     
+    // ✅ الحصول على رقم الفاتورة من البيانات المخزنة
+    const inv = invoicesData[selectedInvoiceIndex];
+    if (!inv) {
+        showNotification('لا توجد بيانات للفاتورة', 'error');
+        return;
+    }
+    const invoiceNumber = inv['final-number'] || 'فاتورة';
+    
     const loading = document.createElement('div');
     loading.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#4361ee;color:white;padding:15px 30px;border-radius:8px;z-index:10000;';
     loading.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري إنشاء PDF...';
@@ -1732,7 +2066,6 @@ async function exportSingleInvoice() {
         });
         
         const imgData = canvas.toDataURL('image/jpeg', 0.85);
-        
         const { jsPDF } = window.jspdf;
         const pdf = new jsPDF({
             orientation: 'portrait',
@@ -1745,10 +2078,9 @@ async function exportSingleInvoice() {
         const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
         
         pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
-        pdf.save(`فاتورة-${document.getElementById('modalInvoiceNumber').textContent}.pdf`);
+        pdf.save(`فاتورة-${invoiceNumber}.pdf`);
         
         showNotification('تم التصدير بنجاح', 'success');
-        
     } catch (error) {
         console.error('خطأ في إنشاء PDF:', error);
         showNotification('حدث خطأ في إنشاء PDF: ' + error.message, 'error');
@@ -1846,6 +2178,10 @@ async function exportMultipleInvoices(indices) {
 }
 
 window.exportInvoicePDF = function() {
+    if (currentDisplayType === 'credit') {
+        window.exportCreditNotePDF();
+        return;
+    }
     exportSingleInvoice();
 };
 
@@ -1853,8 +2189,13 @@ window.exportInvoicePDF = function() {
 // دوال الفاتورة والنموذج الفرعي - مع صورة الشعار المحسنة
 // ============================================
 window.showInvoiceDetails = function(index) {
-    if (index < 0 || index >= invoicesData.length) return;
+    console.log('showInvoiceDetails called with index:', index);
+    if (index < 0 || index >= invoicesData.length) {
+        console.error('Index out of range!');
+        return;
+    }
     selectedInvoiceIndex = index;
+	currentDisplayType = 'invoice';
     const inv = invoicesData[index];
     const finalNum = inv['final-number'] || '';
     const isPostponed = finalNum.startsWith('P') || finalNum.startsWith('p');
@@ -1874,8 +2215,15 @@ window.showInvoiceDetails = function(index) {
         }
     }
 
-    document.getElementById('modalInvoiceNumber').textContent = inv['final-number'] || 'غير محدد';
-    
+// تعيين رقم الفاتورة مباشرة في عنوان النافذة (يتجنب مشكلة اختفاء span)
+const modalTitle = document.getElementById('modalTitle');
+if (modalTitle) {
+    modalTitle.innerHTML = `فاتورة رقم: ${inv['final-number'] || 'غير محدد'}`;
+} else {
+    console.error('❌ العنصر modalTitle غير موجود في DOM');
+    showNotification('خطأ في عرض الفاتورة', 'error');
+    return;
+}  
     // استخدام finalized-date بدلاً من created
     const invoiceDate = inv['finalized-date'] || inv['created'] || '';
     const formattedDate = invoiceDate ? new Date(invoiceDate).toLocaleDateString('ar-EG', { year: 'numeric', month: 'long', day: 'numeric' }) : 'غير محدد';
@@ -2398,21 +2746,20 @@ window.toggleContainers = function(index) {
 
 // دالة الطباعة المعدلة
 window.printInvoice = function() {
+    if (currentDisplayType === 'credit') {
+        printCreditNote();
+        return;
+    }
+    // الكود الأصلي لطباعة الفاتورة
     const content = document.getElementById('invoicePrint');
     if (!content) return alert('لا توجد فاتورة للطباعة');
     
-    // الحصول على رقم الفاتورة لإنشاء QR code
     const inv = invoicesData[selectedInvoiceIndex];
     const invoiceNumber = inv['final-number'] || '';
     const draftNumber = inv['draft-number'] || '';
     
-    // إنشاء نافذة الطباعة
     const printWindow = window.open('', '_blank', 'width=1200,height=800');
-    
-    // نسخ محتوى الفاتورة
     const contentHTML = content.outerHTML;
-    
-    // إنشاء QR code في النافذة الجديدة
     const qrContainerId = `qrcode-container-${invoiceNumber}`;
     
     // استايلات محسنة للطباعة
@@ -2548,6 +2895,32 @@ window.printInvoice = function() {
             }
         </style>
     `;
+		
+
+function printCreditNote() {
+    if (!currentCreditSerial && !currentCreditData) {
+        showNotification('لا توجد بيانات للطباعة', 'error');
+        return;
+    }
+    
+    const item = currentCreditData || creditData.find(d => d.serial == currentCreditSerial);
+    if (!item) {
+        showNotification('لا توجد بيانات للإشعار', 'error');
+        return;
+    }
+    
+    const printWindow = window.open('', '_blank', 'width=1100,height=800');
+    const printHtml = generateCreditPrintHTML(item);
+    
+    printWindow.document.write(printHtml);
+    printWindow.document.close();
+    printWindow.focus();
+    
+    setTimeout(() => {
+        printWindow.print();
+    }, 500);
+}
+
 
     // كتابة محتوى نافذة الطباعة مع تضمين مكتبة QR Code
     printWindow.document.write(`
@@ -2620,7 +2993,11 @@ window.printInvoice = function() {
 };
 
 window.exportInvoiceExcel = function() {
-    const inv = invoicesData[selectedInvoiceIndex];
+     if (currentDisplayType === 'credit') {
+        exportCreditNoteExcel();
+        return;
+    }
+	const inv = invoicesData[selectedInvoiceIndex];
     if (!inv) return;
     const exRate = inv['flex-string-06'] || 48.0215;
     const martyr = 5;
@@ -2691,26 +3068,37 @@ function renderTableView(data) {
                 </div>
             </div>
             <table class="data-table">
-                <thead><tr>
-                    <th style="width:40px;"><input type="checkbox" onclick="toggleAllCheckboxes(this)" id="selectAllCheckbox"></th>
-                    <th>الرقم النهائي</th><th>رقم المسودة</th><th>العميل</th><th>السفينة</th><th>${currentInvoiceType === INVOICE_TYPES.POSTPONED ? 'IB ID / OB ID' : 'رقم البوليصة'}</th><th>تاريخ الرحله</th><th>الإجمالي (EGP)</th><th>المبلغ بالعملة</th>
-                </tr></thead>
+                <thead>
+                    <tr>
+                        <th style="width:40px;"><input type="checkbox" onclick="toggleAllCheckboxes(this)" id="selectAllCheckbox"></th>
+                        <th>الرقم النهائي</th><th>رقم المسودة</th><th>العميل</th><th>السفينة</th><th>${currentInvoiceType === INVOICE_TYPES.POSTPONED ? 'IB ID / OB ID' : 'رقم البوليصة'}</th><th>تاريخ الرحله</th><th>الإجمالي (EGP)</th><th>المبلغ بالعملة</th>
+                    </tr>
+                </thead>
                 <tbody>`;
     
     data.forEach(inv => {
         const idx = invoicesData.indexOf(inv);
+        if (idx === -1) {
+            console.warn('فاتورة غير موجودة في invoicesData:', inv);
+            return;
+        }
         const finalNum = inv['final-number'] || '';
         const invoiceTypeDisplay = finalNum.startsWith('P') || finalNum.startsWith('p') ? 'أجل' : 'نقدي';
         const currency = inv['currency'] || 'EGP';
         const exRate = inv['flex-string-06'] || 48.0215;
         const totalOriginal = inv['total-total'] || 0;
         let displayAmount, displayCurrency;
-        if (currency === 'USAD') { displayAmount = (totalOriginal / exRate).toFixed(2); displayCurrency = 'USAD'; }
-        else { displayAmount = totalOriginal.toFixed(2); displayCurrency = 'EGP'; }
+        if (currency === 'USAD') {
+            displayAmount = (totalOriginal / exRate).toFixed(2);
+            displayCurrency = 'USAD';
+        } else {
+            displayAmount = totalOriginal.toFixed(2);
+            displayCurrency = 'EGP';
+        }
         const isSelected = selectedInvoices.has(idx) ? 'checked' : '';
         const selectedClass = isSelected ? 'selected-row' : '';
         
-        html += `<tr onclick="handleRowClick(${idx}, event)" class="${selectedClass}" data-index="${idx}">
+        html += `<tr onclick="window.handleRowClick(${idx}, event)" class="${selectedClass}" data-index="${idx}">
             <td onclick="event.stopPropagation()"><input type="checkbox" class="invoice-checkbox" data-index="${idx}" ${isSelected} onchange="updateSelectedInvoices(${idx}, this.checked)"></td>
             <td>${inv['final-number'] || '-'} (${invoiceTypeDisplay})</td>
             <td>${inv['draft-number'] || '-'}</td>
@@ -2870,10 +3258,45 @@ window.exportReportExcel = function() {
 // ============================================
 function loadDriveSettings() {
     const saved = localStorage.getItem('driveConfig');
-    if (saved) try { driveConfig = { ...driveConfig, ...JSON.parse(saved) }; } catch { }
-    ['driveApiKey','driveFolderId','driveFileName','driveFileId','driveUsersFileName','driveUsersFileId','logoFileId'].forEach(id => {
+    if (saved) {
+        try {
+            const parsed = JSON.parse(saved);
+            
+            // 🔧 تصحيح القيم القدئة لملف إشعارات الخصم
+            if (parsed.creditFileName === 'credit_data.txt') {
+                parsed.creditFileName = 'creditdata.txt';
+                parsed.creditFileId = '1WU9R9Yby0_QoJeulIgYRuCQk9XV-N_e1';
+                // حفظ التصحيح في localStorage
+                localStorage.setItem('driveConfig', JSON.stringify(parsed));
+            }
+            // إذا كان المعرف فارغاً والاسم صحيحاً، ضع المعرف الافتراضي
+            if (parsed.creditFileName === 'creditdata.txt' && !parsed.creditFileId) {
+                parsed.creditFileId = '1WU9R9Yby0_QoJeulIgYRuCQk9XV-N_e1';
+                localStorage.setItem('driveConfig', JSON.stringify(parsed));
+            }
+            
+            driveConfig = { ...driveConfig, ...parsed };
+        } catch(e) {
+            console.error('خطأ في تحميل إعدادات Drive:', e);
+        }
+    }
+    
+    // تعبئة الحقول في نافذة الإعدادات إذا كانت مفتوحة (أو لأي استخدام لاحق)
+    const fields = [
+        'driveApiKey', 'driveFolderId', 'driveFileName', 'driveFileId',
+        'driveUsersFileName', 'driveUsersFileId', 'logoFileId',
+        'driveCreditFileName', 'driveCreditFileId'
+    ];
+    
+    fields.forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.value = driveConfig[id.replace('drive','').charAt(0).toLowerCase() + id.replace('drive','').slice(1)] || '';
+        if (el) {
+            // تحويل id مثل 'driveApiKey' إلى 'apiKey'
+            let key = id.replace('drive', '');
+            key = key.charAt(0).toLowerCase() + key.slice(1);
+            let value = driveConfig[key] || '';
+            el.value = value;
+        }
     });
 }
 
@@ -2897,7 +3320,9 @@ window.saveDriveSettings = function() {
         fileId: document.getElementById('driveFileId').value.trim(),
         usersFileName: document.getElementById('driveUsersFileName').value.trim() || 'users.json',
         usersFileId: document.getElementById('driveUsersFileId').value.trim(),
-        logoFileId: document.getElementById('logoFileId').value.trim() || '1DugYxs9a21e6J0ynTu6pE0yHXM2wRXSP'
+        logoFileId: document.getElementById('logoFileId').value.trim() || '1DugYxs9a21e6J0ynTu6pE0yHXM2wRXSP',
+        creditFileName: document.getElementById('driveCreditFileName').value.trim() || 'credit_data.txt',
+        creditFileId: document.getElementById('driveCreditFileId').value.trim()
     };
     saveDriveSettingsToStorage();
     const d = document.getElementById('driveMessage');
@@ -2936,6 +3361,15 @@ window.selectDataFile = function(fileId, fileName) {
     document.getElementById('driveFileName').value = fileName;
     driveConfig.fileId = fileId; driveConfig.fileName = fileName;
     document.getElementById('driveTestResult').innerHTML = `✅ تم اختيار ملف البيانات: <strong>${fileName}</strong><br>المعرف: ${fileId}`;
+};
+
+window.selectCreditFile = function(fileId, fileName) {
+    if (!currentUser || currentUser.userType !== 'admin') return showNotification('غير مصرح', 'error');
+    document.getElementById('driveCreditFileId').value = fileId;
+    document.getElementById('driveCreditFileName').value = fileName;
+    driveConfig.creditFileId = fileId;
+    driveConfig.creditFileName = fileName;
+    document.getElementById('driveTestResult').innerHTML = `✅ تم اختيار ملف إشعارات الخصم: <strong>${fileName}</strong><br>المعرف: ${fileId}`;
 };
 
 window.selectUsersFile = function(fileId, fileName) {
@@ -2989,6 +3423,861 @@ function startPeriodicUserUpdate() {
         if (currentUser?.userType === 'admin') await loadUsersFromDrive();
     }, 5 * 60 * 1000);
 }
+
+async function loadCreditDataFromDrive() {
+    if (!driveConfig.apiKey || !driveConfig.folderId) return false;
+    let fileId = driveConfig.creditFileId;
+    if (!fileId && driveConfig.creditFileName) {
+        try {
+            const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(`'${driveConfig.folderId}' in parents and name='${driveConfig.creditFileName}'`)}&key=${driveConfig.apiKey}&fields=files(id,name)`);
+            if (!res.ok) throw new Error('فشل البحث عن ملف الخصم');
+            const data = await res.json();
+            if (!data.files?.length) return false;
+            fileId = data.files[0].id;
+            driveConfig.creditFileId = fileId;
+            if (currentUser?.userType === 'admin') saveDriveSettingsToStorage();
+        } catch { return false; }
+    } else if (!fileId) return false;
+
+    try {
+        showProgress('جاري تحميل إشعارات الخصم...', 30);
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${driveConfig.apiKey}`);
+        if (!res.ok) throw new Error('فشل تحميل ملف الخصم');
+        const content = await res.text();
+        showProgress('جاري تحليل البيانات...', 60);
+        
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(content, "text/xml");
+        const parseError = xmlDoc.querySelector('parsererror');
+        let newCredits = [];
+
+        if (parseError) {
+            const matches = content.match(/<credit[\s\S]*?<\/credit>/g);
+            if (!matches?.length) throw new Error('لا توجد إشعارات خصم');
+            const wrapped = parser.parseFromString(`<root>${matches.join('')}</root>`, 'text/xml');
+            const nodes = wrapped.querySelectorAll('credit');
+            for (let i = 0; i < nodes.length; i++) {
+                const credit = parseCreditNode(nodes[i]);
+                if (credit) newCredits.push(credit);
+            }
+        } else {
+            const nodes = xmlDoc.getElementsByTagName('credit');
+            for (let i = 0; i < nodes.length; i++) {
+                const credit = parseCreditNode(nodes[i]);
+                if (credit) newCredits.push(credit);
+            }
+        }
+
+        if (!newCredits.length) throw new Error('لا توجد إشعارات خصم صالحة');
+        
+        // ✅ حفظ البيانات وتطبيق التصفية
+        creditData = newCredits;
+        console.log('✅ loadCreditDataFromDrive: تم تحميل', creditData.length, 'إشعار خصم');
+        showProgress('تم التحميل', 100);
+        
+        // تطبيق صلاحيات المستخدم على البيانات فوراً
+        filterCreditData();
+        
+        return true;
+        
+    } catch (error) {
+        console.error('❌ خطأ في loadCreditDataFromDrive:', error);
+        showNotification(`❌ خطأ في تحميل إشعارات الخصم: ${error.message}`, 'error');
+        return false;
+    } finally {
+        setTimeout(hideProgress, 1500);
+    }
+}
+
+function parseCreditData(content) {
+    console.log('بدء تحليل بيانات الخصم (XML)...');
+    
+    // أولاً: محاولة التحليل عبر DOMParser
+    const parser = new DOMParser();
+    const xmlDoc = parser.parseFromString(content, "text/xml");
+    const parseError = xmlDoc.querySelector('parsererror');
+    let credits = [];
+    
+    if (!parseError) {
+        // محاولة الحصول على credit بغض النظر عن النطاق
+        // الطريقة: استخدام getElementsByTagName مع ignore namespace
+        credits = xmlDoc.getElementsByTagName('credit');
+        console.log('عدد credit عبر DOMParser:', credits.length);
+        
+        // إذا لم يجد، حاول البحث عن العناصر التي تنتهي بـ "credit" (لوجود نطاق)
+        if (credits.length === 0) {
+            const allElements = xmlDoc.getElementsByTagName('*');
+            credits = Array.from(allElements).filter(el => el.tagName.endsWith('credit'));
+            console.log('عدد credit عبر البحث عن *:', credits.length);
+        }
+    }
+    
+    // إذا لم يجد أي عنصر، استخدم regex
+    if (credits.length === 0) {
+        console.log('لم يتم العثور على credit عبر DOMParser، استخدام regex...');
+        const matches = content.match(/<credit[\s\S]*?<\/credit>/g);
+        if (!matches || matches.length === 0) {
+            console.error('لا توجد عناصر credit في الملف');
+            return [];
+        }
+        console.log('تم العثور على', matches.length, 'عنصر credit عبر regex');
+        
+        // إعادة تحليل كل عنصر على حدة
+        const creditData = [];
+        for (let i = 0; i < matches.length; i++) {
+            const creditXml = matches[i];
+            const creditDoc = parser.parseFromString(creditXml, "text/xml");
+            const creditElement = creditDoc.documentElement;
+            const parsed = parseCreditNode(creditElement);
+            if (parsed) creditData.push(parsed);
+        }
+        return creditData;
+    }
+    
+    // تحويل credits إلى مصفوفة وتطبيق parseCreditNode
+    const creditData = [];
+    for (let i = 0; i < credits.length; i++) {
+        const creditElement = credits[i];
+        const parsed = parseCreditNode(creditElement);
+        if (parsed) creditData.push(parsed);
+    }
+    
+    console.log('تم استخراج', creditData.length, 'إشعار خصم');
+    return creditData;
+}
+
+function debugCreditData() {
+    console.log('=== Debug Credit Data ===');
+    console.log('creditData.length:', creditData.length);
+    console.log('filteredCreditData.length:', filteredCreditData.length);
+    console.log('currentCreditPage:', currentCreditPage);
+    console.log('itemsPerPageCredit:', itemsPerPageCredit);
+    console.log('viewModeCredit:', viewModeCredit);
+    if (creditData.length > 0) {
+        console.log('أول إشعار:', creditData[0]);
+    }
+}
+
+function filterCreditData() {
+    console.log('=== filterCreditData ===');
+    if (!creditData.length) {
+        filteredCreditData = [];
+        renderCreditData();
+        return;
+    }
+    
+    // تطبيق تصفية حسب صلاحيات المستخدم
+    let temp = filterCreditByUser(creditData);
+    
+    // تطبيق أي تصفية إضافية من البحث (إذا كانت هناك معايير بحث مخزنة)
+    // سنقوم بتطبيقها داخل applyCreditSearch، لذا نكتفي بالتصفية الأساسية هنا
+    filteredCreditData = temp;
+    console.log('filteredCreditData.length بعد التصفية:', filteredCreditData.length);
+    renderCreditData();
+}
+
+function renderCreditData() {
+    console.log('=== renderCreditData ===');
+    console.log('filteredCreditData.length:', filteredCreditData.length);
+    if (filteredCreditData.length === 0) {
+        document.getElementById('dataViewContainer').innerHTML = '<div class="no-data"><i class="fas fa-inbox fa-3x"></i><p>لا توجد إشعارات خصم</p></div>';
+        updateCreditSummary();
+        document.getElementById('pagination').innerHTML = '';
+        return;
+    }
+
+    const sorted = sortCreditData(filteredCreditData, currentCreditSortField, currentCreditSortOrder);
+    const totalPages = itemsPerPageCredit === Infinity ? 1 : Math.ceil(sorted.length / itemsPerPageCredit);
+    const start = itemsPerPageCredit === Infinity ? 0 : (currentCreditPage - 1) * itemsPerPageCredit;
+    const end = itemsPerPageCredit === Infinity ? sorted.length : Math.min(start + itemsPerPageCredit, sorted.length);
+    const pageData = sorted.slice(start, end);
+
+    console.log('عرض', pageData.length, 'إشعار من أصل', filteredCreditData.length);
+    if (viewModeCredit === 'table') renderCreditTableView(pageData);
+    else renderCreditCardsView(pageData);
+
+    updateCreditSummary();
+    renderCreditPagination(totalPages);
+}
+
+function sortCreditData(data, field, order) {
+    return [...data].sort((a, b) => {
+        let va = a[field] || '';
+        let vb = b[field] || '';
+        
+        // إذا كان الحقل رقميًا
+        if (typeof va === 'number' && typeof vb === 'number') {
+            return order === 'asc' ? va - vb : vb - va;
+        }
+        
+        // تحويل إلى نص للمقارنة النصية
+        va = String(va).toLowerCase();
+        vb = String(vb).toLowerCase();
+        return order === 'asc' 
+            ? va.localeCompare(vb, 'ar') 
+            : vb.localeCompare(va, 'ar');
+    });
+}
+
+function updateCreditSummary() {
+    const count = filteredCreditData.length;
+    let totalNet = 0;
+    let totalTax = 0;
+    let totalGross = 0;
+
+    filteredCreditData.forEach(item => {
+        totalNet += item.displayAmount;
+        totalTax += item.displayTax;
+        totalGross += (item.displayAmount + item.displayTax);
+    });
+
+    document.getElementById('invoiceCount').textContent = count;
+    document.getElementById('totalSum').innerHTML = totalNet.toFixed(2);
+    document.getElementById('taxSum').innerHTML = totalTax.toFixed(2);
+    document.getElementById('totalUSD').innerHTML = totalGross.toFixed(2);
+    document.getElementById('totalEGPWithoutTax').innerHTML = '0.00';
+    document.getElementById('totalMartyr').innerHTML = '0.00';
+
+    document.getElementById('totalInvoicesHeader').textContent = count;
+    document.getElementById('totalCustomers').textContent = new Set(filteredCreditData.map(i => i.customer)).size;
+    document.getElementById('totalVessels').textContent = '-';
+}
+
+function renderCreditCardsView(data) {
+    let html = '<div class="cards-container">';
+    data.forEach(item => {
+        const net = item.displayAmount;                 // صافي إشعار الخصم
+        const tax = item.displayTax;                    // إجمالي الضرائب
+        const total = net + tax;                        // إجمالي الإشعار بعد الضريبة
+        const currencySymbol = item.currency === 'USAD' ? 'USAD' : 'EGP';
+
+        html += `
+            <div class="invoice-card" onclick="showCreditDetails('${item.serial}')" style="cursor: pointer;">
+                <div class="card-header">
+                    <h3>إشعار خصم: ${item.finalNumber || item.draftNumber || '-'} 
+                        ${item.draftNumber ? `<span style="font-size:0.7em;"> (مسودة: ${item.draftNumber})</span>` : ''}
+                    </h3>
+                    <span class="card-badge">خصم</span>
+                </div>
+                <div class="card-body">
+                    <div class="card-row"><span class="card-label">العميل:</span><span class="card-value">${item.customer || '-'}</span></div>
+                    <div class="card-row"><span class="card-label">رقم الفاتورة الأصلية:</span><span class="card-value">${item.invoiceFinalNumber || '-'}</span></div>
+                    <div class="card-row"><span class="card-label">صافي إشعار الخصم:</span><span class="card-value">${formatNumberWithCommas(net.toFixed(2))} ${currencySymbol}</span></div>
+                    <div class="card-row"><span class="card-label">إجمالي الضرائب:</span><span class="card-value">${formatNumberWithCommas(tax.toFixed(2))} ${currencySymbol}</span></div>
+                    <div class="card-row"><span class="card-label">إجمالي الإشعار بعد الضريبة:</span><span class="card-value">${formatNumberWithCommas(total.toFixed(2))} ${currencySymbol}</span></div>
+                    <div class="card-row"><span class="card-label">سعر الصرف:</span><span class="card-value">${item.exchangeRate.toFixed(4)}</span></div>
+                    <div class="card-row"><span class="card-label">التاريخ:</span><span class="card-value">${item.date || '-'}</span></div>
+                    ${item.notes ? `<div class="card-row"><span class="card-label">ملاحظات:</span><span class="card-value">${item.notes}</span></div>` : ''}
+                </div>
+            </div>`;
+    });
+    html += '</div>';
+    document.getElementById('dataViewContainer').innerHTML = html;
+}
+
+function renderCreditTableView(data) {
+    let html = `
+        <div class="table-container">
+            <div class="table-toolbar" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding:10px; background:#f8f9fa; border-radius:8px; flex-wrap: wrap; gap: 10px;">
+                <div>
+                    <button class="btn btn-secondary" onclick="selectAllCredit()" style="margin-left:10px;"><i class="fas fa-check-double"></i> تحديد الكل</button>
+                    <button class="btn btn-secondary" onclick="deselectAllCredit()"><i class="fas fa-times"></i> إلغاء الكل</button>
+                </div>
+                <div class="export-buttons">
+                    <span id="selectedCreditCount" style="margin-left:15px; font-weight:bold;">0</span> إشعار محدد
+                    <button class="btn btn-primary" onclick="exportSelectedCreditPDF()" id="exportSelectedCreditPDFBtn" disabled><i class="fas fa-file-pdf"></i> PDF</button>
+                    <button class="btn btn-success" onclick="exportSelectedCreditExcel()" id="exportSelectedCreditExcelBtn" disabled><i class="fas fa-file-excel"></i> Excel</button>
+                </div>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th style="width:40px;"><input type="checkbox" onclick="toggleAllCreditCheckboxes(this)" id="selectAllCreditCheckbox"></th>
+                        <th>رقم الإشعار</th>
+                        <th>رقم المسودة</th>
+                        <th>رقم الفاتورة الأصلية</th>
+                        <th>العميل</th>
+                        <th>صافي إشعار الخصم</th>
+                        <th>إجمالي الضرائب</th>
+                        <th>إجمالي الإشعار بعد الضريبة</th>
+                        <th>العملة</th>
+                        <th>سعر الصرف</th>
+                        <th>التاريخ</th>
+                        <th>ملاحظات</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+
+    data.forEach(item => {
+        const net = item.displayAmount;
+        const tax = item.displayTax;
+        const total = net + tax;
+        const currencySymbol = item.currency === 'USAD' ? 'USAD' : 'EGP';
+        const isSelected = selectedCreditNotes.has(item.serial);
+        const selectedClass = isSelected ? 'selected-row' : '';
+
+        html += `<tr onclick="showCreditDetails('${item.serial}')" class="${selectedClass}" data-serial="${item.serial}" style="cursor: pointer;">
+            <td onclick="event.stopPropagation()"><input type="checkbox" class="credit-checkbox" data-serial="${item.serial}" ${isSelected ? 'checked' : ''} onchange="updateSelectedCredit('${item.serial}', this.checked)"></td>
+            <td>${item.finalNumber || '-'}${item.draftNumber ? `<br><small>مسودة: ${item.draftNumber}</small>` : ''}</td>
+            <td>${item.draftNumber || '-'}</td>
+            <td>${item.invoiceFinalNumber || '-'}</td>
+            <td>${item.customer || '-'}</td>
+            <td>${formatNumberWithCommas(net.toFixed(2))}</td>
+            <td>${formatNumberWithCommas(tax.toFixed(2))}</td>
+            <td>${formatNumberWithCommas(total.toFixed(2))}</td>
+            <td>${currencySymbol}</td>
+            <td>${item.exchangeRate.toFixed(4)}</td>
+            <td>${item.date || '-'}</td>
+            <td>${item.notes || '-'}</td>
+        </tr>`;
+    });
+
+    html += `</tbody></table></div>`;
+    document.getElementById('dataViewContainer').innerHTML = html;
+    updateSelectedCreditCount();
+}
+
+function updateSelectedCreditCount() {
+    const count = selectedCreditNotes.size;
+    const countSpan = document.getElementById('selectedCreditCount');
+    const pdfBtn = document.getElementById('exportSelectedCreditPDFBtn');
+    const excelBtn = document.getElementById('exportSelectedCreditExcelBtn');
+    if (countSpan) countSpan.textContent = count;
+    if (pdfBtn) pdfBtn.disabled = count === 0;
+    if (excelBtn) excelBtn.disabled = count === 0;
+}
+
+function updateSelectedCredit(serial, isSelected) {
+    if (isSelected) selectedCreditNotes.add(serial);
+    else selectedCreditNotes.delete(serial);
+    updateSelectedCreditCount();
+    
+    // تحديث حالة الصف
+    const row = document.querySelector(`tr[data-serial="${serial}"]`);
+    if (row) row.classList.toggle('selected-row', isSelected);
+    
+    // تحديث checkbox الرئيسي (تحديد الكل)
+    const allCheckboxes = document.querySelectorAll('.credit-checkbox');
+    const selectAll = document.getElementById('selectAllCreditCheckbox');
+    if (selectAll) {
+        const allChecked = Array.from(allCheckboxes).every(cb => cb.checked);
+        selectAll.checked = allChecked;
+        selectAll.indeterminate = !allChecked && Array.from(allCheckboxes).some(cb => cb.checked);
+    }
+}
+
+function selectAllCredit() {
+    document.querySelectorAll('.credit-checkbox').forEach(cb => {
+        cb.checked = true;
+        const serial = cb.dataset.serial;
+        selectedCreditNotes.add(serial);
+        const row = document.querySelector(`tr[data-serial="${serial}"]`);
+        if (row) row.classList.add('selected-row');
+    });
+    updateSelectedCreditCount();
+    const selectAll = document.getElementById('selectAllCreditCheckbox');
+    if (selectAll) selectAll.checked = true;
+}
+
+function deselectAllCredit() {
+    document.querySelectorAll('.credit-checkbox').forEach(cb => {
+        cb.checked = false;
+        const serial = cb.dataset.serial;
+        selectedCreditNotes.delete(serial);
+        const row = document.querySelector(`tr[data-serial="${serial}"]`);
+        if (row) row.classList.remove('selected-row');
+    });
+    updateSelectedCreditCount();
+    const selectAll = document.getElementById('selectAllCreditCheckbox');
+    if (selectAll) selectAll.checked = false;
+}
+
+
+function changeCreditPage(page) {
+    const totalPages = itemsPerPageCredit === Infinity ? 1 : Math.ceil(filteredCreditData.length / itemsPerPageCredit);
+    if (page >= 1 && page <= totalPages) {
+        currentCreditPage = page;
+        renderCreditData();
+    }
+}
+
+function showCreditDetails(serial) {
+    const item = creditData.find(d => d.serial == serial);
+    if (!item) return;
+    
+    // التحقق من صلاحية المستخدم
+    const allowed = filterCreditByUser([item]);
+    if (allowed.length === 0) {
+        showNotification('غير مصرح لك بعرض هذا الإشعار', 'error');
+        return;
+    }
+    
+    currentDisplayType = 'credit';
+    currentCreditData = item;
+    currentCreditSerial = serial;
+    // ... باقي الكود
+
+		currentDisplayType = 'credit';
+		currentCreditData = item;
+		currentCreditSerial = serial;
+    const net = item.displayAmount;
+    const tax = item.displayTax;
+    const total = net + tax;
+    const currencySymbol = item.currency === 'USAD' ? 'USAD' : 'EGP';
+    const logoSrc = companyLogoBase64 ? companyLogoBase64 : '';
+
+    // جدول البنود بدون عمود "رقم الفاتورة الأصلية"
+    let itemsHtml = '';
+    if (item.items && item.items.length > 0) {
+        itemsHtml = `
+            <div style="margin: 15px 0;">
+                <h4 style="color: #f72585;">تفاصيل البنود:</h4>
+                <table class="charges-table" style="width:100%; font-size:0.85em;">
+                    <thead>
+                        <tr>
+                            <th>الكمية</th>
+                            <th>السعر</th>
+                            <th>المبلغ بعد سعر الصرف</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${item.items.map(i => `
+                            <tr>
+                                <td>${i.quantity}</td>
+                                <td>${i.rateCredited.toFixed(2)}</td>
+                                <td>${formatNumberWithCommas(i.displayAmount.toFixed(2))} ${currencySymbol}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            </div>
+        `;
+    }
+
+    // بقية الكود كما هو مع التأكد من وجود رقم الفاتورة الأصلية في بيانات الفاتورة
+    const html = `
+        <div class="invoice-container" id="creditPrint" style="max-width: 1100px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 20px rgba(0,0,0,0.1);">
+            <style>
+                /* نفس الاستايلات السابقة */
+                .credit-detail-header { background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; padding: 15px 20px; border-radius: 10px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between; }
+                .credit-detail-title { background: linear-gradient(135deg, #f72585, #b5179e); color: white; padding: 12px; text-align: center; border-radius: 8px; margin-bottom: 15px; }
+                .credit-detail-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 15px; }
+                .credit-info-box { background: #f8f9fa; padding: 12px; border-radius: 8px; border-right: 4px solid #f72585; }
+                .credit-summary-box { width: 320px; background: #f8f9fa; padding: 12px; border-radius: 8px; margin-right: auto; }
+                .credit-summary-row { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #dee2e6; }
+                .credit-summary-row.total { border-bottom: none; font-weight: bold; color: #f72585; font-size: 1.1em; }
+                .company-logo-container { width: 70px; height: 70px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #ffd700; overflow: hidden; }
+                .company-logo-image { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
+                .notes-box { margin: 15px 0; padding: 10px; background: #fff3cd; border-right: 4px solid #ffc107; border-radius: 5px; }
+            </style>
+            
+            <div class="credit-detail-header">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <div class="company-logo-container">
+                        ${logoSrc ? `<img src="${logoSrc}" alt="DCHC Logo" class="company-logo-image">` : '<i class="fas fa-ship" style="font-size: 2em; color: #1e3c72;"></i>'}
+                    </div>
+                    <div>
+                        <h2 style="color: #ffd700; margin: 0;">${COMPANY_INFO.name}</h2>
+                        <p style="margin: 3px 0; font-size: 0.8em;">${COMPANY_INFO.nameEn}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="credit-detail-title">
+                <h2 style="font-size: 1.2em; margin: 0;">
+                    إشعار خصم: ${item.finalNumber || item.draftNumber || '-'}
+                    ${item.draftNumber ? `<span style="font-size:0.7em;"> (مسودة: ${item.draftNumber})</span>` : ''}
+                </h2>
+                <p style="margin: 5px 0 0; font-size: 0.9em;">التاريخ: ${item.date || 'غير محدد'}</p>
+            </div>
+            
+            <div class="credit-detail-grid">
+                <div class="credit-info-box">
+                    <h4 style="color: #f72585; margin-bottom: 8px;"><i class="fas fa-user"></i> بيانات العميل</h4>
+                    <div><strong>الاسم:</strong> ${item.customer || '-'}</div>
+                    <div><strong>الرقم الضريبي:</strong> ${item.customerId || '-'}</div>
+                </div>
+                <div class="credit-info-box">
+                    <h4 style="color: #f72585; margin-bottom: 8px;"><i class="fas fa-file-invoice"></i> بيانات الفاتورة</h4>
+                    <div><strong>رقم الفاتورة الأصلية:</strong> ${item.invoiceFinalNumber || '-'}</div>
+                    <div><strong>رقم المسودة:</strong> ${item.draftNumber || '-'}</div>
+                    <div><strong>رقم الإشعار النهائي:</strong> ${item.finalNumber || '-'}</div>
+                </div>
+                <div class="credit-info-box">
+                    <h4 style="color: #f72585; margin-bottom: 8px;"><i class="fas fa-coins"></i> المبالغ</h4>
+                    <div><strong>العملة:</strong> ${currencySymbol}</div>
+                    <div><strong>سعر الصرف:</strong> ${item.exchangeRate.toFixed(4)}</div>
+                    <div><strong>الحالة:</strong> ${item.status || '-'}</div>
+                </div>
+            </div>
+            
+            ${itemsHtml}
+            
+            <div style="display: flex; justify-content: flex-end; margin: 20px 0;">
+                <div class="credit-summary-box">
+                    <div class="credit-summary-row">
+                        <span>صافي إشعار الخصم:</span>
+                        <span>${formatNumberWithCommas(net.toFixed(2))} ${currencySymbol}</span>
+                    </div>
+                    <div class="credit-summary-row">
+                        <span>إجمالي الضرائب:</span>
+                        <span>${formatNumberWithCommas(tax.toFixed(2))} ${currencySymbol}</span>
+                    </div>
+                    <div class="credit-summary-row total">
+                        <span>إجمالي إشعار الخصم بعد الضريبة:</span>
+                        <span>${formatNumberWithCommas(total.toFixed(2))} ${currencySymbol}</span>
+                    </div>
+                </div>
+            </div>
+            
+            ${item.notes ? `<div class="notes-box"><strong>ملاحظات:</strong> ${item.notes}</div>` : ''}
+            
+            <div class="signature-section" style="display: flex; justify-content: space-around; margin: 20px 0 15px; padding: 10px 0; border-top: 2px dashed #dee2e6;">
+                <div style="text-align: center;">
+                    <div style="color: #f72585; font-weight: bold;">معد الإشعار</div>
+                    <div>${item.preparedBy || 'النظام'}</div>
+                    <div style="font-size: 0.7em;">${new Date().toLocaleDateString('ar-EG')}</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="color: #f72585; font-weight: bold;">المراجع</div>
+                    <div>${item.reviewedBy || 'النظام'}</div>
+                </div>
+                <div style="text-align: center;">
+                    <div style="color: #f72585; font-weight: bold;">الختم</div>
+                    <div style="font-size: 2em; opacity: 0.5;"><i class="fas fa-certificate"></i></div>
+                </div>
+            </div>
+            
+            <div class="invoice-footer" style="text-align: center; padding: 10px; border-top: 2px solid #e9ecef; color: #6c757d; font-size: 0.7em;">
+                <p>شكراً لتعاملكم مع ${COMPANY_INFO.name}</p>
+                <p>تم إنشاء هذا الإشعار إلكترونياً</p>
+                <p>تاريخ الطباعة: ${new Date().toLocaleDateString('ar-EG')}</p>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('modalBody').innerHTML = html;
+    document.getElementById('modalTitle').innerHTML = `إشعار خصم: ${item.finalNumber || item.draftNumber || item.serial}`;
+    document.getElementById('invoiceModal').style.display = 'block';
+}
+
+function exportSelectedCreditExcel() {
+    if (selectedCreditNotes.size === 0) {
+        showNotification('لم يتم تحديد أي إشعارات', 'warning');
+        return;
+    }
+    
+    const allSelected = creditData.filter(item => selectedCreditNotes.has(item.serial));
+    const allowedItems = filterCreditByUser(allSelected);
+    
+    if (allowedItems.length === 0) {
+        showNotification('لا توجد إشعارات مصرح بها للتصدير', 'error');
+        return;
+    }
+    
+    const excelData = [
+        ['إشعارات الخصم المحددة'],
+        ['تاريخ التقرير: ' + new Date().toLocaleDateString('ar-EG')],
+        [],
+        ['رقم الإشعار', 'رقم المسودة', 'رقم الفاتورة الأصلية', 'العميل', 'صافي إشعار الخصم', 'إجمالي الضرائب', 'إجمالي الإشعار بعد الضريبة', 'العملة', 'سعر الصرف', 'التاريخ', 'الحالة', 'ملاحظات']
+    ];
+
+    allowedItems.forEach(item => {
+        const net = item.displayAmount;
+        const tax = item.displayTax;
+        const total = net + tax;
+        const currencySymbol = item.currency === 'USAD' ? 'USAD' : 'EGP';
+
+        excelData.push([
+            item.finalNumber || '',
+            item.draftNumber || '',
+            item.invoiceFinalNumber || '',
+            item.customer || '',
+            net.toFixed(2),
+            tax.toFixed(2),
+            total.toFixed(2),
+            currencySymbol,
+            item.exchangeRate.toFixed(4),
+            item.date || '',
+            item.status || '',
+            item.notes || ''
+        ]);
+    });
+
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(excelData);
+    ws['!cols'] = [{ wch: 18 }, { wch: 15 }, { wch: 18 }, { wch: 30 }, { wch: 18 }, { wch: 18 }, { wch: 22 }, { wch: 10 }, { wch: 12 }, { wch: 12 }, { wch: 12 }, { wch: 25 }];
+    XLSX.utils.book_append_sheet(wb, ws, 'إشعارات الخصم');
+
+    const fileName = `إشعارات_خصم_${new Date().toLocaleDateString('ar-EG').replace(/\//g, '-')}.xlsx`;
+    XLSX.writeFile(wb, fileName);
+    showNotification(`تم تصدير ${allowedItems.length} إشعار بنجاح`, 'success');
+}
+
+async function exportSelectedCreditPDF() {
+    if (selectedCreditNotes.size === 0) {
+        showNotification('لم يتم تحديد أي إشعارات', 'warning');
+        return;
+    }
+
+    const selectedItems = creditData.filter(item => selectedCreditNotes.has(item.serial));
+    
+    // التحقق من وجود المكتبات المطلوبة
+    if (typeof window.jspdf === 'undefined' || typeof window.html2canvas === 'undefined') {
+        showNotification('جاري تحميل مكتبات PDF...', 'info');
+        return;
+    }
+
+    showProgress(`جاري تجهيز ${selectedItems.length} إشعار...`, 10);
+
+    try {
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4',
+            compress: true
+        });
+
+        let currentPage = 0;
+
+        for (let i = 0; i < selectedItems.length; i++) {
+            const item = selectedItems[i];
+            
+            showProgress(`جاري تجهيز الإشعار ${i + 1} من ${selectedItems.length}...`, Math.round((i / selectedItems.length) * 100));
+            
+            // إنشاء عنصر مؤقت لعرض الإشعار
+            const tempDiv = document.createElement('div');
+            tempDiv.style.position = 'absolute';
+            tempDiv.style.left = '-9999px';
+            tempDiv.style.top = '-9999px';
+            tempDiv.style.width = '1100px';
+            tempDiv.style.background = 'white';
+            tempDiv.style.padding = '20px';
+            tempDiv.style.direction = 'rtl';
+            
+            // إنشاء محتوى الإشعار باستخدام نفس تصميم showCreditDetails
+            const discountValue = item.amount * item.discount / 100;
+            const finalAmount = item.amount - discountValue;
+            const logoSrc = companyLogoBase64 ? companyLogoBase64 : '';
+            
+            tempDiv.innerHTML = `
+                <div style="max-width: 1100px; margin: 0 auto; background: white; font-family: 'Segoe UI', sans-serif;">
+                    <div style="background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; padding: 15px 20px; border-radius: 10px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between;">
+                        <div style="display: flex; align-items: center; gap: 15px;">
+                            <div style="width: 70px; height: 70px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #ffd700; overflow: hidden;">
+                                ${logoSrc ? `<img src="${logoSrc}" style="width:100%; height:100%; object-fit:cover;">` : '<i class="fas fa-ship" style="font-size:2em;"></i>'}
+                            </div>
+                            <div>
+                                <h2 style="color: #ffd700; margin: 0;">${COMPANY_INFO.name}</h2>
+                                <p style="margin: 3px 0; font-size: 0.8em;">${COMPANY_INFO.nameEn}</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="background: linear-gradient(135deg, #f72585, #b5179e); color: white; padding: 12px; text-align: center; border-radius: 8px; margin-bottom: 15px;">
+                        <h2 style="font-size: 1.2em; margin: 0;">إشعار خصم رقم: ${item.serial || '-'}</h2>
+                        <p style="margin: 5px 0 0; font-size: 0.9em;">التاريخ: ${item.date || 'غير محدد'}</p>
+                    </div>
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 15px;">
+                        <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-right: 4px solid #f72585;">
+                            <h4 style="color: #f72585; margin-bottom: 8px;">بيانات العميل</h4>
+                            <div><strong>الاسم:</strong> ${item.customer || '-'}</div>
+                        </div>
+                        <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-right: 4px solid #f72585;">
+                            <h4 style="color: #f72585; margin-bottom: 8px;">بيانات الفاتورة</h4>
+                            <div><strong>رقم الفاتورة:</strong> ${item.invoiceNumber || '-'}</div>
+                        </div>
+                        <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-right: 4px solid #f72585;">
+                            <h4 style="color: #f72585; margin-bottom: 8px;">المبالغ</h4>
+                            <div><strong>العملة:</strong> ${item.currency || 'EGP'}</div>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: flex-end; margin: 20px 0;">
+                        <div style="width: 280px; background: #f8f9fa; padding: 12px; border-radius: 8px;">
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                                <span>المبلغ الأصلي:</span>
+                                <span>${formatNumberWithCommas(item.amount.toFixed(2))} ${item.currency || 'EGP'}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                                <span>نسبة الخصم:</span>
+                                <span>${item.discount}%</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #dee2e6;">
+                                <span>قيمة الخصم:</span>
+                                <span>${formatNumberWithCommas(discountValue.toFixed(2))} ${item.currency || 'EGP'}</span>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; font-weight: bold; color: #f72585;">
+                                <span>المبلغ بعد الخصم:</span>
+                                <span>${formatNumberWithCommas(finalAmount.toFixed(2))} ${item.currency || 'EGP'}</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="display: flex; justify-content: space-around; margin: 20px 0 15px; padding: 10px 0; border-top: 2px dashed #dee2e6;">
+                        <div style="text-align: center;">
+                            <div style="color: #f72585; font-weight: bold;">معد الإشعار</div>
+                            <div>${item.preparedBy || 'النظام'}</div>
+                            <div style="font-size: 0.7em;">${new Date().toLocaleDateString('ar-EG')}</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="color: #f72585; font-weight: bold;">المراجع</div>
+                            <div>${item.reviewedBy || 'النظام'}</div>
+                        </div>
+                        <div style="text-align: center;">
+                            <div style="color: #f72585; font-weight: bold;">الختم</div>
+                            <div style="font-size: 2em; opacity: 0.5;"><i class="fas fa-certificate"></i></div>
+                        </div>
+                    </div>
+                    <div style="text-align: center; padding: 10px; border-top: 2px solid #e9ecef; color: #6c757d; font-size: 0.7em;">
+                        <p>شكراً لتعاملكم مع ${COMPANY_INFO.name}</p>
+                        <p>تم إنشاء هذا الإشعار إلكترونياً</p>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(tempDiv);
+            const element = tempDiv.firstChild;
+            
+            try {
+                const canvas = await html2canvas(element, {
+                    scale: 1.5,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    useCORS: true
+                });
+                
+                if (currentPage > 0) {
+                    pdf.addPage();
+                }
+                
+                const imgData = canvas.toDataURL('image/jpeg', 0.85);
+                const pdfWidth = pdf.internal.pageSize.getWidth();
+                const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+                
+                pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+                currentPage++;
+                
+            } catch (err) {
+                console.error('خطأ في تصدير الإشعار:', err);
+            } finally {
+                document.body.removeChild(tempDiv);
+            }
+        }
+        
+        showProgress('جاري حفظ الملف...', 100);
+        
+        let fileName;
+        if (selectedItems.length === 1) {
+            fileName = `إشعار_خصم_${selectedItems[0].serial}.pdf`;
+        } else {
+            fileName = `إشعارات_خصم_${new Date().toLocaleDateString('ar-EG').replace(/\//g, '-')}.pdf`;
+        }
+        
+        pdf.save(fileName);
+        showNotification(`تم تصدير ${selectedItems.length} إشعار بنجاح`, 'success');
+        
+    } catch (error) {
+        console.error('خطأ في تصدير PDF:', error);
+        showNotification('حدث خطأ في تصدير PDF: ' + error.message, 'error');
+    } finally {
+        setTimeout(hideProgress, 1500);
+    }
+}
+
+function toggleAllCreditCheckboxes(selectAllCheckbox) {
+    document.querySelectorAll('.credit-checkbox').forEach(cb => {
+        cb.checked = selectAllCheckbox.checked;
+        const serial = cb.dataset.serial;
+        if (selectAllCheckbox.checked) selectedCreditNotes.add(serial);
+        else selectedCreditNotes.delete(serial);
+        const row = document.querySelector(`tr[data-serial="${serial}"]`);
+        if (row) row.classList.toggle('selected-row', selectAllCheckbox.checked);
+    });
+    updateSelectedCreditCount();
+}
+
+function renderCreditPagination(totalPages) {
+    if (itemsPerPageCredit === Infinity || totalPages <= 1) {
+        document.getElementById('pagination').innerHTML = '';
+        return;
+    }
+    
+    let html = `<button class="pagination-btn" onclick="changeCreditPage(${currentCreditPage - 1})" ${currentCreditPage === 1 ? 'disabled' : ''}>
+                    <i class="fas fa-chevron-right"></i>
+                </button>`;
+    
+    const maxPages = 5;
+    let start = Math.max(1, currentCreditPage - Math.floor(maxPages / 2));
+    let end = Math.min(totalPages, start + maxPages - 1);
+    
+    if (end - start + 1 < maxPages) start = Math.max(1, end - maxPages + 1);
+    
+    if (start > 1) {
+        html += `<button class="pagination-btn" onclick="changeCreditPage(1)">1</button>`;
+        if (start > 2) html += `<span class="pagination-btn disabled">...</span>`;
+    }
+    
+    for (let i = start; i <= end; i++) {
+        html += `<button class="pagination-btn ${i === currentCreditPage ? 'active' : ''}" onclick="changeCreditPage(${i})">${i}</button>`;
+    }
+    
+    if (end < totalPages) {
+        if (end < totalPages - 1) html += `<span class="pagination-btn disabled">...</span>`;
+        html += `<button class="pagination-btn" onclick="changeCreditPage(${totalPages})">${totalPages}</button>`;
+    }
+    
+    html += `<button class="pagination-btn" onclick="changeCreditPage(${currentCreditPage + 1})" ${currentCreditPage === totalPages ? 'disabled' : ''}>
+                <i class="fas fa-chevron-left"></i>
+            </button>`;
+    
+    document.getElementById('pagination').innerHTML = html;
+}
+
+function filterCreditByUser(creditArray) {
+    if (!creditArray.length) return [];
+    
+    // المدير يرى كل الإشعارات
+    if (currentUser && currentUser.userType === 'admin') {
+        return [...creditArray];
+    }
+    
+    // المحاسب الحقيقي (بدون معرفات عميل) يرى كل الإشعارات
+    // ولكن إذا كان المحاسب لديه معرفات عميل، فيُعامل كعميل
+    if (currentUser && currentUser.userType === 'accountant') {
+        // التحقق مما إذا كان للمحاسب معرفات عميل (customerIds أو contractCustomerId)
+        const hasCustomerIds = (currentUser.customerIds && currentUser.customerIds.length > 0) || currentUser.contractCustomerId;
+        if (!hasCustomerIds) {
+            return [...creditArray]; // محاسب بدون معرفات -> يرى كل شيء
+        }
+        // إذا كان لديه معرفات، نكمل إلى منطق العميل أدناه
+    }
+    
+    // مستخدم ضيف
+    if (currentUser?.isGuest) {
+        const taxNumber = currentUser.taxNumber;
+        if (!taxNumber) return [];
+        return creditArray.filter(credit => 
+            credit.customerId && credit.customerId.toLowerCase() === taxNumber.toLowerCase()
+        );
+    }
+    
+    // منطق العميل (سواء كان userType = 'customer' أو محاسب له معرفات)
+    // تجميع جميع المعرفات المسموحة
+    let allowedIds = [];
+    if (currentUser.taxNumber) allowedIds.push(currentUser.taxNumber);
+    if (currentUser.contractCustomerId) allowedIds.push(currentUser.contractCustomerId);
+    if (currentUser.customerIds && Array.isArray(currentUser.customerIds)) {
+        allowedIds = allowedIds.concat(currentUser.customerIds);
+    }
+    allowedIds = [...new Set(allowedIds.map(id => id.toLowerCase()))];
+    
+    if (allowedIds.length === 0) return [];
+    
+    return creditArray.filter(credit => {
+        const creditCustomerId = (credit.customerId || '').toLowerCase();
+        return allowedIds.some(id => creditCustomerId === id);
+    });
+}
+
 
 async function loadInvoicesFromDrive() {
     if (!driveConfig.apiKey || !driveConfig.folderId) return false;
@@ -3615,6 +4904,759 @@ window.downloadQRCodePDF = async function() {
     }
 };
 
+async function testCreditFileLoad() {
+    console.log('=== اختبار تحميل ملف إشعارات الخصم ===');
+    
+    // التأكد من وجود إعدادات Drive
+    if (!driveConfig.apiKey || !driveConfig.folderId) {
+        showNotification('❌ إعدادات Drive غير مكتملة', 'error');
+        return;
+    }
+    
+    // تحديد معرف الملف (من الإعدادات)
+    let fileId = driveConfig.creditFileId;
+    const fileName = driveConfig.creditFileName || 'credit_data.txt';
+    
+    // إذا لم يكن هناك معرف، حاول البحث عنه
+    if (!fileId) {
+        showProgress('جاري البحث عن الملف...', 20);
+        try {
+            const query = encodeURIComponent(`'${driveConfig.folderId}' in parents and name='${fileName}' and trashed=false`);
+            const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&key=${driveConfig.apiKey}&fields=files(id,name)`);
+            if (!res.ok) throw new Error('فشل البحث');
+            const data = await res.json();
+            if (!data.files?.length) {
+                showNotification(`❌ لم يتم العثور على ملف "${fileName}" في المجلد`, 'error');
+                return;
+            }
+            fileId = data.files[0].id;
+            driveConfig.creditFileId = fileId;
+            saveDriveSettingsToStorage();
+        } catch (err) {
+            showNotification(`❌ خطأ في البحث: ${err.message}`, 'error');
+            return;
+        } finally {
+            hideProgress();
+        }
+    }
+    
+    // تحميل الملف
+    showProgress('جاري تحميل الملف...', 40);
+    try {
+        const url = `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${driveConfig.apiKey}`;
+        const response = await fetch(url);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const content = await response.text();
+        
+        showProgress('جاري تحليل البيانات...', 70);
+        
+        // تحليل المحتوى (نستخدم نفس دالة parseCreditData الموجودة)
+        const parsedData = parseCreditData(content);
+        
+        // عرض البيانات في نافذة منبثقة
+        showCreditTestWindow(parsedData, fileName);
+        
+        showProgress('اكتمل', 100);
+        setTimeout(hideProgress, 1000);
+        
+    } catch (error) {
+        console.error('خطأ في تحميل الملف:', error);
+        showNotification(`❌ فشل تحميل الملف: ${error.message}`, 'error');
+        hideProgress();
+    }
+}
+
+function showCreditTestWindow(data, fileName) {
+    // إنشاء نافذة منبثقة مؤقتة
+    const modal = document.createElement('div');
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.7);
+        z-index: 100000;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        direction: rtl;
+    `;
+    
+    const contentDiv = document.createElement('div');
+    contentDiv.style.cssText = `
+        background: white;
+        max-width: 90%;
+        max-height: 90%;
+        overflow: auto;
+        padding: 20px;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        font-family: monospace;
+        direction: ltr;
+        text-align: left;
+    `;
+    
+    // بناء HTML لعرض البيانات
+    let html = `<h3 style="text-align:center;">نتائج تحميل ملف "${fileName}"</h3>`;
+    html += `<p><strong>عدد الإشعارات المستخرجة:</strong> ${data.length}</p>`;
+    
+    if (data.length === 0) {
+        html += `<p style="color:red;">لم يتم العثور على بيانات صالحة. تأكد من صيغة الملف.</p>`;
+    } else {
+        html += `<table border="1" cellpadding="5" cellspacing="0" style="border-collapse:collapse; width:100%;">`;
+        html += `<thead><tr>
+            <th>رقم الإشعار</th><th>العميل</th><th>رقم الفاتورة</th><th>المبلغ</th><th>الخصم %</th><th>قيمة الخصم</th><th>العملة</th><th>التاريخ</th>
+        </tr></thead><tbody>`;
+        
+        data.forEach(item => {
+            const discountValue = item.amount * item.discount / 100;
+            html += `<tr>
+                <td>${item.serial || '-'}</td>
+                <td>${item.customer || '-'}</td>
+                <td>${item.finalNumber || item.draftNumber || '-'}</td>
+                <td>${item.amount.toFixed(2)}</td>
+                <td>${item.discount.toFixed(2)}%</td>
+                <td>${discountValue.toFixed(2)}</td>
+                <td>${item.currency}</td>
+                <td>${item.date || '-'}</td>
+            </tr>`;
+        });
+        
+        html += `</tbody></table>`;
+        
+        // عرض أول عنصر من البيانات للتأكد من البنية
+        if (data[0]) {
+            html += `<hr><h4>عينة من البيانات (أول عنصر):</h4>`;
+            html += `<pre>${JSON.stringify(data[0], null, 2)}</pre>`;
+        }
+    }
+    
+    html += `<div style="text-align:center; margin-top:20px;">
+        <button onclick="this.closest('div').parentElement.remove()" style="padding:8px 20px; background:#4361ee; color:white; border:none; border-radius:5px;">إغلاق</button>
+    </div>`;
+    
+    contentDiv.innerHTML = html;
+    modal.appendChild(contentDiv);
+    document.body.appendChild(modal);
+    
+    // إغلاق النافذة عند النقر خارج المحتوى
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) modal.remove();
+    });
+}
+
+// ============================================
+// دوال الطباعة لإشعارات الخصم
+// ============================================
+
+/**
+ * إنشاء HTML لطباعة إشعار الخصم
+ */
+function generateCreditPrintHTML(item) {
+    const net = item.displayAmount;
+    const tax = item.displayTax;
+    const total = net + tax;
+    const currencySymbol = item.currency === 'USAD' ? 'USAD' : 'EGP';
+    const logoSrc = companyLogoBase64 ? companyLogoBase64 : '';
+
+    let itemsHtml = '';
+    if (item.items && item.items.length > 0) {
+        itemsHtml = `
+            <table class="print-items-table" style="width:100%; border-collapse: collapse; margin: 15px 0;">
+                <thead>
+                    <tr>
+                        <th style="border:1px solid #ddd; padding:8px; background:#f72585; color:white;">الكمية</th>
+                        <th style="border:1px solid #ddd; padding:8px; background:#f72585; color:white;">السعر</th>
+                        <th style="border:1px solid #ddd; padding:8px; background:#f72585; color:white;">المبلغ بعد سعر الصرف</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    ${item.items.map(i => `
+                        <tr>
+                            <td style="border:1px solid #ddd; padding:8px; text-align:center;">${i.quantity}</td>
+                            <td style="border:1px solid #ddd; padding:8px; text-align:center;">${i.rateCredited.toFixed(2)}</td>
+                            <td style="border:1px solid #ddd; padding:8px; text-align:center;">${formatNumberWithCommas(i.displayAmount.toFixed(2))} ${currencySymbol}</td>
+                        </tr>
+                    `).join('')}
+                </tbody>
+            </table>
+        `;
+    }
+
+    return `<!DOCTYPE html>
+    <html dir="rtl">
+    <head>
+        <meta charset="UTF-8">
+        <title>طباعة إشعار خصم - ${item.finalNumber || item.draftNumber}</title>
+        <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+        <style>
+            @page { size: A4; margin: 1cm; }
+            body {
+                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+                direction: rtl;
+                background: white;
+                padding: 0;
+                margin: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+            }
+            .print-container {
+                max-width: 1000px;
+                margin: 0 auto;
+                background: white;
+                padding: 20px;
+            }
+            .header {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin-bottom: 20px;
+                padding-bottom: 10px;
+                border-bottom: 2px solid #e0e0e0;
+            }
+            .logo-area {
+                display: flex;
+                align-items: center;
+                gap: 15px;
+            }
+            .logo {
+                width: 70px;
+                height: 70px;
+                background: #f0f0f0;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                overflow: hidden;
+                border: 2px solid #ffd700;
+            }
+            .logo img { width: 100%; height: 100%; object-fit: cover; }
+            .company-info h2 { margin: 0; color: #1e3c72; }
+            .company-info p { margin: 5px 0; font-size: 0.8em; color: #555; }
+            .title {
+                background: #f72585;
+                color: white;
+                padding: 10px;
+                text-align: center;
+                border-radius: 8px;
+                margin-bottom: 20px;
+            }
+            .info-grid {
+                display: grid;
+                grid-template-columns: repeat(3, 1fr);
+                gap: 15px;
+                margin-bottom: 20px;
+            }
+            .info-box {
+                background: #f8f9fa;
+                padding: 12px;
+                border-radius: 8px;
+                border-right: 4px solid #f72585;
+            }
+            .info-box h4 { margin: 0 0 8px; color: #f72585; }
+            .summary-box {
+                width: 280px;
+                background: #f8f9fa;
+                padding: 12px;
+                border-radius: 8px;
+                margin-right: auto;
+                margin-top: 20px;
+            }
+            .summary-row {
+                display: flex;
+                justify-content: space-between;
+                padding: 5px 0;
+                border-bottom: 1px solid #ddd;
+            }
+            .summary-row.total {
+                font-weight: bold;
+                color: #f72585;
+                border-bottom: none;
+            }
+            .footer {
+                text-align: center;
+                margin-top: 30px;
+                padding-top: 10px;
+                border-top: 1px solid #ddd;
+                font-size: 0.8em;
+                color: #777;
+            }
+            .notes-box {
+                background: #fff3cd;
+                padding: 10px;
+                border-right: 4px solid #ffc107;
+                margin-top: 15px;
+            }
+        </style>
+    </head>
+    <body>
+        <div class="print-container">
+            <div class="header">
+                <div class="logo-area">
+                    <div class="logo">
+                        ${logoSrc ? `<img src="${logoSrc}" alt="Logo">` : '<i class="fas fa-ship" style="font-size: 2em;"></i>'}
+                    </div>
+                    <div class="company-info">
+                        <h2>${COMPANY_INFO.name}</h2>
+                        <p>${COMPANY_INFO.nameEn}</p>
+                        <p>${COMPANY_INFO.address} | هاتف: ${COMPANY_INFO.phone}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="title">
+                <h2>إشعار خصم: ${item.finalNumber || item.draftNumber || '-'} ${item.draftNumber ? `(مسودة: ${item.draftNumber})` : ''}</h2>
+                <p>التاريخ: ${item.date || 'غير محدد'}</p>
+            </div>
+            
+            <div class="info-grid">
+                <div class="info-box">
+                    <h4>بيانات العميل</h4>
+                    <div><strong>الاسم:</strong> ${item.customer || '-'}</div>
+                    <div><strong>الرقم الضريبي:</strong> ${item.customerId || '-'}</div>
+                </div>
+                <div class="info-box">
+                    <h4>بيانات الفاتورة</h4>
+                    <div><strong>رقم الفاتورة الأصلية:</strong> ${item.invoiceFinalNumber || '-'}</div>
+                    <div><strong>رقم المسودة:</strong> ${item.draftNumber || '-'}</div>
+                    <div><strong>رقم الإشعار النهائي:</strong> ${item.finalNumber || '-'}</div>
+                </div>
+                <div class="info-box">
+                    <h4>المبالغ</h4>
+                    <div><strong>العملة:</strong> ${currencySymbol}</div>
+                    <div><strong>سعر الصرف:</strong> ${item.exchangeRate.toFixed(4)}</div>
+                    <div><strong>الحالة:</strong> ${item.status || '-'}</div>
+                </div>
+            </div>
+            
+            ${itemsHtml}
+            
+            <div class="summary-box">
+                <div class="summary-row"><span>صافي إشعار الخصم:</span><span>${formatNumberWithCommas(net.toFixed(2))} ${currencySymbol}</span></div>
+                <div class="summary-row"><span>إجمالي الضرائب:</span><span>${formatNumberWithCommas(tax.toFixed(2))} ${currencySymbol}</span></div>
+                <div class="summary-row total"><span>إجمالي الإشعار بعد الضريبة:</span><span>${formatNumberWithCommas(total.toFixed(2))} ${currencySymbol}</span></div>
+            </div>
+            
+            ${item.notes ? `<div class="notes-box"><strong>ملاحظات:</strong> ${item.notes}</div>` : ''}
+            
+            <div class="footer">
+                <p>شكراً لتعاملكم مع ${COMPANY_INFO.name}</p>
+                <p>تم إنشاء هذا الإشعار إلكترونياً - تاريخ الطباعة: ${new Date().toLocaleDateString('ar-EG')}</p>
+            </div>
+        </div>
+    </body>
+    </html>`;
+}
+
+/**
+ * طباعة إشعار الخصم
+ */
+window.printCreditNote = function() {
+    console.log('تم استدعاء printCreditNote');
+    
+    let item = null;
+    if (currentCreditData) {
+        item = currentCreditData;
+    } else if (currentCreditSerial) {
+        item = creditData.find(d => d.serial == currentCreditSerial);
+    }
+    
+    if (!item) {
+        showNotification('لا توجد بيانات للإشعار', 'error');
+        return;
+    }
+    
+    const printWindow = window.open('', '_blank', 'width=1100,height=800');
+    if (!printWindow) {
+        showNotification('الرجاء السماح للنوافذ المنبثقة', 'error');
+        return;
+    }
+    
+    const printHtml = generateCreditPrintHTML(item);
+    printWindow.document.write(printHtml);
+    printWindow.document.close();
+    printWindow.focus();
+    
+    setTimeout(() => {
+        printWindow.print();
+    }, 500);
+};
+
+window.exportCreditNotePDF = async function() {
+    console.log('تم استدعاء exportCreditNotePDF');
+    
+    let item = null;
+    if (currentCreditData) {
+        item = currentCreditData;
+    } else if (currentCreditSerial) {
+        item = creditData.find(d => d.serial == currentCreditSerial);
+    }
+    
+    if (!item) {
+        showNotification('لا توجد بيانات للإشعار', 'error');
+        return;
+    }
+    
+    // محاولة العثور على عنصر الطباعة في النافذة الحالية
+    let element = document.getElementById('creditPrint');
+    let isTempElement = false;
+    
+    if (!element) {
+        // إذا لم يكن موجوداً، نقوم بإنشاء نسخة مؤقتة
+        const tempDiv = document.createElement('div');
+        tempDiv.style.position = 'absolute';
+        tempDiv.style.left = '-9999px';
+        tempDiv.style.top = '-9999px';
+        tempDiv.innerHTML = generateCreditPrintHTML(item);
+        document.body.appendChild(tempDiv);
+        element = tempDiv.firstChild;
+        isTempElement = true;
+    }
+    
+    if (typeof window.jspdf === 'undefined' || typeof window.html2canvas === 'undefined') {
+        showNotification('جاري تحميل مكتبات PDF...', 'info');
+        if (isTempElement && element && element.parentElement) element.parentElement.remove();
+        return;
+    }
+    
+    const loading = document.createElement('div');
+    loading.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:#4361ee;color:white;padding:15px 30px;border-radius:8px;z-index:10000;';
+    loading.innerHTML = '<i class="fas fa-spinner fa-spin"></i> جاري إنشاء PDF...';
+    document.body.appendChild(loading);
+    
+    try {
+        const canvas = await html2canvas(element, {
+            scale: 1.5,
+            backgroundColor: '#ffffff',
+            logging: false,
+            useCORS: true,
+            imageTimeout: 0
+        });
+        
+        const imgData = canvas.toDataURL('image/jpeg', 0.85);
+        const { jsPDF } = window.jspdf;
+        const pdf = new jsPDF({
+            orientation: 'portrait',
+            unit: 'mm',
+            format: 'a4',
+            compress: true
+        });
+        
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        
+        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+        pdf.save(`إشعار_خصم_${item.finalNumber || item.draftNumber || item.serial}.pdf`);
+        
+        showNotification('تم التصدير بنجاح', 'success');
+        
+    } catch (error) {
+        console.error('خطأ في إنشاء PDF:', error);
+        showNotification('حدث خطأ في إنشاء PDF: ' + error.message, 'error');
+    } finally {
+        loading.remove();
+        // ✅ إزالة العنصر المؤقت فقط إذا تم إنشاؤه، وليس العنصر الأصلي
+        if (isTempElement && element && element.parentElement) {
+            element.parentElement.remove();
+        }
+        // ✅ لا نغلق النافذة المنبثقة
+        // ✅ لا نعدل على modalBody أو أي شيء آخر
+    }
+};
+
+window.exportCreditNoteExcel = function() {
+    console.log('تم استدعاء exportCreditNoteExcel');
+    
+    let item = null;
+    if (currentCreditData) {
+        item = currentCreditData;
+    } else if (currentCreditSerial) {
+        item = creditData.find(d => d.serial == currentCreditSerial);
+    }
+    
+    if (!item) {
+        showNotification('لا توجد بيانات للإشعار', 'error');
+        return;
+    }
+    
+    const net = item.displayAmount;
+    const tax = item.displayTax;
+    const total = net + tax;
+    const currencySymbol = item.currency === 'USAD' ? 'USAD' : 'EGP';
+    
+    const excelData = [
+        ['إشعار خصم'],
+        [`رقم الإشعار: ${item.finalNumber || item.draftNumber || '-'}`],
+        [`رقم المسودة: ${item.draftNumber || '-'}`],
+        [`رقم الفاتورة الأصلية: ${item.invoiceFinalNumber || '-'}`],
+        [`العميل: ${item.customer || '-'}`],
+        [`الرقم الضريبي: ${item.customerId || '-'}`],
+        [`التاريخ: ${item.date || '-'}`],
+        [`العملة: ${currencySymbol}`],
+        [`سعر الصرف: ${item.exchangeRate.toFixed(4)}`],
+        [`الحالة: ${item.status || '-'}`],
+        [],
+        ['الكمية', 'السعر', 'المبلغ بعد سعر الصرف']
+    ];
+    
+    if (item.items && item.items.length > 0) {
+        item.items.forEach(i => {
+            excelData.push([
+                i.quantity,
+                i.rateCredited.toFixed(2),
+                `${i.displayAmount.toFixed(2)} ${currencySymbol}`
+            ]);
+        });
+    } else {
+        excelData.push(['لا توجد بنود', '', '']);
+    }
+    
+    excelData.push([], ['ملخص']);
+    excelData.push(['صافي إشعار الخصم:', `${net.toFixed(2)} ${currencySymbol}`]);
+    excelData.push(['إجمالي الضرائب:', `${tax.toFixed(2)} ${currencySymbol}`]);
+    excelData.push(['إجمالي الإشعار بعد الضريبة:', `${total.toFixed(2)} ${currencySymbol}`]);
+    
+    if (item.notes) {
+        excelData.push(['ملاحظات:', item.notes]);
+    }
+    
+    const wb = XLSX.utils.book_new();
+    const ws = XLSX.utils.aoa_to_sheet(excelData);
+    ws['!cols'] = [{ wch: 25 }, { wch: 20 }];
+    XLSX.utils.book_append_sheet(wb, ws, 'إشعار خصم');
+    
+    XLSX.writeFile(wb, `إشعار_خصم_${item.finalNumber || item.draftNumber || item.serial}.xlsx`);
+    showNotification('تم تصدير Excel بنجاح', 'success');
+};
+
+// بناء واجهة البحث للفواتير
+function buildInvoiceSearchUI() {
+    const advancedSearch = document.querySelector('.advanced-search');
+    if (!advancedSearch) return;
+    const searchBody = advancedSearch.querySelector('.search-body');
+    if (!searchBody) return;
+    
+    let customerFieldHtml = '';
+    const isAdmin = currentUser && currentUser.userType === 'admin';
+    
+    // إذا كان المستخدم ليس مديراً (أي محاسب أو عميل أو زائر) وله معرفات
+    if (!isAdmin && currentUser) {
+        let availableIds = [];
+        // جمع المعرفات من customerIds و contractCustomerId فقط (بدون taxNumber)
+        if (currentUser.customerIds && Array.isArray(currentUser.customerIds)) {
+            availableIds.push(...currentUser.customerIds);
+        }
+        if (currentUser.contractCustomerId && !availableIds.includes(currentUser.contractCustomerId)) {
+            availableIds.push(currentUser.contractCustomerId);
+        }
+        // إزالة التكرار والقيم الفارغة
+        availableIds = [...new Set(availableIds.filter(id => id && id.trim() !== ''))];
+        
+        if (availableIds.length > 0) {
+            let options = '<option value="">الكل</option>';
+            availableIds.forEach(id => {
+                const escapedId = id.replace(/"/g, '&quot;');
+                options += `<option value="${escapedId}">${escapedId}</option>`;
+            });
+            customerFieldHtml = `
+                <div class="search-field">
+                    <label><i class="fas fa-user-tie"></i> اسم العميل</label>
+                    <select id="searchCustomer">
+                        ${options}
+                    </select>
+                </div>
+            `;
+        }
+    }
+    
+    // إذا لم يتم إنشاء القائمة المنسدلة (مدير أو لا توجد معرفات) استخدم الحقل النصي
+    if (!customerFieldHtml) {
+        customerFieldHtml = `
+            <div class="search-field">
+                <label><i class="fas fa-user-tie"></i> اسم العميل</label>
+                <input type="text" id="searchCustomer" placeholder="اسم العميل...">
+            </div>
+        `;
+    }
+    
+    // بناء واجهة البحث المتقدم كاملة
+    searchBody.innerHTML = `
+        <div class="search-grid">
+            <div class="search-field">
+                <label><i class="fas fa-hashtag"></i> رقم الفاتورة النهائي</label>
+                <input type="text" id="searchFinalNumber" placeholder="مثال: C25-22491">
+            </div>
+            <div class="search-field">
+                <label><i class="fas fa-file-signature"></i> رقم المسودة</label>
+                <input type="text" id="searchDraftNumber" placeholder="مثال: 263531">
+            </div>
+            ${customerFieldHtml}
+            <div class="search-field">
+                <label><i class="fas fa-ship"></i> اسم السفينة</label>
+                <input type="text" id="searchVessel" placeholder="اسم السفينة...">
+            </div>
+            <div class="search-field">
+                <label><i class="fas fa-barcode"></i> رقم البوليصة</label>
+                <input type="text" id="searchBlNumber" placeholder="رقم البوليصة...">
+            </div>
+            <div class="search-field">
+                <label><i class="fas fa-container-storage"></i> رقم الحاوية</label>
+                <input type="text" id="searchContainer" placeholder="رقم الحاوية...">
+            </div>
+            <div class="search-field">
+                <label><i class="fas fa-tag"></i> الحالة</label>
+                <select id="searchStatus">
+                    <option value="">الكل</option>
+                    <option value="FINAL">نهائية (FINAL)</option>
+                    <option value="DRAFT">مسودة (DRAFT)</option>
+                </select>
+            </div>
+            <div class="search-field">
+                <label><i class="fas fa-calendar"></i> من تاريخ</label>
+                <input type="date" id="searchDateFrom">
+            </div>
+            <div class="search-field">
+                <label><i class="fas fa-calendar"></i> إلى تاريخ</label>
+                <input type="date" id="searchDateTo">
+            </div>
+            <div class="search-field">
+                <label><i class="fas fa-tag"></i> نوع الفاتورة</label>
+                <select id="searchInvoiceType">
+                    <option value="">الكل</option>
+                    <option value="cash">نقدي</option>
+                    <option value="postponed">أجل</option>
+                </select>
+            </div>
+        </div>
+        <div class="search-actions">
+            <button class="btn btn-primary" onclick="applyAdvancedSearch()"><i class="fas fa-filter"></i> تطبيق البحث</button>
+            <button class="btn btn-secondary" onclick="resetAdvancedSearch()"><i class="fas fa-undo"></i> إعادة ضبط</button>
+        </div>
+    `;
+}
+
+// بناء واجهة البحث لإشعارات الخصم
+function buildCreditSearchUI() {
+    const advancedSearch = document.querySelector('.advanced-search');
+    if (!advancedSearch) return;
+    const searchBody = advancedSearch.querySelector('.search-body');
+    if (!searchBody) return;
+    searchBody.innerHTML = `
+        <div class="search-grid">
+            <div class="search-field">
+                <label><i class="fas fa-hashtag"></i> رقم الإشعار</label>
+                <input type="text" id="creditSearchSerial" placeholder="رقم الإشعار أو رقم المسودة">
+            </div>
+            <div class="search-field">
+                <label><i class="fas fa-user"></i> اسم العميل</label>
+                <input type="text" id="creditSearchCustomer" placeholder="اسم العميل...">
+            </div>
+            <div class="search-field">
+                <label><i class="fas fa-file-invoice"></i> رقم الفاتورة الأصلية</label>
+                <input type="text" id="creditSearchInvoiceNumber" placeholder="رقم الفاتورة الأصلية...">
+            </div>
+            <div class="search-field">
+                <label><i class="fas fa-calendar"></i> من تاريخ الإشعار</label>
+                <input type="date" id="creditSearchDateFrom">
+            </div>
+            <div class="search-field">
+                <label><i class="fas fa-calendar"></i> إلى تاريخ الإشعار</label>
+                <input type="date" id="creditSearchDateTo">
+            </div>
+            <div class="search-field">
+                <label><i class="fas fa-tag"></i> الحالة</label>
+                <select id="creditSearchStatus">
+                    <option value="">الكل</option>
+                    <option value="FINAL">نهائي</option>
+                    <option value="DRAFT">مسودة</option>
+                </select>
+            </div>
+        </div>
+        <div class="search-actions">
+            <button class="btn btn-primary" onclick="applyCreditSearch()"><i class="fas fa-filter"></i> تطبيق البحث</button>
+            <button class="btn btn-secondary" onclick="resetCreditSearch()"><i class="fas fa-undo"></i> إعادة ضبط</button>
+        </div>
+    `;
+    // فتح جسم البحث تلقائيًا
+    if (!searchBody.classList.contains('show')) {
+        searchBody.classList.add('show');
+        const icon = advancedSearch.querySelector('#searchToggleIcon');
+        if (icon) icon.style.transform = 'rotate(180deg)';
+    }
+}
+
+// تطبيق البحث على إشعارات الخصم
+window.applyCreditSearch = function() {
+    const serial = document.getElementById('creditSearchSerial')?.value.trim().toLowerCase() || '';
+    const customer = document.getElementById('creditSearchCustomer')?.value.trim().toLowerCase() || '';
+    const invoiceNumber = document.getElementById('creditSearchInvoiceNumber')?.value.trim().toLowerCase() || '';
+    const dateFrom = document.getElementById('creditSearchDateFrom')?.value;
+    const dateTo = document.getElementById('creditSearchDateTo')?.value;
+    const status = document.getElementById('creditSearchStatus')?.value;
+
+    // الخطوة 1: تصفية حسب صلاحيات المستخدم (بدون البحث)
+    let filtered = filterCreditByUser(creditData);
+    
+    // الخطوة 2: تطبيق معايير البحث الإضافية
+    if (serial) {
+        filtered = filtered.filter(c => 
+            (c.serial && c.serial.toLowerCase().includes(serial)) || 
+            (c.draftNumber && c.draftNumber.toLowerCase().includes(serial)) ||
+            (c.finalNumber && c.finalNumber.toLowerCase().includes(serial))
+        );
+    }
+    if (customer) {
+        filtered = filtered.filter(c => (c.customer || '').toLowerCase().includes(customer));
+    }
+    if (invoiceNumber) {
+        filtered = filtered.filter(c => (c.invoiceFinalNumber || '').toLowerCase().includes(invoiceNumber));
+    }
+    if (dateFrom) {
+        const fromDate = new Date(dateFrom);
+        fromDate.setHours(0,0,0,0);
+        filtered = filtered.filter(c => {
+            if (!c.date) return false;
+            const d = new Date(c.date);
+            return d >= fromDate;
+        });
+    }
+    if (dateTo) {
+        const toDate = new Date(dateTo);
+        toDate.setHours(23,59,59,999);
+        filtered = filtered.filter(c => {
+            if (!c.date) return false;
+            const d = new Date(c.date);
+            return d <= toDate;
+        });
+    }
+    if (status) {
+        filtered = filtered.filter(c => c.status === status);
+    }
+    
+    filteredCreditData = filtered;
+    currentCreditPage = 1;
+    renderCreditData();
+    showNotification(`تم العثور على ${filtered.length} إشعار خصم`, filtered.length ? 'success' : 'info');
+};
+
+// إعادة ضبط البحث في إشعارات الخصم
+window.resetCreditSearch = function() {
+    document.getElementById('creditSearchSerial').value = '';
+    document.getElementById('creditSearchCustomer').value = '';
+    document.getElementById('creditSearchInvoiceNumber').value = '';
+    document.getElementById('creditSearchDateFrom').value = '';
+    document.getElementById('creditSearchDateTo').value = '';
+    document.getElementById('creditSearchStatus').value = '';
+    
+    // إعادة تعيين إلى القائمة المصفاة حسب الصلاحيات (بدون بحث)
+    filteredCreditData = filterCreditByUser(creditData);
+    currentCreditPage = 1;
+    renderCreditData();
+    showNotification('تم إعادة ضبط البحث', 'info');
+};
+
+
 // ============================================
 // التهيئة الرئيسية
 // ============================================
@@ -3634,7 +5676,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         checkSession();
         
         document.getElementById('fileInput')?.addEventListener('change', handleFileUpload);
-        document.getElementById('sortSelect')?.addEventListener('change', () => { currentSortField = document.getElementById('sortSelect').value; renderData(); });
+        document.getElementById('sortSelect')?.addEventListener('change', () => { 
+    currentSortField = document.getElementById('sortSelect').value; 
+    if (currentInvoiceType === INVOICE_TYPES.CREDIT) {
+        currentCreditSortField = currentSortField;
+        renderCreditData();
+    } else {
+        renderData();
+    }
+});
         document.getElementById('itemsPerPage')?.addEventListener('change', changeItemsPerPage);
         document.querySelectorAll('#searchFinalNumber, #searchDraftNumber, #searchCustomer, #searchVessel, #searchBlNumber, #searchContainer, #searchStatus, #searchDateFrom, #searchDateTo, #searchInvoiceType').forEach(input => input?.addEventListener('input', debounce(applyAdvancedSearch, 500)));
         window.addEventListener('click', e => { if (e.target === document.getElementById('invoiceModal')) window.closeModal(); });
