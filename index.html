@@ -150,6 +150,7 @@
                     <button class="btn btn-secondary" onclick="location.reload()">
                         <i class="fas fa-sync-alt"></i> إعادة تعيين
                     </button>
+					
                 </div>
 
                 <div class="db-controls" id="dbControls"></div>
@@ -161,9 +162,10 @@
 
             <!-- تبويبات أنواع الفواتير -->
             <div class="invoice-type-tabs">
-                <button class="type-tab active" onclick="switchInvoiceType('cash')">الفواتير النقدية</button>
-                <button class="type-tab" onclick="switchInvoiceType('postponed')">الفواتير الآجلة</button>
-            </div>
+				<button class="type-tab active" onclick="switchInvoiceType('cash')">الفواتير النقدية</button>
+				<button class="type-tab" onclick="switchInvoiceType('postponed')">الفواتير الآجلة</button>
+				<button class="type-tab" onclick="switchInvoiceType('credit')">إشعارات الخصم</button>
+			</div>
 
             <!-- تبويبات التقارير -->
             <div class="reports-tabs">
@@ -442,6 +444,11 @@
                         <input type="text" id="editContractCustomerId" placeholder="أدخل رقم العقد">
                         <small class="form-text">هذا الرقم يربط الفواتير الآجلة بالمستخدم</small>
                     </div>
+					<div class="form-group">
+						<label><i class="fas fa-id-card"></i> المعرفات الإضافية (customer-id)</label>
+						<input type="text" id="editCustomerIds" placeholder="أدخل المعرفات مفصولة بفواصل، مثال: MSC,202487288,user001">
+						<small class="form-text">هذه المعرفات تسمح للمستخدم برؤية الفواتير التي تحتوي على أي منها (سواء في payee-customer-id أو contract-customer-id).</small>
+					</div>
                     <div class="form-group">
                         <label>نوع المستخدم</label>
                         <select id="editUserType">
@@ -513,6 +520,18 @@
                     <input type="text" id="driveUsersFileId" placeholder="معرف ملف المستخدمين" value="1-ktLLXz1Febs44lB-aqfuNmTRs1GNB0w">
                     <small class="form-text">المعرف: 1-ktLLXz1Febs44lB-aqfuNmTRs1GNB0w</small>
                 </div>
+				
+				<hr>
+				<h3><i class="fas fa-tags"></i> ملف إشعارات الخصم</h3>
+				<div class="form-group">
+					<label><i class="fas fa-file"></i> اسم ملف إشعارات الخصم</label>
+					<input type="text" id="driveCreditFileName" placeholder="creditdata.txt" value="creditdata.txt">
+				</div>
+				<div class="form-group">
+					<label><i class="fas fa-id-card"></i> معرف ملف إشعارات الخصم</label>
+					<input type="text" id="driveCreditFileId" placeholder="معرف الملف" value="1WU9R9Yby0_QoJeulIgYRuCQk9XV-N_e1">
+					<small class="form-text">اتركه فارغًا للبحث التلقائي عند أول تحميل.</small>
+				</div>
                 
                 <div style="display: flex; gap: 10px; margin-top: 20px; flex-wrap: wrap;">
                     <button class="btn btn-secondary" onclick="testDriveConnection()" style="flex: 1;">
