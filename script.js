@@ -1669,18 +1669,53 @@ function clearSelectedInvoices() {
 function groupCashCharges(charges) {
     const sortedCharges = [...charges].sort((a, b) => (a['event-type-id'] || '').localeCompare(b['event-type-id'] || ''));
     const grouped = [], map = new Map();
+    
     sortedCharges.forEach(c => {
         const key = `${c.description || ''}-${c['event-type-id'] || ''}-${c['storage-days'] || 1}`;
         const storageDays = c['storage-days'] || 1;
+        
         if (map.has(key)) {
             const ex = map.get(key);
-            ex.quantity += 1; // كل بند يضيف 1
+            // ✅ لخدمة EMER_STORAGE نجمع الكميات الأصلية، وإلا نضيف 1
+            if (c['event-type-id'] === 'EMER_STORAGE') {
+                ex.quantity += (c.quantity || 1);
+            } else {
+                ex.quantity += 1;
+            }
             ex.amount += (c.amount || 0);
-            if (c.containerNumbers?.length) c.containerNumbers.forEach(cont => { if (!ex.containerNumbers.includes(cont)) ex.containerNumbers.push(cont); });
-            if (c['event-performed-from'] || c['event-performed-to']) ex.dates.push({ from: c['event-performed-from'] || '-', to: c['event-performed-to'] || '-', days: storageDays });
+            if (c.containerNumbers?.length) {
+                c.containerNumbers.forEach(cont => {
+                    if (!ex.containerNumbers.includes(cont)) ex.containerNumbers.push(cont);
+                });
+            }
+            if (c['event-performed-from'] || c['event-performed-to']) {
+                ex.dates.push({
+                    from: c['event-performed-from'] || '-',
+                    to: c['event-performed-to'] || '-',
+                    days: storageDays
+                });
+            }
         } else {
-            const newC = { ...c, quantity: 1, containerNumbers: [...(c.containerNumbers || [])], totalStorageDays: storageDays, dates: [] };
-            if (c['event-performed-from'] || c['event-performed-to']) newC.dates.push({ from: c['event-performed-from'] || '-', to: c['event-performed-to'] || '-', days: storageDays });
+            // ✅ تحديد الكمية الابتدائية: للـ EMER_STORAGE نستخدم الكمية الأصلية، وإلا 1
+            let initialQuantity = 1;
+            if (c['event-type-id'] === 'EMER_STORAGE') {
+                initialQuantity = c.quantity || 1;
+            }
+            
+            const newC = {
+                ...c,
+                quantity: initialQuantity,
+                containerNumbers: [...(c.containerNumbers || [])],
+                totalStorageDays: storageDays,
+                dates: []
+            };
+            if (c['event-performed-from'] || c['event-performed-to']) {
+                newC.dates.push({
+                    from: c['event-performed-from'] || '-',
+                    to: c['event-performed-to'] || '-',
+                    days: storageDays
+                });
+            }
             map.set(key, newC);
             grouped.push(newC);
         }
@@ -2275,15 +2310,17 @@ if (modalTitle) {
         const containerCount = charge.containerNumbers?.length || 0;
 
         let displayStorageDays;
-        if (isPostponed) {
-            if (charge['event-type-id'] === 'REEFER' || charge['event-type-id'] === 'STORAGE') {
-                displayStorageDays = charge.totalStorageDays;
-            } else {
-                displayStorageDays = 1;
-            }
-        } else {
-            displayStorageDays = charge.totalStorageDays;
-        }
+if (isPostponed) {
+    if (charge['event-type-id'] === 'REEFER' || charge['event-type-id'] === 'STORAGE') {
+        displayStorageDays = charge.totalStorageDays;
+    } else {
+        displayStorageDays = 1;
+    }
+} else {
+    // ✅ للفواتير النقدية: نستخدم storageDays الأصلي (من أول عنصر في المجموعة)
+    // لأن totalStorageDays قد يكون مجموع عدة بنود
+    displayStorageDays = charge['storage-days'] || 1;
+}
 
         if (isPostponed) {
             // التحقق مما إذا كانت الخدمة من نوع REEFER أو STORAGE
@@ -2300,16 +2337,25 @@ if (modalTitle) {
                 <td><strong>${formatNumberWithCommas(amountDisplay)}</strong></td>
                 <td>${containerCount > 0 ? `<i id="icon-${idx}" class="fas fa-chevron-down"></i> <span style="font-size:0.8em;">${containerCount}</span>` : ''}</td>
             </tr>`;
-        } else {
-            // الفواتير النقدية كما هي بدون تغيير
+                } else {
+            // الفواتير النقدية
             const chargeDate = charge['paid-thru-day'] || charge['created'] || '';
             const formattedChargeDate = chargeDate ? new Date(chargeDate).toLocaleDateString('ar-EG') : '-';
+            
+            let quantityToShow = charge.quantity || 1;
+            let storageDaysToShow = displayStorageDays;
+            
+            // ✅ فقط لخدمة EMER_STORAGE: نعرض الكمية الأصلية في أيام التخزين
+            if (charge['event-type-id'] === 'EMER_STORAGE') {
+                storageDaysToShow = charge.quantity || 1;  // الكمية الأصلية
+                quantityToShow = 1;  // العدد يبقى 1
+            }
             
             chargesRows += `<tr onclick="toggleContainers(${idx})" style="cursor: pointer;">
                 <td>${charge.description || '-'}</td>
                 <td>${charge['event-type-id'] || '-'}</td>
-                <td>${charge.quantity || 1}</td>
-                <td>${displayStorageDays}</td>
+                <td>${quantityToShow}</td>
+                <td>${storageDaysToShow}</td>
                 <td>${(charge['rate-billed'] || 0).toFixed(2)}</td>
                 <td><strong>${formatNumberWithCommas(amountDisplay)}</strong></td>
                 <td>${formattedChargeDate}</td>
