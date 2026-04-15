@@ -4067,6 +4067,12 @@ async function exportSelectedCreditPDF() {
     }
 
     const selectedItems = creditData.filter(item => selectedCreditNotes.has(item.serial));
+    const allowedItems = filterCreditByUser(selectedItems);
+    
+    if (allowedItems.length === 0) {
+        showNotification('لا توجد إشعارات مصرح بها للتصدير', 'error');
+        return;
+    }
     
     // التحقق من وجود المكتبات المطلوبة
     if (typeof window.jspdf === 'undefined' || typeof window.html2canvas === 'undefined') {
@@ -4074,10 +4080,12 @@ async function exportSelectedCreditPDF() {
         return;
     }
 
-    showProgress(`جاري تجهيز ${selectedItems.length} إشعار...`, 10);
+    showProgress(`جاري تجهيز ${allowedItems.length} إشعار...`, 10);
 
     try {
         const { jsPDF } = window.jspdf;
+        
+        // إنشاء PDF جديد
         const pdf = new jsPDF({
             orientation: 'portrait',
             unit: 'mm',
@@ -4087,114 +4095,50 @@ async function exportSelectedCreditPDF() {
 
         let currentPage = 0;
 
-        for (let i = 0; i < selectedItems.length; i++) {
-            const item = selectedItems[i];
+        for (let i = 0; i < allowedItems.length; i++) {
+            const item = allowedItems[i];
             
-            showProgress(`جاري تجهيز الإشعار ${i + 1} من ${selectedItems.length}...`, Math.round((i / selectedItems.length) * 100));
+            showProgress(`جاري تجهيز الإشعار ${i + 1} من ${allowedItems.length}...`, Math.round((i / allowedItems.length) * 100));
             
-            // إنشاء عنصر مؤقت لعرض الإشعار
-            const tempDiv = document.createElement('div');
-            tempDiv.style.position = 'absolute';
-            tempDiv.style.left = '-9999px';
-            tempDiv.style.top = '-9999px';
-            tempDiv.style.width = '1100px';
-            tempDiv.style.background = 'white';
-            tempDiv.style.padding = '20px';
-            tempDiv.style.direction = 'rtl';
+            // ✅ إنشاء HTML كامل للإشعار (بدون استخدام iframe)
+            const printHtml = generateCreditPrintHTML(item);
             
-            // إنشاء محتوى الإشعار باستخدام نفس تصميم showCreditDetails
-            const discountValue = item.amount * item.discount / 100;
-            const finalAmount = item.amount - discountValue;
-            const logoSrc = companyLogoBase64 ? companyLogoBase64 : '';
+            // ✅ إنشاء عنصر مؤقت في الذاكرة (ليس في DOM المرئي)
+            const tempContainer = document.createElement('div');
+            tempContainer.style.position = 'absolute';
+            tempContainer.style.left = '-9999px';
+            tempContainer.style.top = '-9999px';
+            tempContainer.style.width = '1100px';
+            tempContainer.style.backgroundColor = '#ffffff';
+            tempContainer.style.padding = '20px';
+            tempContainer.style.direction = 'rtl';
+            tempContainer.innerHTML = printHtml;
             
-            tempDiv.innerHTML = `
-                <div style="max-width: 1100px; margin: 0 auto; background: white; font-family: 'Segoe UI', sans-serif;">
-                    <div style="background: linear-gradient(135deg, #1e3c72, #2a5298); color: white; padding: 15px 20px; border-radius: 10px; margin-bottom: 15px; display: flex; align-items: center; justify-content: space-between;">
-                        <div style="display: flex; align-items: center; gap: 15px;">
-                            <div style="width: 70px; height: 70px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; border: 3px solid #ffd700; overflow: hidden;">
-                                ${logoSrc ? `<img src="${logoSrc}" style="width:100%; height:100%; object-fit:cover;">` : '<i class="fas fa-ship" style="font-size:2em;"></i>'}
-                            </div>
-                            <div>
-                                <h2 style="color: #ffd700; margin: 0;">${COMPANY_INFO.name}</h2>
-                                <p style="margin: 3px 0; font-size: 0.8em;">${COMPANY_INFO.nameEn}</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div style="background: linear-gradient(135deg, #f72585, #b5179e); color: white; padding: 12px; text-align: center; border-radius: 8px; margin-bottom: 15px;">
-                        <h2 style="font-size: 1.2em; margin: 0;">إشعار خصم رقم: ${item.serial || '-'}</h2>
-                        <p style="margin: 5px 0 0; font-size: 0.9em;">التاريخ: ${item.date || 'غير محدد'}</p>
-                    </div>
-                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 15px;">
-                        <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-right: 4px solid #f72585;">
-                            <h4 style="color: #f72585; margin-bottom: 8px;">بيانات العميل</h4>
-                            <div><strong>الاسم:</strong> ${item.customer || '-'}</div>
-                        </div>
-                        <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-right: 4px solid #f72585;">
-                            <h4 style="color: #f72585; margin-bottom: 8px;">بيانات الفاتورة</h4>
-                            <div><strong>رقم الفاتورة:</strong> ${item.invoiceNumber || '-'}</div>
-                        </div>
-                        <div style="background: #f8f9fa; padding: 12px; border-radius: 8px; border-right: 4px solid #f72585;">
-                            <h4 style="color: #f72585; margin-bottom: 8px;">المبالغ</h4>
-                            <div><strong>العملة:</strong> ${item.currency || 'EGP'}</div>
-                        </div>
-                    </div>
-                    <div style="display: flex; justify-content: flex-end; margin: 20px 0;">
-                        <div style="width: 280px; background: #f8f9fa; padding: 12px; border-radius: 8px;">
-                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #dee2e6;">
-                                <span>المبلغ الأصلي:</span>
-                                <span>${formatNumberWithCommas(item.amount.toFixed(2))} ${item.currency || 'EGP'}</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #dee2e6;">
-                                <span>نسبة الخصم:</span>
-                                <span>${item.discount}%</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #dee2e6;">
-                                <span>قيمة الخصم:</span>
-                                <span>${formatNumberWithCommas(discountValue.toFixed(2))} ${item.currency || 'EGP'}</span>
-                            </div>
-                            <div style="display: flex; justify-content: space-between; padding: 8px 0; font-weight: bold; color: #f72585;">
-                                <span>المبلغ بعد الخصم:</span>
-                                <span>${formatNumberWithCommas(finalAmount.toFixed(2))} ${item.currency || 'EGP'}</span>
-                            </div>
-                        </div>
-                    </div>
-                    <div style="display: flex; justify-content: space-around; margin: 20px 0 15px; padding: 10px 0; border-top: 2px dashed #dee2e6;">
-                        <div style="text-align: center;">
-                            <div style="color: #f72585; font-weight: bold;">معد الإشعار</div>
-                            <div>${item.preparedBy || 'النظام'}</div>
-                            <div style="font-size: 0.7em;">${new Date().toLocaleDateString('ar-EG')}</div>
-                        </div>
-                        <div style="text-align: center;">
-                            <div style="color: #f72585; font-weight: bold;">المراجع</div>
-                            <div>${item.reviewedBy || 'النظام'}</div>
-                        </div>
-                        <div style="text-align: center;">
-                            <div style="color: #f72585; font-weight: bold;">الختم</div>
-                            <div style="font-size: 2em; opacity: 0.5;"><i class="fas fa-certificate"></i></div>
-                        </div>
-                    </div>
-                    <div style="text-align: center; padding: 10px; border-top: 2px solid #e9ecef; color: #6c757d; font-size: 0.7em;">
-                        <p>شكراً لتعاملكم مع ${COMPANY_INFO.name}</p>
-                        <p>تم إنشاء هذا الإشعار إلكترونياً</p>
-                    </div>
-                </div>
-            `;
+            // إضافة العنصر إلى DOM (مؤقتاً)
+            document.body.appendChild(tempContainer);
             
-            document.body.appendChild(tempDiv);
-            const element = tempDiv.firstChild;
+            // ✅ انتظار تحميل العنصر بالكامل
+            await new Promise(resolve => setTimeout(resolve, 300));
             
             try {
-                const canvas = await html2canvas(element, {
+                // ✅ تحويل العنصر إلى Canvas
+                const canvas = await html2canvas(tempContainer, {
                     scale: 1.5,
                     backgroundColor: '#ffffff',
                     logging: false,
-                    useCORS: true
+                    useCORS: true,
+                    allowTaint: false,
+                    imageTimeout: 0,
+                    windowWidth: tempContainer.scrollWidth,
+                    windowHeight: tempContainer.scrollHeight
                 });
                 
+                // إضافة صفحة جديدة إذا لم تكن الصفحة الأولى
                 if (currentPage > 0) {
                     pdf.addPage();
                 }
                 
+                // إضافة الصورة إلى PDF
                 const imgData = canvas.toDataURL('image/jpeg', 0.85);
                 const pdfWidth = pdf.internal.pageSize.getWidth();
                 const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
@@ -4204,22 +4148,28 @@ async function exportSelectedCreditPDF() {
                 
             } catch (err) {
                 console.error('خطأ في تصدير الإشعار:', err);
+                showNotification(`خطأ في تصدير الإشعار ${item.serial}: ${err.message}`, 'error');
             } finally {
-                document.body.removeChild(tempDiv);
+                // ✅ إزالة العنصر المؤقت من DOM
+                if (tempContainer && tempContainer.parentNode) {
+                    document.body.removeChild(tempContainer);
+                }
             }
         }
         
         showProgress('جاري حفظ الملف...', 100);
         
+        // تحديد اسم الملف
         let fileName;
-        if (selectedItems.length === 1) {
-            fileName = `إشعار_خصم_${selectedItems[0].serial}.pdf`;
+        if (allowedItems.length === 1) {
+            fileName = `إشعار_خصم_${allowedItems[0].serial}.pdf`;
         } else {
             fileName = `إشعارات_خصم_${new Date().toLocaleDateString('ar-EG').replace(/\//g, '-')}.pdf`;
         }
         
+        // حفظ PDF
         pdf.save(fileName);
-        showNotification(`تم تصدير ${selectedItems.length} إشعار بنجاح`, 'success');
+        showNotification(`تم تصدير ${allowedItems.length} إشعار بنجاح`, 'success');
         
     } catch (error) {
         console.error('خطأ في تصدير PDF:', error);
