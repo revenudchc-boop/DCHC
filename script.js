@@ -4054,17 +4054,16 @@ function renderTableView(data) {
                     <button class="btn btn-secondary" onclick="deselectAllInvoices()"><i class="fas fa-times"></i> إلغاء الكل</button>
                 </div>
                 <div class="export-buttons">
-					<span id="selectedCount" style="margin-left:15px; font-weight:bold;">0</span> فاتورة محددة
-					<button class="btn btn-primary" onclick="exportSelectedInvoices()" id="exportSelectedBtn" disabled><i class="fas fa-file-pdf"></i> PDF</button>
-					<button class="btn btn-success" onclick="exportSelectedInvoicesExcel()" id="exportSelectedExcelBtn" disabled><i class="fas fa-file-excel"></i> Excel</button>
-					<button class="btn btn-info" onclick="exportSelectedContainers()" id="exportContainersBtn" disabled style="background: #4cc9f0; color: white;">
-						<i class="fas fa-container-storage"></i> تصدير الحاويات
-					</button>
-					<!-- ✅ زر واحد فقط: مطالبة تحصيل -->
-					<button class="btn btn-secondary" onclick="exportSelectedReport()">
-						<i class="fas fa-file-invoice-dollar"></i> مطالبة تحصيل
-					</button>
-				</div>
+                    <span id="selectedCount" style="margin-left:15px; font-weight:bold;">0</span> فاتورة محددة
+                    <button class="btn btn-primary" onclick="exportSelectedInvoices()" id="exportSelectedBtn" disabled><i class="fas fa-file-pdf"></i> PDF</button>
+                    <button class="btn btn-success" onclick="exportSelectedInvoicesExcel()" id="exportSelectedExcelBtn" disabled><i class="fas fa-file-excel"></i> Excel</button>
+                    <button class="btn btn-info" onclick="exportSelectedContainers()" id="exportContainersBtn" disabled style="background: #4cc9f0; color: white;">
+                        <i class="fas fa-container-storage"></i> تصدير الحاويات
+                    </button>
+                    <button class="btn btn-secondary" onclick="exportSelectedReport()">
+                        <i class="fas fa-file-invoice-dollar"></i> مطالبة تحصيل
+                    </button>
+                </div>
             </div>
             <table class="data-table">
                 <thead>
@@ -4073,6 +4072,7 @@ function renderTableView(data) {
                         <th style="width:50px;">معاينة</th>
                         <th>الرقم النهائي</th>
                         <th>رقم المسودة</th>
+                        <th>تاريخ الفاتورة</th>   <!-- ✅ تم النقل إلى هنا -->
                         <th>العميل</th>
                         <th>السفينة</th>
                         <th>${currentInvoiceType === INVOICE_TYPES.POSTPONED ? 'IB ID / OB ID' : 'رقم البوليصة'}</th>
@@ -4106,28 +4106,31 @@ function renderTableView(data) {
         const isSelected = selectedInvoices.has(idx) ? 'checked' : '';
         const selectedClass = isSelected ? 'selected-row' : '';
         
-        // مفتاح فريد للفاتورة (لحالة المعاينة)
-		const viewKey = getInvoiceKey(inv);
+        const viewKey = getInvoiceKey(inv);
         const isViewed = viewedInvoices.has(viewKey) ? 'checked' : '';
+        
+        const invoiceDateRaw = inv['finalized-date'] || inv['created'] || '';
+        const invoiceDate = invoiceDateRaw ? new Date(invoiceDateRaw).toLocaleDateString('ar-EG') : '-';
         
         html += `<tr onclick="window.handleRowClick(${idx}, event)" class="${selectedClass}" data-index="${idx}" data-key="${viewKey}">
             <td onclick="event.stopPropagation()"><input type="checkbox" class="invoice-checkbox" data-index="${idx}" ${isSelected} onchange="updateSelectedInvoices(${idx}, this.checked)"></td>
             <td class="viewed-cell" onclick="event.stopPropagation()">
                 <input type="checkbox" class="viewed-checkbox" data-key="${viewKey}" ${isViewed} 
                        onchange="toggleInvoiceViewed('${viewKey}', this.checked, '${finalNum}', '${draftNum}')">
-            </td>
-            <td>${inv['final-number'] || '-'} (${invoiceTypeDisplay})</td>
-            <td>${inv['draft-number'] || '-'}</td>
-            <td>${(inv['payee-customer-id'] || '-').substring(0,20)}</td>
-            <td>${inv['key-word1'] || '-'}</td>
-            <td>${inv['key-word2'] || '-'}</td>
-            <td>${inv['flex-date-02'] ? new Date(inv['flex-date-02']).toLocaleDateString('ar-EG') : '-'}</td>
-            <td>${formatNumberWithCommas(totalOriginal.toFixed(2))}</td>
-            <td>${formatNumberWithCommas(displayAmount)} ${displayCurrency}</td>
+            <\/td>
+            <td>${inv['final-number'] || '-'} (${invoiceTypeDisplay})<\/td>
+            <td>${inv['draft-number'] || '-'}<\/td>
+            <td>${invoiceDate}<\/td>   <!-- ✅ تم النقل إلى هنا -->
+            <td>${(inv['payee-customer-id'] || '-').substring(0,20)}<\/td>
+            <td>${inv['key-word1'] || '-'}<\/td>
+            <td>${inv['key-word2'] || '-'}<\/td>
+            <td>${inv['flex-date-02'] ? new Date(inv['flex-date-02']).toLocaleDateString('ar-EG') : '-'}<\/td>
+            <td>${formatNumberWithCommas(totalOriginal.toFixed(2))}<\/td>
+            <td>${formatNumberWithCommas(displayAmount)} ${displayCurrency}<\/td>
         </tr>`;
     });
     
-    html += '</tbody></table></div>';
+    html += '</tbody><table></div>';
     document.getElementById('dataViewContainer').innerHTML = html;
     updateSelectedCount();
 }
