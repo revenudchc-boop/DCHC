@@ -52,6 +52,12 @@ let viewModeCredit = 'cards';
 let selectedCreditNotes = new Set();
 // متغير لتخزين الفواتير التي تمت معاينتها
 let viewedInvoices = new Set();
+// ============================================
+// إعدادات التحديث التلقائي (Auto Refresh)
+// ============================================
+let autoRefreshEnabled = false;      // هل التحديث التلقائي مفعل؟
+let autoRefreshInterval = 5;         // الفاصل الزمني بالدقائق (الافتراضي 5 دقائق)
+let autoRefreshTimer = null;         // معرف المؤقت
 
 // نظام المستخدمين
 let users = [];
@@ -346,11 +352,44 @@ function formatNumberWithCommas(number) {
 const DRIVE_CONFIG = {
     clientId: '835944620738-jcl9dh4j2fjuut18vhvik3605t9k20m9.apps.googleusercontent.com',
     clientSecret: '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',
-    refreshToken: '1//03R8lpZHRni85CgYIARAAGAMSNwF-L9IrOF3fGtkQFkR2pEoXauIphw4zdzJODZpAIGCwvh3ge2KXV06FvJCLhjIfu66QVQqMK8s',
+    refreshToken: '',  // سيتم تعبئته من ملف refreshtoken.txt على Drive
     fileId: '1DuActXaKPadEJ843EUlEAAmU7CBHQAVt'
 };
 
 let driveAccessToken = null;
+
+// تحميل Refresh Token من ملف نصي على Drive
+async function loadRefreshTokenFromDrive() {
+    if (!driveConfig.apiKey || !driveConfig.folderId) return false;
+    const fileName = 'refreshtoken.txt';
+    try {
+        // البحث عن الملف في المجلد
+        const query = encodeURIComponent(`'${driveConfig.folderId}' in parents and name='${fileName}' and trashed=false`);
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&key=${driveConfig.apiKey}&fields=files(id,name)`);
+        if (!res.ok) throw new Error('فشل البحث عن ملف التوكن');
+        const data = await res.json();
+        if (!data.files || data.files.length === 0) {
+            console.error('❌ لم يتم العثور على ملف refreshtoken.txt في المجلد');
+            return false;
+        }
+        const fileId = data.files[0].id;
+        // تحميل محتوى الملف
+        const contentRes = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${driveConfig.apiKey}`);
+        if (!contentRes.ok) throw new Error('فشل تحميل محتوى ملف التوكن');
+        const token = await contentRes.text();
+        const cleanToken = token.trim();
+        if (!cleanToken) {
+            throw new Error('ملف التوكن فارغ');
+        }
+        // تحديث الثابت العام
+        DRIVE_CONFIG.refreshToken = cleanToken;
+        console.log('✅ تم تحميل Refresh Token من Drive بنجاح');
+        return true;
+    } catch (error) {
+        console.error('❌ خطأ في تحميل Refresh Token:', error);
+        return false;
+    }
+}
 
 // تجديد Access Token باستخدام Refresh Token
 async function refreshAccessToken() {
@@ -841,7 +880,17 @@ async function exportSelectedReport() {
 // ============================================
 // عرض التقرير في نافذة معاينة (Modal)
 // ============================================
+// ============================================
+// عرض التقرير في نافذة معاينة (Modal)
+// ============================================
 function showReportPreview(reportHtmlWithSummary, reportHtmlWithoutSummary) {
+    // إزالة أي نافذة معاينة سابقة
+    const existingModal = document.getElementById('reportPreviewModal');
+    if (existingModal) {
+        existingModal.remove();
+    }
+
+    // إنشاء النافذة المنبثقة الرئيسية
     const modal = document.createElement('div');
     modal.id = 'reportPreviewModal';
     modal.style.cssText = `
@@ -851,14 +900,16 @@ function showReportPreview(reportHtmlWithSummary, reportHtmlWithoutSummary) {
         width: 100%;
         height: 100%;
         background: rgba(0,0,0,0.7);
-        z-index: 100000;
+        z-index: 99999;
         display: flex;
         justify-content: center;
         align-items: center;
         direction: rtl;
     `;
     
+    // إنشاء محتوى النافذة الداخلي
     const modalContent = document.createElement('div');
+    modalContent.id = 'reportPreviewModalContent';
     modalContent.style.cssText = `
         background: white;
         width: 90%;
@@ -869,8 +920,10 @@ function showReportPreview(reportHtmlWithSummary, reportHtmlWithoutSummary) {
         flex-direction: column;
         overflow: hidden;
         box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        position: relative;
     `;
     
+    // إنشاء رأس النافذة
     const modalHeader = document.createElement('div');
     modalHeader.style.cssText = `
         display: flex;
@@ -890,6 +943,7 @@ function showReportPreview(reportHtmlWithSummary, reportHtmlWithoutSummary) {
         </div>
     `;
     
+    // إضافة الأنماط للأزرار
     const style = document.createElement('style');
     style.textContent = `
         .btn-preview {
@@ -920,22 +974,98 @@ function showReportPreview(reportHtmlWithSummary, reportHtmlWithoutSummary) {
     `;
     modalContent.appendChild(style);
     
+    // إنشاء منطقة عرض التقرير
     const contentArea = document.createElement('div');
     contentArea.className = 'report-content';
-    contentArea.innerHTML = reportHtmlWithSummary;  // ✅ المعاينة تعرض النسخة الكاملة
+    contentArea.innerHTML = reportHtmlWithSummary;
     
+    // تجميع النافذة
     modalContent.appendChild(modalHeader);
     modalContent.appendChild(contentArea);
     modal.appendChild(modalContent);
     document.body.appendChild(modal);
     
+    // إضافة شريط تقدم مخصص داخل النافذة (وليس في body)
+    let progressContainer = null;
+    let progressMessage = null;
+    
+    function showProgressInsideModal(message, percentage) {
+        if (!progressContainer) {
+            progressContainer = document.createElement('div');
+            progressContainer.id = 'modalProgressContainer';
+            progressContainer.style.cssText = `
+                position: absolute;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 4px;
+                background: #e0e0e0;
+                z-index: 1000;
+                display: none;
+            `;
+            
+            const progressBar = document.createElement('div');
+            progressBar.id = 'modalProgressBar';
+            progressBar.style.cssText = `
+                height: 100%;
+                background: linear-gradient(90deg, #0F9D58, #0B7D44);
+                width: 0%;
+                transition: width 0.3s ease;
+            `;
+            progressContainer.appendChild(progressBar);
+            
+            progressMessage = document.createElement('div');
+            progressMessage.id = 'modalProgressMessage';
+            progressMessage.style.cssText = `
+                position: absolute;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                background: rgba(0,0,0,0.85);
+                color: white;
+                padding: 15px 30px;
+                border-radius: 50px;
+                z-index: 1001;
+                display: none;
+                font-size: 1em;
+                white-space: nowrap;
+                box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+            `;
+            
+            modalContent.appendChild(progressContainer);
+            modalContent.appendChild(progressMessage);
+        }
+        
+        progressContainer.style.display = 'block';
+        progressMessage.style.display = 'block';
+        progressContainer.querySelector('#modalProgressBar').style.width = percentage + '%';
+        progressMessage.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${message}`;
+        
+        if (percentage >= 100) {
+            setTimeout(() => {
+                if (progressContainer) progressContainer.style.display = 'none';
+                if (progressMessage) progressMessage.style.display = 'none';
+            }, 1500);
+        }
+    }
+    
+    function hideProgressInsideModal() {
+        if (progressContainer) progressContainer.style.display = 'none';
+        if (progressMessage) progressMessage.style.display = 'none';
+    }
+    
     // إغلاق النافذة
-    document.getElementById('closePreviewBtn').onclick = () => modal.remove();
+    document.getElementById('closePreviewBtn').onclick = () => {
+        modal.remove();
+    };
+    
     modal.addEventListener('click', (e) => {
-        if (e.target === modal) modal.remove();
+        if (e.target === modal) {
+            modal.remove();
+        }
     });
     
-    // طباعة (تستخدم النسخة الكاملة مع البطاقات)
+    // طباعة
     document.getElementById('printReportBtn').onclick = () => {
         const printWindow = window.open('', '_blank', 'width=1100,height=800');
         printWindow.document.write(reportHtmlWithSummary);
@@ -944,94 +1074,81 @@ function showReportPreview(reportHtmlWithSummary, reportHtmlWithoutSummary) {
         setTimeout(() => printWindow.print(), 500);
     };
     
-    // تصدير PDF (يستخدم النسخة بدون بطاقات)
+    // تصدير PDF
     document.getElementById('downloadReportPdfBtn').onclick = async () => {
-        // استخدام الدالة المساعدة لتصدير PDF (يمكنك استخدام نفس الكود السابق مع splitReportIntoPages)
-
-}
-    
-// ✅ تصدير PDF (الكود الكامل كما هو، بدون تكرار)
-    document.getElementById('downloadReportPdfBtn').onclick = async () => {
-        // التأكد من وجود المكتبات
         if (typeof window.jspdf === 'undefined' || typeof window.html2canvas === 'undefined') {
             showNotification('مكتبات PDF غير متوفرة، يرجى تحديث الصفحة', 'error');
             return;
         }
-    
-        // تقسيم التقرير إلى صفحات (مع إجمالي الصفحة والإجمالي العام وترقيم الصفحات)
-        const pages = splitReportIntoPages(reportHtmlWithoutSummary, 15); // ✅ استخدم reportHtmlWithoutSummary بدلاً من reportHtml
         
-        if (pages.length === 0) {
-            showNotification('لا توجد بيانات للتقرير', 'error');
-            return;
-        }
-
-    
-    showProgress('جاري إنشاء التقرير...', 10);
-    const { jsPDF } = window.jspdf;
-    const pdf = new jsPDF({
-        orientation: 'landscape',
-        unit: 'mm',
-        format: 'a4',
-        compress: true
-    });
-    
-    const margin = 10; // هوامش علوية وسفلية (ملم)
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const contentWidth = pdfWidth - (margin * 2);
-    
-    try {
-        for (let idx = 0; idx < pages.length; idx++) {
-            const pageHtml = pages[idx].html;
+        showProgressInsideModal('جاري إنشاء التقرير...', 10);
+        
+        try {
+            const pages = splitReportIntoPages(reportHtmlWithoutSummary, 15);
+            if (pages.length === 0) {
+                showNotification('لا توجد بيانات للتقرير', 'error');
+                return;
+            }
             
-            // إنشاء عنصر مؤقت للصفحة الحالية
-            const tempDiv = document.createElement('div');
-            tempDiv.style.position = 'absolute';
-            tempDiv.style.left = '-9999px';
-            tempDiv.style.top = '-9999px';
-            tempDiv.style.width = '1100px';
-            tempDiv.style.background = 'white';
-            tempDiv.style.padding = '20px';
-            tempDiv.style.direction = 'rtl';
-            tempDiv.innerHTML = pageHtml;
-            document.body.appendChild(tempDiv);
-            
-            await new Promise(resolve => setTimeout(resolve, 150));
-            
-            const canvas = await html2canvas(tempDiv, {
-                scale: 2.2,
-                backgroundColor: '#ffffff',
-                logging: false,
-                useCORS: true,
-                windowWidth: tempDiv.scrollWidth,
-                windowHeight: tempDiv.scrollHeight
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF({
+                orientation: 'landscape',
+                unit: 'mm',
+                format: 'a4',
+                compress: true
             });
             
-            const imgData = canvas.toDataURL('image/jpeg', 0.9);
-            const imgHeight = (canvas.height * contentWidth) / canvas.width;
+            const margin = 10;
+            const pdfWidth = pdf.internal.pageSize.getWidth();
+            const contentWidth = pdfWidth - (margin * 2);
             
-            if (idx > 0) pdf.addPage();
-            pdf.addImage(imgData, 'JPEG', margin, margin, contentWidth, imgHeight);
+            for (let idx = 0; idx < pages.length; idx++) {
+                const pageHtml = pages[idx].html;
+                
+                const tempDiv = document.createElement('div');
+                tempDiv.style.position = 'absolute';
+                tempDiv.style.left = '-9999px';
+                tempDiv.style.top = '-9999px';
+                tempDiv.style.width = '1100px';
+                tempDiv.style.background = 'white';
+                tempDiv.style.padding = '20px';
+                tempDiv.style.direction = 'rtl';
+                tempDiv.innerHTML = pageHtml;
+                document.body.appendChild(tempDiv);
+                
+                await new Promise(resolve => setTimeout(resolve, 150));
+                
+                const canvas = await html2canvas(tempDiv, {
+                    scale: 2.2,
+                    backgroundColor: '#ffffff',
+                    logging: false,
+                    useCORS: true,
+                    windowWidth: tempDiv.scrollWidth,
+                    windowHeight: tempDiv.scrollHeight
+                });
+                
+                const imgData = canvas.toDataURL('image/jpeg', 0.9);
+                const imgHeight = (canvas.height * contentWidth) / canvas.width;
+                
+                if (idx > 0) pdf.addPage();
+                pdf.addImage(imgData, 'JPEG', margin, margin, contentWidth, imgHeight);
+                
+                document.body.removeChild(tempDiv);
+                
+                showProgressInsideModal(`جاري إنشاء الصفحة ${idx + 1} من ${pages.length}...`, Math.round(((idx + 1) / pages.length) * 100));
+            }
             
-            document.body.removeChild(tempDiv);
+            const fileName = `تقرير_فواتير_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.pdf`;
+            pdf.save(fileName);
+            showNotification(`تم تصدير التقرير (${pages.length} صفحات) بنجاح`, 'success');
+            
+        } catch (err) {
+            console.error(err);
+            showNotification('حدث خطأ في تصدير PDF', 'error');
+        } finally {
+            hideProgressInsideModal();
         }
-        
-        const fileName = `تقرير_فواتير_${new Date().toISOString().slice(0,19).replace(/:/g, '-')}.pdf`;
-        pdf.save(fileName);
-        showNotification(`تم تصدير التقرير (${pages.length} صفحات) بنجاح`, 'success');
-    } catch (err) {
-        console.error(err);
-        showNotification('حدث خطأ في تصدير PDF', 'error');
-    } finally {
-        hideProgress();
-    }
-};
-
-    
-    // إغلاق النافذة عند النقر خارج المحتوى
-    modal.addEventListener('click', (e) => {
-        if (e.target === modal) modal.remove();
-    });
+    };
 }
 
 // ============================================
@@ -1069,7 +1186,7 @@ async function loadLogoFromDrive() {
 // ============================================
 // دوال شريط التقدم
 // ============================================
-function showProgress(message, percentage) {
+function showProgress(message, percentage, parentElement = null) {
     let container = document.getElementById('progressBarContainer');
     let bar = document.getElementById('progressBar');
     let msg = document.getElementById('progressMessage');
@@ -1078,19 +1195,27 @@ function showProgress(message, percentage) {
         container = document.createElement('div');
         container.id = 'progressBarContainer';
         container.className = 'progress-bar-container';
-        container.style.zIndex = '100001';  // ✅ إضافة هذا السطر
+        container.style.cssText = 'position: absolute; top: 0; left: 0; width: 100%; height: 4px; background: #e0e0e0; z-index: 100; display: none;';
         
         bar = document.createElement('div');
         bar.id = 'progressBar';
         bar.className = 'progress-bar';
+        bar.style.cssText = 'height: 100%; background: linear-gradient(90deg, #0F9D58, #0B7D44); width: 0%; transition: width 0.3s ease;';
         container.appendChild(bar);
-        document.body.appendChild(container);
 
         msg = document.createElement('div');
         msg.id = 'progressMessage';
         msg.className = 'progress-message';
-        msg.style.zIndex = '100001';  // ✅ إضافة هذا السطر
-        document.body.appendChild(msg);
+        msg.style.cssText = 'position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); background: white; padding: 15px 30px; border-radius: 50px; box-shadow: 0 5px 20px rgba(0,0,0,0.3); z-index: 101; display: none; font-size: 1em; white-space: nowrap;';
+        
+        // نضيف العناصر إلى parentElement المحدد
+        if (parentElement) {
+            parentElement.appendChild(container);
+            parentElement.appendChild(msg);
+        } else {
+            document.body.appendChild(container);
+            document.body.appendChild(msg);
+        }
     }
 
     container.style.display = 'block';
@@ -1109,7 +1234,12 @@ function showProgress(message, percentage) {
 function hideProgress() {
     const container = document.getElementById('progressBarContainer');
     const msg = document.getElementById('progressMessage');
-    if (container) container.style.display = 'none';
+    if (container) {
+        container.style.display = 'none';
+        // اختيارياً: إزالة العناصر بالكامل بعد الإخفاء
+        // container.remove();
+        // msg.remove();
+    }
     if (msg) msg.style.display = 'none';
 }
 
@@ -1222,34 +1352,74 @@ async function saveUsersToDrive() {
     } finally { setTimeout(hideProgress, 1500); }
 }
 
-function loadUsersFromBackup() {
-    const backup = localStorage.getItem('backupUsers');
-    if (backup) try { users = JSON.parse(backup); return true; } catch { return false; }
-    return false;
-}
-
-function loadDefaultUsers() {
-    users = [
-        { id: 'user_admin', username: 'admin', email: 'admin@dchc-egdam.com', taxNumber: 'ADMIN001', contractCustomerId: 'ADMIN001', customerIds: [], userType: 'admin', password: 'admin123', status: 'active', createdAt: new Date().toISOString(), lastLogin: null },
-        { id: 'user_accountant', username: 'accountant', email: 'accountant@dchc-egdam.com', taxNumber: 'ACC001', contractCustomerId: 'ACC001', customerIds: [], userType: 'accountant', password: 'acc123', status: 'active', createdAt: new Date().toISOString(), lastLogin: null },
-        { id: 'msc', username: 'msc', email: 'customer@example.com', taxNumber: '202487288', contractCustomerId: 'MSC', customerIds: ['MSC', '202487288'], userType: 'customer', password: 'msc123', status: 'active', createdAt: new Date().toISOString(), lastLogin: null },
-        { id: 'one', username: 'one', email: 'accountant@dchc-egdam.com', taxNumber: '374380139', contractCustomerId: 'ONE', customerIds: ['ONE', '374380139'], userType: 'accountant', password: 'one123', status: 'active', createdAt: new Date().toISOString(), lastLogin: null },
-        { id: 'zim', username: 'zim', email: 'zim@gmail.com', taxNumber: '123456789', contractCustomerId: 'zim', customerIds: ['zim', '123456789'], userType: 'customer', password: 'zim123', status: 'active', createdAt: new Date().toISOString(), lastLogin: null }
-    ];
-    showNotification('تم استخدام المستخدمين الافتراضيين', 'warning');
-}
-
-async function loadUsers(forceRefresh = false) {
-    if (forceRefresh) {
-        if (await loadUsersFromDrive()) showNotification('تم تحديث المستخدمين', 'success');
-        else if (!loadUsersFromBackup()) loadDefaultUsers();
-    } else {
-        if (!await loadUsersFromDrive()) {
-            if (!loadUsersFromBackup()) loadDefaultUsers();
-        }
+// دالة مساعدة لفك تشفير Base64 (للاستخدام في حالة الطوارئ فقط)
+function decodeBase64(encoded) {
+    try {
+        return atob(encoded);
+    } catch(e) {
+        return encoded;
     }
 }
 
+// تحميل النسخة الاحتياطية من localStorage
+function loadUsersFromBackup() {
+    const backup = localStorage.getItem('backupUsers');
+    if (backup) {
+        try { 
+            users = JSON.parse(backup); 
+            return true; 
+        } catch { 
+            return false; 
+        }
+    }
+    return false;
+}
+
+// (ملغاة) لم نعد نستخدم مستخدمين افتراضيين متعددين
+// function loadDefaultUsers() { ... }  // تم حذفها نهائياً
+
+// تحميل المستخدمين (الاعتماد الأساسي على Drive)
+async function loadUsers(forceRefresh = false) {
+    // محاولة التحميل من Drive أولاً
+    let loaded = false;
+    if (forceRefresh) {
+        loaded = await loadUsersFromDrive();
+    } else {
+        loaded = await loadUsersFromDrive();
+    }
+    
+    if (loaded) {
+        // نجح التحميل من Drive
+        if (forceRefresh) showNotification('تم تحديث المستخدمين', 'success');
+        return;
+    }
+    
+    // فشل التحميل من Drive → نحاول من النسخة الاحتياطية المحلية
+    if (loadUsersFromBackup()) {
+        console.warn('⚠️ تم تحميل المستخدمين من النسخة الاحتياطية المحلية');
+        showNotification('تم تحميل المستخدمين من النسخة الاحتياطية', 'warning');
+        return;
+    }
+    
+    // في حالة عدم وجود أي بيانات (لا Drive ولا نسخة احتياطية)، نضيف مديراً احتياطياً واحداً فقط
+    console.error('❌ فشل تحميل المستخدمين من Drive والنسخة الاحتياطية. سيتم إنشاء مدير احتياطي.');
+    users = [{
+        id: 'user_admin_emergency',
+        username: 'admin',
+        email: 'admin@emergency.local',
+        taxNumber: decodeBase64('QURNSU4wMDE='),      // ADMIN001
+        contractCustomerId: decodeBase64('QURNSU4wMDE='),
+        customerIds: [],
+        userType: 'admin',
+        password: decodeBase64('YWRtaW4xMjM='),       
+        status: 'active',
+        createdAt: new Date().toISOString(),
+        lastLogin: null
+    }];
+    showNotification('تم إنشاء مدير احتياطي بسبب فشل تحميل المستخدمين', 'warning');
+}
+
+// تحديث المستخدمين يدوياً من Drive (للمدير فقط)
 window.refreshUsersFromDrive = async function() {
     if (!currentUser || currentUser.userType !== 'admin') {
         showNotification('غير مصرح لك بتحديث المستخدمين', 'error');
@@ -1260,8 +1430,13 @@ window.refreshUsersFromDrive = async function() {
         renderUsersTable();
         showNotification('تم تحديث المستخدمين', 'success');
     } else {
-        if (loadUsersFromBackup()) renderUsersTable();
-        else showNotification('فشل التحديث', 'error');
+        // إذا فشل التحديث من Drive، نحاول جلب من النسخة الاحتياطية (إن وجدت)
+        if (loadUsersFromBackup()) {
+            renderUsersTable();
+            showNotification('تم تحميل المستخدمين من النسخة الاحتياطية', 'warning');
+        } else {
+            showNotification('فشل تحديث المستخدمين ولا توجد نسخة احتياطية', 'error');
+        }
     }
 };
 
@@ -1421,13 +1596,21 @@ function checkSession() {
             document.getElementById('mainApp').style.display = 'block';
             updateUserInterface();
             addDatabaseControls();
-            
-            // ✅ فقط تحميل الفواتير (وهو سيقوم بتحميل العلامات تلقائياً بعد الانتهاء)
-            setTimeout(() => loadInvoicesFromDrive(), 500);
-            
-            // تحديث المستخدمين كل 5 دقائق (للمدير فقط)
+
+            // ✅ الخطوة 1: تحميل البيانات فوراً (بدون انتظار المؤقت)
+            showNotification('جاري تحميل البيانات...', 'info');
+            loadInvoicesFromDrive().then(() => {
+                console.log('✅ تم التحميل الأولي بنجاح');
+            }).catch(err => {
+                console.error('❌ فشل التحميل الأولي:', err);
+            });
+
+            // ✅ الخطوة 2: بدء المؤقت (بعد تعيين الإعدادات، لكن لا يمنع التحميل الأولي)
+            applyRefreshSetting();
+
+            // تحديث المستخدمين كل 5 دقائق للمدير (مستقل)
             if (currentUser.userType === 'admin') {
-                setInterval(async () => { 
+                setInterval(async () => {
                     if (currentUser?.userType === 'admin') {
                         await loadUsersFromDrive();
                     }
@@ -1465,7 +1648,13 @@ window.handleLogin = async function() {
     document.getElementById('mainApp').style.display = 'block';
     updateUserInterface();
     addDatabaseControls();
-    setTimeout(() => loadInvoicesFromDrive(), 500);
+
+    // ✅ الخطوة 1: تحميل البيانات فوراً (بدون انتظار)
+    showNotification('جاري تحميل البيانات...', 'info');
+    await loadInvoicesFromDrive();  // ننتظر التحميل (اختياري)
+    
+    // ✅ الخطوة 2: بدء المؤقت (إذا كان مفعلاً)
+    applyRefreshSetting();
 };
 
 window.handleGuestLogin = async function() {
@@ -1486,7 +1675,13 @@ window.handleGuestLogin = async function() {
     showNotification(msg, 'info');
 };
 
-window.logout = function() { currentUser = null; sessionStorage.removeItem('currentUser'); location.reload(); };
+window.logout = function() {
+    // ✅ إيقاف التحديث التلقائي عند تسجيل الخروج
+    stopRefreshTimer();
+    currentUser = null;
+    sessionStorage.removeItem('currentUser');
+    location.reload();
+};
 
 function updateUserInterface() {
     if (!currentUser) return;
@@ -1622,7 +1817,7 @@ function showNotification(message, type) {
         position: 'fixed', top: '20px', left: '50%', transform: 'translateX(-50%)',
         background: type === 'success' ? '#10b981' : type === 'info' ? '#3b82f6' : '#ef4444',
         color: 'white', padding: '12px 24px', borderRadius: '50px', boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
-        zIndex: '10000', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.95em'
+        zIndex: '100000000', display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.95em'
     });
     notif.innerHTML = `<i class="fas fa-${type === 'success' ? 'check-circle' : type === 'info' ? 'info-circle' : 'exclamation-circle'}"></i><span>${message}</span>`;
     document.body.appendChild(notif);
@@ -3020,11 +3215,10 @@ async function exportSingleInvoice() {
     
     const element = document.getElementById('invoicePrint');
     if (!element) {
-        showNotification('لا توجد فاتورة للتصدير', 'error');
+        showNotification('لا توجد فاتورة للطباعة', 'error');
         return;
     }
     
-    // ✅ الحصول على رقم الفاتورة من البيانات المخزنة
     const inv = invoicesData[selectedInvoiceIndex];
     if (!inv) {
         showNotification('لا توجد بيانات للفاتورة', 'error');
@@ -3038,38 +3232,92 @@ async function exportSingleInvoice() {
     document.body.appendChild(loading);
     
     try {
-        const canvas = await html2canvas(element, {
-            scale: 1.5,
+        // منع التفاف النص مؤقتاً
+        element.classList.add('pdf-export-nowrap');
+        await new Promise(r => setTimeout(r, 50));
+        
+        const fullCanvas = await html2canvas(element, {
+            scale: 2.0,
             backgroundColor: '#ffffff',
             logging: false,
-            allowTaint: true,
             useCORS: true,
-            imageTimeout: 0
+            imageTimeout: 0,
+            windowWidth: element.scrollWidth,
+            windowHeight: element.scrollHeight
         });
         
-        const imgData = canvas.toDataURL('image/jpeg', 0.85);
+        element.classList.remove('pdf-export-nowrap');
+        
         const { jsPDF } = window.jspdf;
-        const pdf = new jsPDF({
-            orientation: 'portrait',
-            unit: 'mm',
-            format: 'a4',
-            compress: true
-        });
-        
+        const pdf = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4', compress: true });
+        const margin = 8;
         const pdfWidth = pdf.internal.pageSize.getWidth();
-        const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const contentWidth = pdfWidth - (margin * 2);
+        const availableHeightMM = pdfHeight - (margin * 2);
         
-        pdf.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight, undefined, 'FAST');
+        const imgWidth = fullCanvas.width;
+        const imgHeight = fullCanvas.height;
+        const scaleX = contentWidth / imgWidth;
+        const pageHeightPx = availableHeightMM / scaleX;
+        
+        // عدد الصفحات المحسوب بدقة
+        const totalPages = Math.ceil(imgHeight / pageHeightPx);
+        
+        showProgress(`تقسيم إلى ${totalPages} صفحات...`, 10);
+        
+        // تداخل 12 بكسل لتجنب قطع النص
+        const overlapPx = 6;
+        
+        for (let i = 0; i < totalPages; i++) {
+            if (i > 0) pdf.addPage();
+            
+            let startY = i * pageHeightPx;
+            let endY = (i + 1) * pageHeightPx;
+            
+            // الصفحة الأخيرة تأخذ حتى نهاية الصورة
+            if (i === totalPages - 1) {
+                endY = imgHeight;
+            }
+            
+            // نضيف تداخل في البداية (باستثناء الصفحة الأولى) لالتقاط الصف المقطوع
+            if (i > 0) {
+                startY = Math.max(0, startY - overlapPx);
+            }
+            // نضيف تداخل في النهاية (باستثناء الصفحة الأخيرة) لالتقاط الصف المقطوع في الأسفل
+            if (i < totalPages - 1) {
+                endY = Math.min(imgHeight, endY + overlapPx);
+            }
+            
+            if (startY >= endY) continue;
+            
+            // قص الشريحة
+            const sliceCanvas = document.createElement('canvas');
+            sliceCanvas.width = imgWidth;
+            sliceCanvas.height = endY - startY;
+            const ctx = sliceCanvas.getContext('2d');
+            ctx.drawImage(fullCanvas, 0, startY, imgWidth, sliceCanvas.height, 0, 0, sliceCanvas.width, sliceCanvas.height);
+            
+            const imgData = sliceCanvas.toDataURL('image/jpeg', 0.92);
+            const sliceHeightMM = sliceCanvas.height * scaleX;
+            pdf.addImage(imgData, 'JPEG', margin, margin, contentWidth, sliceHeightMM);
+            
+            showProgress(`صفحة ${i+1} من ${totalPages}`, Math.round(((i+1)/totalPages)*100));
+        }
+        
         pdf.save(`فاتورة-${invoiceNumber}.pdf`);
+        showNotification(`تم التصدير (${totalPages} صفحات) بنجاح`, 'success');
         
-        showNotification('تم التصدير بنجاح', 'success');
     } catch (error) {
-        console.error('خطأ في إنشاء PDF:', error);
-        showNotification('حدث خطأ في إنشاء PDF: ' + error.message, 'error');
+        console.error(error);
+        showNotification('خطأ: ' + error.message, 'error');
     } finally {
         loading.remove();
+        hideProgress();
     }
 }
+
+window.exportSingleInvoice = exportSingleInvoice;
 
 async function exportMultipleInvoices(indices) {
     if (typeof window.jspdf === 'undefined' || typeof window.html2canvas === 'undefined') {
@@ -3150,6 +3398,7 @@ async function exportMultipleInvoices(indices) {
         
         pdf.save(fileName);
         showNotification(`تم تصدير ${indices.length} فاتورة بنجاح`, 'success');
+
         
     } catch (error) {
         console.error('خطأ في التصدير:', error);
@@ -3157,6 +3406,10 @@ async function exportMultipleInvoices(indices) {
     } finally {
         setTimeout(hideProgress, 1500);
     }
+	
+	        // ✅ إغلاق نافذة الفاتورة بعد الانتهاء من التصدير
+        closeModal();
+
 }
 
 window.exportInvoicePDF = function() {
@@ -6716,6 +6969,10 @@ function loadViewedInvoices() {
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('بدء تشغيل النظام...');
     loadDriveSettings();
+	
+	
+	// ✅ استدعاء تحميل التوكن
+    await loadRefreshTokenFromDrive();
     
     // تحميل الشعار من Drive
     await loadLogoFromDrive();
@@ -6876,3 +7133,166 @@ async function exportDirectPDF() {
     // ثم:
     await exportReportAsProfessionalPDF(reportHtmlWithoutSummary, 'تقرير_فواتير');
 }
+
+// ============================================
+// نظام التحديث التلقائي (Auto Refresh)
+// ============================================
+
+// ========== دوال التحديث التلقائي (النسخة النهائية الموحدة) ==========
+let refreshIntervalId = null;
+let currentRefreshEnabled = false;
+let currentRefreshMinutes = 30;
+
+// تحديث واجهة الحالة داخل النافذة
+function updateRefreshStatusDisplay() {
+    const statusDiv = document.getElementById('refreshStatus');
+    if (!statusDiv) return;
+    if (currentRefreshEnabled && currentRefreshMinutes >= 30) {
+        statusDiv.innerHTML = `<i class="fas fa-check-circle"></i> ✅ مفعل - التحديث كل ${currentRefreshMinutes} دقيقة`;
+        statusDiv.style.background = '#d4edda';
+        statusDiv.style.color = '#155724';
+    } else {
+        statusDiv.innerHTML = `<i class="fas fa-ban"></i> ❌ غير مفعل`;
+        statusDiv.style.background = '#f8d7da';
+        statusDiv.style.color = '#721c24';
+    }
+}
+
+// إيقاف المؤقت
+function stopRefreshTimer() {
+    if (refreshIntervalId) {
+        clearInterval(refreshIntervalId);
+        refreshIntervalId = null;
+    }
+    currentRefreshEnabled = false;
+    updateRefreshStatusDisplay();
+    console.log('تم إيقاف التحديث التلقائي');
+}
+
+// بدء المؤقت
+function startRefreshTimer(minutes) {
+    if (refreshIntervalId) stopRefreshTimer(); // إيقاف القديم
+    if (!minutes || minutes < 30) {
+        currentRefreshEnabled = false;
+        updateRefreshStatusDisplay();
+        return;
+    }
+    currentRefreshEnabled = true;
+    currentRefreshMinutes = minutes;
+    refreshIntervalId = setInterval(async () => {
+        console.log(`تحديث تلقائي بعد ${minutes} دقيقة`);
+        if (currentUser) {
+            await loadInvoicesFromDrive();
+            if (currentUser.isGuest) {
+                filterInvoicesByGuest(currentUser.taxNumber, currentUser.blNumber);
+            } else {
+                filterInvoicesByUser();
+            }
+            renderData();
+            showNotification('تم تحديث البيانات تلقائياً', 'success');
+        }
+    }, minutes * 60 * 1000);
+    updateRefreshStatusDisplay();
+    console.log(`تم تفعيل التحديث التلقائي كل ${minutes} دقيقة`);
+}
+
+function applyRefreshSetting() {
+    const enabled = localStorage.getItem('refresh_enabled') === 'true';
+    const minutes = parseInt(localStorage.getItem('refresh_minutes') || '30');
+    if (enabled && minutes >= 30) {
+        startRefreshTimer(minutes);
+    } else {
+        stopRefreshTimer();
+    }
+}
+
+// حفظ الإعدادات من النافذة
+window.saveRefreshSettings = function() {
+    const enabledSelect = document.getElementById('refreshEnabled');
+    const intervalInput = document.getElementById('refreshInterval');
+    if (!enabledSelect || !intervalInput) {
+        showNotification('حدث خطأ في النافذة', 'error');
+        return;
+    }
+    const enabled = enabledSelect.value === 'true';
+    let minutes = parseInt(intervalInput.value);
+    if (isNaN(minutes)) minutes = 30;
+    if (enabled && minutes < 30) {
+        showNotification('⚠️ الحد الأدنى 30 دقيقة', 'warning');
+        return;
+    }
+    if (enabled && minutes > 1440) minutes = 1440;
+    
+    // حفظ في localStorage
+    localStorage.setItem('refresh_enabled', enabled ? 'true' : 'false');
+    if (enabled) {
+        localStorage.setItem('refresh_minutes', minutes);
+        startRefreshTimer(minutes);
+    } else {
+        localStorage.removeItem('refresh_minutes');
+        stopRefreshTimer();
+    }
+    // تحديث واجهة النافذة
+    updateRefreshSettingsForm();
+    closeRefreshSettingsModal();
+    showNotification(enabled ? `✅ تم تفعيل التحديث كل ${minutes} دقيقة` : '⏸️ تم إيقاف التحديث التلقائي', 'success');
+};
+
+// تحميل الإعدادات من localStorage وتطبيقها
+function loadRefreshSettings() {
+    const enabled = localStorage.getItem('refresh_enabled') === 'true';
+    const minutes = parseInt(localStorage.getItem('refresh_minutes') || '30');
+    if (enabled && minutes >= 30) {
+        startRefreshTimer(minutes);
+    } else {
+        stopRefreshTimer();
+    }
+    updateRefreshSettingsForm();
+}
+
+// تحديث حقول النافذة بناءً على المتغيرات الحالية (وليس localStorage)
+function updateRefreshSettingsForm() {
+    const enabledSelect = document.getElementById('refreshEnabled');
+    const intervalInput = document.getElementById('refreshInterval');
+    if (!enabledSelect || !intervalInput) return;
+    // استخدم currentRefreshEnabled و currentRefreshMinutes بدلاً من localStorage
+    enabledSelect.value = currentRefreshEnabled ? 'true' : 'false';
+    intervalInput.value = currentRefreshMinutes;
+    updateRefreshStatusDisplay();
+}
+
+// فتح النافذة
+window.openRefreshSettings = function() {
+    if (!currentUser) {
+        showNotification('يرجى تسجيل الدخول أولاً', 'warning');
+        return;
+    }
+    updateRefreshSettingsForm(); // تعرض القيم الحالية
+    const modal = document.getElementById('refreshSettingsModal');
+    if (modal) modal.style.display = 'block';
+};
+
+// إغلاق النافذة
+window.closeRefreshSettingsModal = function() {
+    const modal = document.getElementById('refreshSettingsModal');
+    if (modal) modal.style.display = 'none';
+};
+
+// تحديث يدوي فوري
+window.manualRefresh = async function() {
+    if (!currentUser) return;
+    showNotification('🔄 جاري التحديث اليدوي...', 'info');
+    await loadInvoicesFromDrive();
+    if (currentUser.isGuest) {
+        filterInvoicesByGuest(currentUser.taxNumber, currentUser.blNumber);
+    } else {
+        filterInvoicesByUser();
+    }
+    renderData();
+    showNotification('✅ تم التحديث اليدوي بنجاح', 'success');
+};
+
+// عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', () => {
+    loadRefreshSettings();
+});
