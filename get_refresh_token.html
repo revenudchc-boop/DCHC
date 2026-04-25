@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Get Refresh Token</title>
+</head>
+<body>
+    <h1>الحصول على Refresh Token</h1>
+    <button id="authBtn">تسجيل الدخول بحساب Google</button>
+    <pre id="output" style="margin-top:20px; background:#f0f0f0; padding:10px;"></pre>
+    
+    <script>
+        const CLIENT_ID = '835944620738-jcl9dh4j2fjuut18vhvik3605t9k20m9.apps.googleusercontent.com';
+        const CLIENT_SECRET = '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';
+        const REDIRECT_URI = window.location.href.split('?')[0];
+        const SCOPE = 'https://www.googleapis.com/auth/drive.file';
+        
+        document.getElementById('authBtn').onclick = () => {
+            const authUrl = 'https://accounts.google.com/o/oauth2/auth?' + new URLSearchParams({
+                client_id: CLIENT_ID,
+                redirect_uri: REDIRECT_URI,
+                response_type: 'code',
+                scope: SCOPE,
+                access_type: 'offline',
+                prompt: 'consent'
+            });
+            window.location.href = authUrl;
+        };
+        
+        // معالجة إعادة التوجيه وتبادل الكود
+        const urlParams = new URLSearchParams(window.location.search);
+        const code = urlParams.get('code');
+        
+        if (code) {
+            document.getElementById('output').innerText = 'جاري استبدال الكود بـ Refresh Token...';
+            
+            fetch('https://oauth2.googleapis.com/token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: new URLSearchParams({
+                    code: code,
+                    client_id: CLIENT_ID,
+                    client_secret: CLIENT_SECRET,
+                    redirect_uri: REDIRECT_URI,
+                    grant_type: 'authorization_code'
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.refresh_token) {
+                    document.getElementById('output').innerHTML = `
+                        ✅ تم الحصول على Refresh Token بنجاح!<br><br>
+                        <strong>انسخ هذا الرمز وضعه في script.js:</strong><br>
+                        <code style="background:#333; color:#0f0; display:block; padding:10px; margin-top:10px;">${data.refresh_token}</code>
+                    `;
+                } else if (data.error) {
+                    document.getElementById('output').innerHTML = `❌ خطأ: ${data.error_description || data.error}`;
+                }
+            })
+            .catch(error => {
+                document.getElementById('output').innerHTML = `❌ خطأ: ${error.message}`;
+            });
+        }
+    </script>
+</body>
+</html>

@@ -1907,12 +1907,93 @@ header {
    تنسيقات QR Code
 ======================================== */
 
+/* زر إعدادات التحديث التلقائي - مميز */
+.refresh-settings-btn {
+    background: linear-gradient(135deg, #f59e0b, #d97706);
+    color: white !important;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 8px rgba(245, 158, 11, 0.3);
+}
+
+.refresh-settings-btn:hover {
+    transform: scale(1.1) rotate(15deg);
+    box-shadow: 0 4px 15px rgba(245, 158, 11, 0.5);
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+}
+
+.refresh-settings-btn i {
+    font-size: 1.2em;
+    animation: none;
+    transition: transform 0.3s ease;
+}
+
+.refresh-settings-btn:hover i {
+    animation: spin 1s ease;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* إذا كان التحديث مفعلاً، نضيف مؤشر نشط */
+.refresh-settings-btn.active {
+    background: linear-gradient(135deg, #10b981, #059669);
+    box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.3);
+}
+
+.refresh-settings-btn.active::after {
+    content: '';
+    position: absolute;
+    top: -2px;
+    right: -2px;
+    width: 12px;
+    height: 12px;
+    background: #10b981;
+    border-radius: 50%;
+    border: 2px solid white;
+}
+
+/* إضافة نبض للزر إذا كان التحديث مفعلاً */
+@keyframes pulse {
+    0% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4); }
+    70% { box-shadow: 0 0 0 6px rgba(16, 185, 129, 0); }
+    100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0); }
+}
+
+.refresh-settings-btn.active {
+    animation: pulse 2s infinite;
+}
+
 /* حاوية QR Code */
 #qrcode-container-
 /* ========================================
    تنسيقات إضافية للطباعة و QR Code
 ======================================== */
 
-/* تحسين عرض QR Code في الطباعة */
-@media print {
-    #qrcode-container-
+
+
+/* منع التفاف النص في جداول الفاتورة المنبثقة */
+#invoicePrint .charges-table td {
+    white-space: nowrap !important;
+    padding: 8px 4px !important;
+}
+#invoicePrint .charges-table {
+    table-layout: auto !important;
+    min-width: 100%;
+}
+#invoicePrint .charges-section {
+    overflow-x: auto !important;
+}
+
+/* منع التفاف النص في خلايا جدول الفاتورة أثناء تصدير PDF فقط */
+.pdf-export-nowrap .charges-table td {
+    white-space: nowrap !important;
+}
+
