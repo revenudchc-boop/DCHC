@@ -1997,3 +1997,189 @@ header {
     white-space: nowrap !important;
 }
 
+/* ========================================
+   شريط الأخبار العصري - تصميم احترافي
+======================================== */
+
+/* الحاوية الرئيسية */
+.news-ticker-container {
+    background: linear-gradient(90deg, #0f2027, #203a43, #2c5364);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 20px;
+    border-radius: 12px;
+    margin: 10px 20px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+    direction: rtl;
+    font-family: 'Segoe UI', 'Tahoma', 'Cairo', sans-serif;
+    backdrop-filter: blur(2px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* القسم الأيسر (العنوان) */
+.news-ticker-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: linear-gradient(135deg, #ff416c, #ff4b2b);
+    padding: 8px 20px;
+    border-radius: 50px;
+    color: white;
+    font-weight: bold;
+    font-size: 0.9rem;
+    flex-shrink: 0;
+    white-space: nowrap;
+    box-shadow: 0 2px 10px rgba(255, 75, 43, 0.3);
+    margin: 8px 0;
+}
+
+.news-ticker-header i {
+    font-size: 1.1rem;
+    animation: pulse 1.2s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.05); }
+}
+
+/* منطقة الحركة */
+.news-ticker-wrapper {
+    flex: 1;
+    overflow: hidden;
+    margin: 0 15px;
+    position: relative;
+    height: 50px;
+    display: flex;
+    align-items: center;  /* توسيط عمودي */
+}
+
+
+/* المحتوى المتحرك */
+.news-ticker {
+    white-space: nowrap;
+    direction: ltr;
+    position: relative;
+    width: 100%;
+}
+
+
+/* العنصر الداخلي */
+.news-ticker-content {
+    display: inline-block;
+    white-space: nowrap;
+    direction: rtl;
+    vertical-align: middle;  /* توسيط إضافي */
+}
+
+
+/* الخبر الواحد */
+.news-item {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    margin: 0 15px;
+    padding: 6px 18px;
+    background: rgba(255, 255, 255, 0.12);
+    border-radius: 40px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    white-space: nowrap;
+    color: #ffffff;
+    font-size: 0.9rem;
+    font-weight: 500;
+    backdrop-filter: blur(4px);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.news-item:hover {
+    background: rgba(255, 65, 108, 0.5);
+    transform: translateY(-2px) scale(1.02);
+    border-color: rgba(255, 65, 108, 0.8);
+}
+
+/* أيقونة الخبر */
+.news-icon {
+    font-size: 0.85rem;
+    color: #ffd700;
+}
+
+/* الفاصل بين الأخبار */
+.news-separator {
+    display: inline-block;
+    margin: 0 8px;
+    font-size: 1rem;
+    color: #ffd700;
+    white-space: nowrap;
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+}
+
+/* حركة التمرير */
+@keyframes scrollTicker {
+    0% {
+        transform: translateY(-50%) translateX(100%);
+    }
+    100% {
+        transform: translateY(-50%) translateX(-100%);
+    }
+}
+
+/* للشاشات الصغيرة */
+@media (max-width: 768px) {
+    .news-ticker-container {
+        margin: 5px 10px;
+        padding: 0 10px;
+    }
+    .news-ticker-header {
+        padding: 4px 12px;
+        font-size: 0.7rem;
+    }
+    .news-item {
+        margin: 0 8px;
+        padding: 4px 12px;
+        font-size: 0.75rem;
+    }
+    .news-ticker-wrapper {
+        height: 42px;
+        margin: 0 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .news-ticker-header span {
+        display: none;
+    }
+    .news-ticker-header i {
+        margin: 0;
+    }
+    .news-ticker-header {
+        padding: 4px 10px;
+    }
+}
+
+
+/* ========================================
+   حركة شريط الأخبار
+======================================== */
+@keyframes tickerScroll {
+    0% {
+        transform: translateX(0);
+    }
+    100% {
+        transform: translateX(-50%);
+    }
+}
+
+/* توسيط الأخبار عمودياً - حل سريع */
+.news-ticker-wrapper {
+    display: flex;
+    align-items: center;
+    height: 50px;
+}
+
+.news-ticker {
+    top: auto;
+    transform: none;
+    position: relative;
+    width: 100%;
+}

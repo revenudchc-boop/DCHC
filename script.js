@@ -52,6 +52,7 @@ let viewModeCredit = 'cards';
 let selectedCreditNotes = new Set();
 // متغير لتخزين الفواتير التي تمت معاينتها
 let viewedInvoices = new Set();
+const NEWS_VISIBLE_KEY = 'newsBarVisible';
 // ============================================
 // إعدادات التحديث التلقائي (Auto Refresh)
 // ============================================
@@ -1595,9 +1596,19 @@ function checkSession() {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('mainApp').style.display = 'block';
             updateUserInterface();
+            
+            // ✅ تحميل شريط الأخبار (ظاهر تلقائياً)
+            if (currentUser) {
+                setTimeout(() => {
+                    if (typeof initNewsBar === 'function') {
+                        initNewsBar();
+                    }
+                }, 1000);
+            }
+            
             addDatabaseControls();
 
-            // ✅ الخطوة 1: تحميل البيانات فوراً (بدون انتظار المؤقت)
+            // ✅ تحميل البيانات فوراً
             showNotification('جاري تحميل البيانات...', 'info');
             loadInvoicesFromDrive().then(() => {
                 console.log('✅ تم التحميل الأولي بنجاح');
@@ -1605,18 +1616,21 @@ function checkSession() {
                 console.error('❌ فشل التحميل الأولي:', err);
             });
 
-            // ✅ الخطوة 2: بدء المؤقت (بعد تعيين الإعدادات، لكن لا يمنع التحميل الأولي)
-            applyRefreshSetting();
+            // ✅ بدء التحديث التلقائي
+            if (typeof applyRefreshSetting === 'function') {
+                applyRefreshSetting();
+            }
 
-            // تحديث المستخدمين كل 5 دقائق للمدير (مستقل)
+            // ✅ تحديث المستخدمين كل 5 دقائق للمدير فقط
             if (currentUser.userType === 'admin') {
                 setInterval(async () => {
-                    if (currentUser?.userType === 'admin') {
+                    if (currentUser?.userType === 'admin' && typeof loadUsersFromDrive === 'function') {
                         await loadUsersFromDrive();
                     }
                 }, 5 * 60 * 1000);
             }
         } catch(e) {
+            console.error('خطأ في استعادة الجلسة:', e);
             sessionStorage.removeItem('currentUser');
         }
     }
@@ -1713,6 +1727,13 @@ function updateUserInterface() {
 
     // ✅ بناء واجهة البحث المتقدم لكل المستخدمين (الدالة الداخلية ستقرر القائمة أو النص)
     buildInvoiceSearchUI();
+	
+	    // تحميل شريط الأخبار
+    if (currentUser) {
+        setTimeout(function() {
+            initNewsBar();
+        }, 1000);
+    }
 }
 
 window.showChangePassword = function() {
@@ -7296,3 +7317,123 @@ window.manualRefresh = async function() {
 document.addEventListener('DOMContentLoaded', () => {
     loadRefreshSettings();
 });
+
+
+// ============================================
+// شريط الأخبار المتحرك - نسخة بطيئة ومستقرة
+// ============================================
+
+async function loadNewsFromDrive() {
+    const newsBar = document.getElementById('newsBar');
+    const newsContent = document.getElementById('newsTickerContent');
+    
+    if (!newsBar || !newsContent) {
+        console.error('❌ عناصر شريط الأخبار غير موجودة');
+        return;
+    }
+
+    const newsUrl = 'https://raw.githubusercontent.com/revenudchc-boop/dataconnect/main/news.txt';
+
+    try {
+        newsContent.innerHTML = '<div class="news-item"><i class="fas fa-spinner fa-spin"></i> جاري تحميل الأخبار...</div>';
+        newsBar.style.display = 'flex';
+        
+        const response = await fetch(newsUrl);
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const content = await response.text();
+        
+        let newsItems = content.split(/\r?\n/).filter(line => line.trim() !== '');
+        if (newsItems.length === 0) newsItems = ['مرحباً بك في نظام الفواتير المتقدم'];
+        
+        let html = '';
+        for (let repeat = 0; repeat < 3; repeat++) {
+            newsItems.forEach((item, idx) => {
+                let icon = 'fas fa-star';
+                if (item.includes('عاجل') || item.includes('هام')) icon = 'fas fa-bolt';
+                else if (item.includes('تحديث')) icon = 'fas fa-sync-alt';
+                else if (item.includes('جديد')) icon = 'fas fa-gift';
+                else if (item.includes('🎉')) icon = 'fas fa-party-horn';
+                
+                html += `<div class="news-item"><i class="${icon} news-icon"></i><span>${escapeHtmlNews(item)}</span></div>`;
+                if (idx < newsItems.length - 1) html += `<span class="news-separator">✦</span>`;
+            });
+            if (repeat < 2) html += `<span class="news-separator" style="margin:0 25px;">◆ ◆ ◆</span>`;
+        }
+        
+        newsContent.innerHTML = html;
+        
+        const ticker = document.querySelector('.news-ticker');
+        if (ticker) {
+            // إزالة الأنيميشن القديمة
+            ticker.style.animation = 'none';
+            // إعادة تعيين
+            ticker.offsetHeight;
+            // حساب السرعة
+            const contentWidth = newsContent.scrollWidth;
+            const duration = Math.max(30, Math.min(80, contentWidth / 40));
+            // تعيين الأنيميشن الجديدة
+            ticker.style.animation = `tickerScroll ${duration}s linear infinite`;
+            console.log(`✅ سرعة الشريط: ${duration} ثانية`);
+        }
+        
+    } catch (error) {
+        console.error('خطأ في تحميل الأخبار:', error);
+        const newsContentElem = document.getElementById('newsTickerContent');
+        if (newsContentElem) {
+            newsContentElem.innerHTML = '<div class="news-item">⚠️ تعذر تحميل الأخبار</div>';
+        }
+        const newsBarElem = document.getElementById('newsBar');
+        if (newsBarElem) newsBarElem.style.display = 'flex';
+    }
+}
+
+// دالة تنظيف النص من الرموز الضارة
+function escapeHtmlNews(str) {
+    if (!str) return '';
+    return str
+        .replace(/[&<>]/g, function(m) {
+            if (m === '&') return '&amp;';
+            if (m === '<') return '&lt;';
+            if (m === '>') return '&gt;';
+            return m;
+        })
+        .replace(/[\uD800-\uDBFF][\uDC00-\uDFFF]/g, function(c) {
+            return c; // الحفاظ على الرموز التعبيرية (Emoji)
+        });
+}
+
+// تهيئة شريط الأخبار (يتم استدعاؤها بعد تسجيل الدخول)
+function initNewsBar() {
+    const newsBar = document.getElementById('newsBar');
+    if (!newsBar) {
+        console.error('❌ لم يتم العثور على شريط الأخبار');
+        return;
+    }
+    console.log('🔄 جاري تهيئة شريط الأخبار...');
+    newsBar.style.display = 'flex';
+    loadNewsFromDrive();
+}
+
+// دالة إعادة ضبط سرعة الشريط (اختيارية - يمكن استدعاؤها يدوياً)
+function setNewsTickerSpeed(seconds) {
+    const ticker = document.querySelector('.news-ticker');
+    if (ticker) {
+        ticker.style.animation = 'none';
+        ticker.offsetHeight;
+        ticker.style.animation = `scrollTicker ${seconds}s linear infinite`;
+        console.log(`✅ تم تغيير سرعة الشريط إلى ${seconds} ثانية`);
+    }
+}
+
+window.initNewsBar = initNewsBar;
+
+function toggleNewsBar() {
+    const newsBar = document.getElementById('newsBar');
+    if (newsBar) {
+        if (newsBar.style.display === 'none') {
+            newsBar.style.display = 'flex';
+        } else {
+            newsBar.style.display = 'none';
+        }
+    }
+}
