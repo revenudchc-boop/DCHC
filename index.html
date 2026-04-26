@@ -90,6 +90,13 @@
 				<button class="user-btn refresh-settings-btn" onclick="openRefreshSettings()" title="إعدادات التحديث التلقائي">
 					<i class="fas fa-clock"></i>
 				</button>
+				
+				<div class="user-actions">
+    <!-- الأزرار الموجودة -->
+    <button class="user-btn" onclick="toggleNewsBar()" title="إظهار/إخفاء الأخبار">
+        <i class="fas fa-newspaper"></i>
+    </button>
+</div>
                 <button class="user-btn drive-settings-btn" id="driveSettingsBtn" onclick="openDriveSettings()" title="إعدادات Google Drive">
                     <i class="fab fa-google-drive"></i>
                 </button>
@@ -105,6 +112,26 @@
 
             </div>
         </div>
+
+<!-- شريط الأخبار -->
+		<div id="newsBarContainer" style="position: relative;">
+			<div id="newsBar" class="news-ticker-container" style="display: flex;">
+				<div class="news-ticker-header">
+					<i class="fas fa-newspaper"></i>
+					<span>أخبار عاجلة</span>
+					<div class="news-ticker-pulse"></div>
+				</div>
+				<div class="news-ticker-wrapper">
+					<div class="news-ticker" id="newsTicker">
+						<div class="news-ticker-content" id="newsTickerContent">
+							جاري تحميل الأخبار...
+						</div>
+					</div>
+				</div>
+			</div>
+			
+
+		</div>
 
         <!-- شريط بيانات الشركة -->
         <div class="company-bar">
