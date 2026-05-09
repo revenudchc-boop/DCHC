@@ -3213,3 +3213,173 @@ body > div[style*="position: absolute"][style*="left: -9999px"] .grand-total-row
     color: #ffffff !important;
     font-weight: 700 !important;
 }
+
+/* ========================================
+   تنسيق التقارير - النسخة الأصلية
+======================================== */
+
+/* جدول التقرير - الوضع النهاري */
+#reportContent table.report-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: #ffffff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    margin: 20px 0;
+    font-size: 0.9em;
+}
+
+#reportContent table.report-table th {
+    background: linear-gradient(135deg, #4361ee, #3a0ca3);
+    color: #ffffff;
+    padding: 14px 10px;
+    font-weight: 700;
+    font-size: 0.9em;
+    text-align: center;
+    border: none;
+}
+
+#reportContent table.report-table td {
+    padding: 12px 10px;
+    border-bottom: 1px solid #e9ecef;
+    text-align: center;
+    font-size: 0.9em;
+    font-weight: 600;
+    color: #000000;
+}
+
+#reportContent table.report-table tbody tr:hover td {
+    background: #f1f5f9;
+}
+
+#reportContent table.report-table tbody tr:last-child td {
+    border-bottom: none;
+}
+
+/* صفوف الإجمالي */
+#reportContent table.report-table .total-row,
+#reportContent table.report-table .page-total-row {
+    background: #e8f0fe;
+    font-weight: bold;
+}
+
+#reportContent table.report-table .grand-total-row {
+    background: #d1ecf1;
+    font-weight: bold;
+}
+
+/* بطاقات الإحصائيات */
+#reportContent .report-stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+#reportContent .report-stats .stat-item {
+    background: #f8f9fa;
+    padding: 18px 15px;
+    border-radius: 10px;
+    text-align: center;
+    border: 1px solid #e9ecef;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04);
+}
+
+#reportContent .report-stats .stat-label {
+    color: #6c757d;
+    font-size: 0.85em;
+    margin-bottom: 8px;
+    font-weight: 500;
+}
+
+#reportContent .report-stats .stat-value {
+    font-size: 1.6em;
+    font-weight: 800;
+    color: #4361ee;
+}
+
+/* عنوان التقرير */
+#reportTitle {
+    color: #1e3c72 !important;
+    font-weight: 700;
+    font-size: 1.3em;
+}
+
+#reportContent h3 {
+    color: #4361ee !important;
+    font-weight: 700;
+    font-size: 1.1em;
+    margin-bottom: 15px;
+}
+
+#reportContent h4 {
+    color: #1e3c72 !important;
+    font-weight: 600;
+}
+
+/* رسالة لا توجد بيانات */
+#reportContent .no-data {
+    color: #6c757d;
+    font-size: 1.1em;
+    padding: 40px;
+}
+
+/* ============================================
+   الوضع الداكن - ألوان التقارير
+=========================================== */
+.dark-mode #reportContent table.report-table {
+    background: #1e293b;
+}
+
+.dark-mode #reportContent table.report-table th {
+    background: linear-gradient(135deg, #4361ee, #3a0ca3);
+    color: #ffffff;
+}
+
+.dark-mode #reportContent table.report-table td {
+    color: #e2e8f0;
+    border-bottom: 1px solid #334155;
+}
+
+.dark-mode #reportContent table.report-table tbody tr:hover td {
+    background: rgba(255,255,255,0.04);
+}
+
+.dark-mode #reportContent table.report-table .total-row,
+.dark-mode #reportContent table.report-table .page-total-row {
+    background: rgba(67,97,238,0.12);
+}
+
+.dark-mode #reportContent table.report-table .grand-total-row {
+    background: rgba(67,97,238,0.18);
+}
+
+.dark-mode #reportContent .report-stats .stat-item {
+    background: rgba(255,255,255,0.05);
+    border: 1px solid #334155;
+}
+
+.dark-mode #reportContent .report-stats .stat-label {
+    color: #94a3b8;
+}
+
+.dark-mode #reportContent .report-stats .stat-value {
+    color: #818cf8;
+}
+
+.dark-mode #reportContent h3 {
+    color: #818cf8 !important;
+}
+
+.dark-mode #reportContent h4 {
+    color: #e2e8f0 !important;
+}
+
+.dark-mode #reportContent .no-data {
+    color: #94a3b8;
+}
+
+#reportContent table th {
+    color: #ffffff !important;
+}
