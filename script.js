@@ -2,6 +2,10 @@
 // نظام الفواتير المتقدم - النسخة النهائية مع تحسين الترتيب وإضافة فواصل الألف
 // جميع الحقوق محفوظة لشركة دمياط لتداول الحاويات و البضائع
 // ============================================
+window.onerror = function(msg, url, line, col, error) {
+    console.error('❌ خطأ في السطر ' + line + ':', msg);
+    return false;
+};
 
 // بيانات الشركة
 const COMPANY_INFO = {
@@ -53,6 +57,9 @@ let selectedCreditNotes = new Set();
 // متغير لتخزين الفواتير التي تمت معاينتها
 let viewedInvoices = new Set();
 const NEWS_VISIBLE_KEY = 'newsBarVisible';
+let isQuickPayment = false;
+let isSearching = false;  // منع تغيير وضع العرض أثناء البحث
+
 // ============================================
 // إعدادات التحديث التلقائي (Auto Refresh)
 // ============================================
@@ -91,137 +98,115 @@ let selectedInvoices = new Set();
 // إعدادات Web App للمزامنة
 // ============================================
 const SYNC_WEB_APP_URL = 'https://script.google.com/macros/s/AKfycbwhI-WpSqD2jmS0-dENEDACYFYV9JiS5r0snG0haJqtBJTSROXrtBHmHOY5-_5c_Pf9/exec';
+// إعدادات التخزين السحابي لحالة المعاينة (Google Apps Script)
+const VIEWED_CLOUD_URL = 'https://script.google.com/macros/s/AKfycbwXfSeRg3JAxsgCTDedaspLe9SVEAn5gpInrs-TLGkbgq9599UOhXRQX2DR3cjW7X0R1A/exec';
+// إعدادات نظام السدادات (Google Apps Script)
+const PAYMENTS_API_URL = 'https://script.google.com/macros/s/AKfycbzy9GqPotfkBmVcbBqQsqcyUEGSoTkGGxZDiEi8qjvX4yoxW6BgAGC83KI3xYDJMSDn/exec';
+// متغيرات نظام السدادات
+let paymentsData = [];
+let filteredPayments = [];
+let currentPaymentPage = 1;
+let itemsPerPagePayments = 25;
 
 async function loadViewedFromDrive() {
-    console.log('🔍 [1] بدء تنفيذ loadViewedFromDrive');
+    console.log('🔍 بدء تحميل حالة المعاينة من Google Apps Script...');
     
-    // التحقق من وجود currentUser
     if (!currentUser) {
-        console.error('❌ [2] currentUser غير موجود!');
+        console.error('❌ currentUser غير موجود!');
         return false;
     }
-    console.log('✅ [2] currentUser موجود:', currentUser.username);
     
-    // التحقق من وجود driveAccessToken
-    if (!driveAccessToken) {
-        console.log('🔄 [3] driveAccessToken غير موجود، جاري تجديده...');
+    // إعادة المحاولة حتى 3 مرات مع تأخير بين المحاولات
+    for (let attempt = 1; attempt <= 3; attempt++) {
         try {
-            await refreshAccessToken();
-            console.log('✅ [4] تم تجديد access_token بنجاح');
+            const response = await fetch(VIEWED_CLOUD_URL);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            
+            const data = await response.json();
+            const userKey = currentUser.username;
+            const invoiceViewed = data[userKey] || [];
+			const creditViewed = data[userKey + '_credits'] || [];
+			const userViewed = [...invoiceViewed, ...creditViewed];
+            viewedInvoices = new Set(userViewed);
+            saveViewedInvoices(); // نسخة احتياطية محلية
+            
+            console.log(`✅ تم تحميل ${viewedInvoices.size} فاتورة للمستخدم ${userKey}`);
+            return true;
         } catch (error) {
-            console.error('❌ [4] فشل تجديد access_token:', error);
-            return false;
+            console.warn(`⚠️ المحاولة ${attempt} فشلت:`, error.message);
+            if (attempt < 3) {
+                // انتظر ثانية ثم أعد المحاولة
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
         }
-    } else {
-        console.log('✅ [3] driveAccessToken موجود');
     }
     
-    try {
-        console.log('🔄 [5] جاري إرسال طلب إلى Drive API...');
-        const response = await fetch(`https://www.googleapis.com/drive/v3/files/${DRIVE_CONFIG.fileId}?alt=media`, {
-            headers: { 'Authorization': `Bearer ${driveAccessToken}` }
-        });
-        
-        console.log(`📡 [6] حالة الاستجابة: ${response.status}`);
-        
-        if (response.ok) {
-            const data = await response.json();
-            console.log('✅ [7] البيانات المستلمة:', data);
-            
-            const userKey = currentUser.username;
-            const userViewed = data[userKey] || [];
-            console.log(`📋 [8] بيانات المستخدم ${userKey}:`, userViewed);
-            
-            viewedInvoices = new Set(userViewed);
-            saveViewedInvoices();
-            
-            console.log(`✅ [9] تم تحميل ${viewedInvoices.size} فاتورة للمستخدم ${userKey}`);
-            
-            // تحديث واجهة الجدول
-            if (typeof renderData === 'function') {
-                console.log('🔄 [10] جاري تحديث واجهة الجدول...');
-                renderData();
-            }
-            return true;
-        } else if (response.status === 404) {
-            console.log('📄 [7] ملف الحالة غير موجود (404)، سيتم إنشاؤه عند أول حفظ');
-            return false;
-        } else {
-            const errorText = await response.text();
-            console.error(`❌ [7] فشل التحميل: ${response.status} - ${errorText}`);
-            return false;
-        }
-    } catch (error) {
-        console.error('❌ [8] خطأ في طلب Drive:', error);
-        return false;
-    }
+    console.error('❌ فشلت جميع محاولات تحميل حالة المعاينة');
+    return false;
 }
 
+let isSavingToDrive = false;
+let saveQueueTimer = null;
+let lastSaveTime = 0;
+
 async function saveViewedToDrive() {
-    if (!driveAccessToken) {
-        await refreshAccessToken();
+    const now = Date.now();
+    
+    // ✅ إذا مر أقل من 3 ثواني على آخر حفظ، انتظر
+    if (now - lastSaveTime < 3000) {
+        clearTimeout(saveQueueTimer);
+        saveQueueTimer = setTimeout(() => saveViewedToDrive(), 3000);
+        return;
     }
     
-    try {
-        // 1. قراءة البيانات الحالية من الملف أولاً
-        let allData = {};
-        try {
-            const readResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${DRIVE_CONFIG.fileId}?alt=media`, {
-                headers: { 'Authorization': `Bearer ${driveAccessToken}` }
-            });
-            
-            if (readResponse.ok) {
-                const text = await readResponse.text();
-                // ✅ التحقق من أن الملف ليس فارغاً
-                if (text && text.trim()) {
-                    try {
-                        allData = JSON.parse(text);
-                    } catch (e) {
-                        console.warn('⚠️ محتوى الملف غير صالح (JSON parse error)، سيتم إنشاء بيانات جديدة');
-                        allData = {};
-                    }
-                } else {
-                    console.log('📄 الملف فارغ، سيتم إنشاء بيانات جديدة');
-                    allData = {};
-                }
-            } else if (readResponse.status === 404) {
-                console.log('📄 ملف الحالة غير موجود، سيتم إنشاؤه');
-                allData = {};
-            } else {
-                console.warn(`⚠️ لم نتمكن من قراءة الملف الحالي: ${readResponse.status}`);
-            }
-        } catch (readError) {
-            console.warn('⚠️ خطأ في قراءة الملف:', readError);
-            allData = {};
-        }
-        
-        // 2. تحديث بيانات المستخدم الحالي
-        const userKey = currentUser?.username || 'guest';
-        allData[userKey] = [...viewedInvoices];
-        allData.lastUpdated = new Date().toISOString();
-        
-        // 3. حفظ البيانات المحدثة
-        const saveResponse = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${DRIVE_CONFIG.fileId}?uploadType=media`, {
-            method: 'PATCH',
-            headers: {
-                'Authorization': `Bearer ${driveAccessToken}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(allData)
-        });
-        
-        if (saveResponse.ok) {
-            console.log(`✅ تم حفظ الحالة في Drive للمستخدم ${userKey}`);
-            return true;
-        } else {
-            const errorText = await saveResponse.text();
-            console.error(`❌ فشل حفظ البيانات في Drive: ${saveResponse.status} - ${errorText}`);
-            return false;
-        }
-    } catch (error) {
-        console.error('❌ خطأ في حفظ الحالة إلى Drive:', error);
-        return false;
+    // ✅ إذا كان هناك حفظ جاري، انتظر
+    if (isSavingToDrive) {
+        clearTimeout(saveQueueTimer);
+        saveQueueTimer = setTimeout(() => saveViewedToDrive(), 3000);
+        return;
     }
+    
+    isSavingToDrive = true;
+    lastSaveTime = now;
+    console.log('💾 بدء حفظ حالة المعاينة...');
+    
+    for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+            let allData = {};
+            try {
+                const readResponse = await fetch(VIEWED_CLOUD_URL);
+                if (readResponse.ok) {
+                    const text = await readResponse.text();
+                    if (text && text.trim()) {
+                        allData = JSON.parse(text);
+                    }
+                }
+            } catch (e) {}
+
+            const userKey = currentUser?.username || 'guest';
+            allData[userKey] = [...viewedInvoices].filter(k => !k.startsWith('credit_'));
+            allData[userKey + '_credits'] = [...viewedInvoices].filter(k => k.startsWith('credit_'));
+            allData.lastUpdated = new Date().toISOString();
+
+            const saveResponse = await fetch(VIEWED_CLOUD_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify(allData)
+            });
+
+            if (saveResponse.ok) {
+                console.log(`✅ تم حفظ ${viewedInvoices.size} عنصر للمستخدم ${userKey}`);
+                isSavingToDrive = false;
+                return true;
+            }
+        } catch (error) {
+            console.warn(`⚠️ محاولة ${attempt} فشلت`);
+            await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+    }
+    
+    isSavingToDrive = false;
+    return false;
 }
 
 // متغير لتخزين الشعار
@@ -252,8 +237,24 @@ async function checkUnviewedInvoicesAndShowReport() {
         return !viewedInvoices.has(viewKey);
     });
     
-    if (unviewedInvoices.length === 0) {
-        console.log('✅ جميع الفواتير تمت معاينتها مسبقاً');
+    // ✅ التحقق من إشعارات الخصم غير المعاينة
+    let unviewedCredits = [];
+    if (typeof creditData !== 'undefined' && creditData.length > 0) {
+        const userCredits = creditData.filter(c => {
+            if (!c.customerId) return false;
+            const custId = c.customerId.toLowerCase();
+            return userInvoices.some(inv => 
+                (inv['payee-customer-id'] || '').toLowerCase().includes(custId)
+            );
+        });
+        unviewedCredits = userCredits.filter(c => {
+            const viewKey = 'credit_' + (c.serial || c.draftNumber || c.finalNumber);
+            return !viewedInvoices.has(viewKey);
+        });
+    }
+
+    if (unviewedInvoices.length === 0 && unviewedCredits.length === 0) {
+        console.log('✅ جميع الفواتير وإشعارات الخصم تمت معاينتها');
         return;
     }
     
@@ -299,8 +300,50 @@ async function checkUnviewedInvoicesAndShowReport() {
     if (!companyLogoBase64) {
         await loadLogoFromDrive();
     }
+	
+	    // ✅ تحميل بيانات إشعارات الخصم
+    if (typeof creditData !== 'undefined' && creditData.length === 0) {
+        await loadCreditDataFromDriveSilent();
+    }
     
     // إنشاء HTML التقرير (مع بطاقات الإجماليات)
+    // ✅ إضافة إشعارات الخصم
+    let creditItems = [];
+    if (typeof creditData !== 'undefined' && creditData.length > 0) {
+        const customerIds = [...new Set(sortedInvoices.map(inv =>
+            (inv['payee-customer-id'] || '').toLowerCase()
+        ).filter(id => id))];
+        creditItems = creditData.filter(c => {
+            if (!c.customerId) return false;
+            const matchCustomer = customerIds.some(cid => c.customerId.toLowerCase().includes(cid));
+            if (!matchCustomer) return false;
+            
+            // ✅ إخفاء إشعارات الخصم التي تم تحديدها
+            const viewKey = 'credit_' + (c.serial || c.draftNumber || c.finalNumber);
+            const isViewed = viewedInvoices.has(viewKey);
+            return !isViewed;
+        });
+    }
+    totals.credits = creditItems;
+	
+	    // ✅ تحديث الإجماليات بعد خصم إشعارات الخصم
+    creditItems.forEach(c => {
+        const amount = c.displayAmount || 0;
+        const tax = c.displayTax || 0;
+        const total = amount + tax;
+        
+        if (c.currency === 'USAD') {
+            totals.usadCharges -= amount;
+            totals.usadTaxes -= tax;
+            totals.usadTotal -= total;
+        } else {
+            totals.egpCharges -= amount;
+            totals.egpTaxes -= tax;
+            totals.egpTotal -= total;
+        }
+        totals.grandTotal -= total;
+    });
+
     const reportHtmlWithSummary = generateReportHTML(sortedInvoices, {
         fromDate: '', toDate: '',
         lineOperatorsText,
@@ -348,16 +391,7 @@ function formatNumberWithCommas(number) {
     // ... الكود الموجود
 }
 
-// إعدادات Drive المباشرة
-// ============================================
-const DRIVE_CONFIG = {
-    clientId: '835944620738-jcl9dh4j2fjuut18vhvik3605t9k20m9.apps.googleusercontent.com',
-    clientSecret: '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',
-    refreshToken: '',  // سيتم تعبئته من ملف refreshtoken.txt على Drive
-    fileId: '1DuActXaKPadEJ843EUlEAAmU7CBHQAVt'
-};
 
-let driveAccessToken = null;
 
 // تحميل Refresh Token من ملف نصي على Drive
 async function loadRefreshTokenFromDrive() {
@@ -392,70 +426,6 @@ async function loadRefreshTokenFromDrive() {
     }
 }
 
-// تجديد Access Token باستخدام Refresh Token
-async function refreshAccessToken() {
-    try {
-        const response = await fetch('https://oauth2.googleapis.com/token', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-            body: new URLSearchParams({
-                client_id: DRIVE_CONFIG.clientId,
-                client_secret: DRIVE_CONFIG.clientSecret,
-                refresh_token: DRIVE_CONFIG.refreshToken,
-                grant_type: 'refresh_token'
-            })
-        });
-        
-        if (!response.ok) {
-            const errorText = await response.text();
-            throw new Error(`فشل تجديد التوكن: ${response.status} - ${errorText}`);
-        }
-        
-        const data = await response.json();
-        driveAccessToken = data.access_token;
-        console.log('✅ تم تجديد Access Token بنجاح');
-        return driveAccessToken;
-    } catch (error) {
-        console.error('❌ خطأ في تجديد Access Token:', error);
-        throw error;
-    }
-}
-
-// حفظ إلى Drive
-async function saveViewedToDrive() {
-    if (!driveAccessToken) await refreshAccessToken();
-    try {
-        // قراءة الملف الحالي أولاً
-        let allData = {};
-        const readResponse = await fetch(`https://www.googleapis.com/drive/v3/files/${DRIVE_CONFIG.fileId}?alt=media`, {
-            headers: { 'Authorization': `Bearer ${driveAccessToken}` }
-        });
-        if (readResponse.ok) {
-            allData = await readResponse.json();
-        }
-        
-        const userKey = currentUser?.username || 'guest';
-        allData[userKey] = [...viewedInvoices];
-        allData.lastUpdated = new Date().toISOString();
-        
-        const response = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${DRIVE_CONFIG.fileId}?uploadType=media`, {
-            method: 'PATCH',
-            headers: {
-                'Authorization': `Bearer ${driveAccessToken}`,
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(allData)
-        });
-        
-        if (response.ok) {
-            console.log('✅ تم حفظ الحالة في Drive');
-            return true;
-        }
-    } catch (error) {
-        console.error('خطأ في حفظ الحالة إلى Drive:', error);
-    }
-    return false;
-}
 
 // ============================================
 // دوال تنسيق الأرقام
@@ -664,6 +634,7 @@ function splitReportIntoPages(reportHtml, rowsPerPage = 15) {
 // دالة إنشاء HTML للتقرير المفصل
 function generateReportHTML(invoices, reportInfo, logoBase64) {
     const { fromDate, toDate, lineOperatorsText, totals, count } = reportInfo;
+	    const credits = reportInfo.totals.credits || [];
     const currentDate = new Date().toISOString().slice(0,10).replace(/-/g, '/');
     
     const logoSrc = logoBase64 || '';
@@ -769,7 +740,23 @@ function generateReportHTML(invoices, reportInfo, logoBase64) {
         </div>
         <table class="report-table">
             <thead><tr><th>م</th><th>رقم الفاتورة</th><th>تاريخ الفاتورة</th><th>اسم السفينة</th><th>تاريخ الرحلة</th><th>العملة</th><th>المبلغ (USAD)</th><th>الضريبة (USAD)</th><th>المبلغ (EGP)</th><th>الضريبة (EGP)</th><th>الإجمالي النهائي</th></tr></thead>
-            <tbody>${rows}</tbody>
+            <tbody>${rows}
+            ${credits.map((c, i) => 
+                '<tr style="background: rgba(247,37,133,0.05);">' +
+                '<td>' + (invoices.length + i + 1) + '</td>' +
+                '<td style="color:#f72585; font-weight:bold;">' + (c.finalNumber || c.draftNumber || c.serial || '-') + '</td>' +
+                '<td>' + (c.date || '').replace(/-/g, '/') + '</td>' +
+                '<td style="color:#f72585;">إشعار خصم</td>' +
+                '<td>-</td>' +
+                '<td>' + (c.currency || 'EGP') + '</td>' +
+                '<td>' + (c.currency === 'USAD' ? (-c.displayAmount || 0).toFixed(2) : '-') + '</td>' +
+                '<td>' + (c.currency === 'USAD' ? (-c.displayTax || 0).toFixed(2) : '-') + '</td>' +
+                '<td>' + (c.currency !== 'USAD' ? (-c.displayAmount || 0).toFixed(2) : '-') + '</td>' +
+                '<td>' + (c.currency !== 'USAD' ? (-c.displayTax || 0).toFixed(2) : '-') + '</td>' +
+                '<td style="color:#f72585; font-weight:bold;">' + (-(c.displayAmount + c.displayTax) || 0).toFixed(2) + ' ' + (c.currency === 'USAD' ? 'USAD' : 'EGP') + '</td>' +
+                '</tr>'
+            ).join('')}
+			</tbody>
         </table>
         
         <div class="summary-section">
@@ -861,8 +848,67 @@ async function exportSelectedReport() {
     if (!companyLogoBase64) {
         await loadLogoFromDrive();
     }
+	
+	    // ✅ تجميع إشعارات الخصم لنفس العملاء
+    let creditItems = [];
+
+    // ✅ ترتيب إشعارات الخصم حسب التاريخ (الأقدم أولاً)
+    creditData.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+
+    if (typeof creditData !== 'undefined' && creditData.length === 0) {
+        await loadCreditDataFromDrive();
+    }
+
+    if (typeof creditData !== 'undefined' && creditData.length > 0) {
+        // جمع معرفات العملاء من الفواتير المحددة
+        const customerIds = [...new Set(selectedInvoicesData.map(inv =>
+            (inv['payee-customer-id'] || '').toLowerCase()
+        ).filter(id => id))];
+
+        // ✅ تحديد نطاق التاريخ من الفواتير المحددة
+        const invDates = selectedInvoicesData.map(inv => 
+            (inv['finalized-date'] || inv['created'] || '').slice(0, 10)
+        ).filter(d => d);
+        const minDate = invDates.length ? invDates.sort()[0] : '';
+        const maxDate = invDates.length ? invDates.sort()[invDates.length - 1] : '';
+
+        // فلترة إشعارات الخصم (حسب العميل + حسب التاريخ)
+        creditItems = creditData.filter(c => {
+            if (!c.customerId) return false;
+            const matchCustomer = customerIds.some(cid => c.customerId.toLowerCase().includes(cid));
+            if (!matchCustomer) return false;
+            
+            // فلترة حسب التاريخ إن وجد
+            const creditDate = (c.date || '').slice(0, 10);
+            if (!creditDate) return true; // إذا لم يكن له تاريخ، يظهر
+            if (minDate && creditDate < minDate) return false;
+            if (maxDate && creditDate > maxDate) return false;
+            return true;
+        });
+    }
 
     // إنشاء HTML الكامل (مع بطاقات الإجماليات)
+    // ✅ إضافة creditItems إلى كائن totals
+    totals.credits = creditItems;
+	
+	    // ✅ تحديث الإجماليات بعد خصم إشعارات الخصم
+    creditItems.forEach(c => {
+        const amount = c.displayAmount || 0;
+        const tax = c.displayTax || 0;
+        const total = amount + tax;
+        
+        if (c.currency === 'USAD') {
+            totals.usadCharges -= amount;
+            totals.usadTaxes -= tax;
+            totals.usadTotal -= total;
+        } else {
+            totals.egpCharges -= amount;
+            totals.egpTaxes -= tax;
+            totals.egpTotal -= total;
+        }
+        totals.grandTotal -= total;
+    });
+
     const reportHtmlWithSummary = generateReportHTML(selectedInvoicesData, {
         fromDate, toDate,
         lineOperatorsText,
@@ -1609,9 +1655,19 @@ function checkSession() {
             addDatabaseControls();
 
             // ✅ تحميل البيانات فوراً
-            showNotification('جاري تحميل البيانات...', 'info');
-            loadInvoicesFromDrive().then(() => {
+            console.log('🟢 بدء تحميل البيانات من Drive...');
+            loadInvoicesFromDrive().then(async () => {
                 console.log('✅ تم التحميل الأولي بنجاح');
+                // ✅ تحميل السدادات لتحديث حالة الفواتير
+                console.log('🔄 جاري تحميل السدادات...');
+                await loadPaymentsFromCloud(currentUser.username);
+                console.log('📋 السدادات بعد التحميل:', paymentsData.length);
+                // إعادة عرض البيانات لتحديث الأيقونات
+                if (currentUser?.isGuest) {
+                    filterInvoicesByGuest(currentUser.taxNumber, currentUser.blNumber);
+                } else {
+                    filterInvoicesByUser();
+                }
             }).catch(err => {
                 console.error('❌ فشل التحميل الأولي:', err);
             });
@@ -1675,6 +1731,24 @@ window.handleGuestLogin = async function() {
     const taxNumber = document.getElementById('guestTaxNumber').value.trim();
     const blNumber = document.getElementById('guestBlNumber').value.trim();
     if (!taxNumber && !blNumber) return showLoginMessage('أدخل الرقم الضريبي أو البوليصة', 'error');
+    
+    // ✅ التحقق إذا كان الرقم الضريبي مسجلاً لمستخدم
+    if (taxNumber) {
+        await loadUsers(true);
+        const registeredUser = users.find(u => 
+            u.taxNumber === taxNumber || 
+            u.contractCustomerId === taxNumber ||
+            (u.customerIds && u.customerIds.includes(taxNumber))
+        );
+        
+        if (registeredUser) {
+            return showLoginMessage(
+                `⚠️ هذا الرقم الضريبي مسجل للمستخدم "${registeredUser.username}". الرجاء تسجيل الدخول بدلاً من وضع الزائر.`,
+                'error'
+            );
+        }
+    }
+    
     currentUser = { id: 'guest_' + Date.now(), username: 'زائر', email: 'guest@temp.com', taxNumber: taxNumber || null, blNumber: blNumber || null, userType: 'customer', isGuest: true, lastLogin: new Date().toISOString() };
     sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
     document.getElementById('loginScreen').style.display = 'none';
@@ -1699,6 +1773,21 @@ window.logout = function() {
 
 function updateUserInterface() {
     if (!currentUser) return;
+    
+    // ✅ تحديث الشريط الجانبي
+    const sidebarAvatar = document.getElementById('sidebarAvatar');
+    const sidebarName = document.getElementById('sidebarName');
+    const sidebarRole = document.getElementById('sidebarRole');
+    const sidebarAdminLink = document.getElementById('sidebarAdminLink');
+    
+    if (sidebarAvatar) sidebarAvatar.textContent = (currentUser.username || 'م')[0];
+    if (sidebarName) sidebarName.textContent = currentUser.username || 'مستخدم';
+    
+    const roleMap = { admin: 'مدير', accountant: 'محاسب', customer: 'عميل' };
+    if (sidebarRole) sidebarRole.textContent = '● ' + (roleMap[currentUser.userType] || 'مستخدم');
+    if (sidebarAdminLink) sidebarAdminLink.style.display = currentUser.userType === 'admin' ? '' : 'none';
+    
+    // ✅ تحديث العناصر العلوية (إن وجدت)
     let displayName = currentUser.username, taxDisplay = '', badgeClass = '', badgeText = '';
     if (currentUser.isGuest) {
         displayName = 'زائر';
@@ -1708,30 +1797,48 @@ function updateUserInterface() {
         taxDisplay = `الرقم الضريبي: ${currentUser.taxNumber || 'غير محدد'}`;
         if (currentUser.contractCustomerId) taxDisplay += ` | رقم العقد: ${currentUser.contractCustomerId}`;
         badgeClass = currentUser.userType;
-        badgeText = { admin: 'مدير', accountant: 'محاسب', customer: 'عميل' }[currentUser.userType] || currentUser.userType;
+        badgeText = roleMap[currentUser.userType] || currentUser.userType;
     }
-    document.getElementById('currentUserDisplay').textContent = displayName;
-    document.getElementById('userTaxDisplay').textContent = taxDisplay;
-    const badge = document.getElementById('userTypeBadge');
-    badge.textContent = badgeText; badge.className = `user-badge ${badgeClass}`;
+    
+    const currentUserDisplay = document.getElementById('currentUserDisplay');
+    const userTaxDisplay = document.getElementById('userTaxDisplay');
+    const userTypeBadge = document.getElementById('userTypeBadge');
+    
+    if (currentUserDisplay) currentUserDisplay.textContent = displayName;
+    if (userTaxDisplay) userTaxDisplay.textContent = taxDisplay;
+    if (userTypeBadge) {
+        userTypeBadge.textContent = badgeText;
+        userTypeBadge.className = `user-badge ${badgeClass}`;
+    }
 
     const isAdmin = currentUser.userType === 'admin';
     const isGuest = currentUser.isGuest;
 
-    document.getElementById('driveSettingsBtn').style.display = isAdmin ? 'flex' : 'none';
-    document.querySelector('[onclick="showChangePassword()"]').style.display = isGuest ? 'none' : 'flex';
-    document.getElementById('adminPanelBtn').style.display = isAdmin ? 'flex' : 'none';
-    document.querySelector('label[for="fileInput"]').style.display = isAdmin ? 'inline-flex' : 'none';
-    document.querySelector('.btn-drive').style.display = isAdmin ? 'inline-flex' : 'none';
-    document.getElementById('dbControls').style.display = isAdmin ? 'flex' : 'none';
+    const driveSettingsBtn = document.getElementById('driveSettingsBtn');
+    const adminPanelBtn = document.getElementById('adminPanelBtn');
+    const openingBalanceBtn = document.getElementById('openingBalanceBtn');
+    const uploadXmlBtn = document.getElementById('uploadXmlBtn');
+    const driveUpdateBtn = document.getElementById('driveUpdateBtn');    
+    if (driveSettingsBtn) driveSettingsBtn.style.display = isAdmin ? 'flex' : 'none';
+    if (adminPanelBtn) adminPanelBtn.style.display = isAdmin ? 'flex' : 'none';
+    if (openingBalanceBtn) openingBalanceBtn.style.display = isAdmin ? 'flex' : 'none';
+    if (uploadXmlBtn) uploadXmlBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+    if (driveUpdateBtn) driveUpdateBtn.style.display = isAdmin ? 'inline-flex' : 'none';
 
-    // ✅ بناء واجهة البحث المتقدم لكل المستخدمين (الدالة الداخلية ستقرر القائمة أو النص)
-    buildInvoiceSearchUI();
-	
-	    // تحميل شريط الأخبار
+    const showChangePasswordBtn = document.querySelector('[onclick="showChangePassword()"]');
+    if (showChangePasswordBtn) showChangePasswordBtn.style.display = isGuest ? 'none' : 'flex';
+
+    // بناء واجهة البحث المتقدم
+    if (typeof buildInvoiceSearchUI === 'function') {
+        buildInvoiceSearchUI();
+    }
+    
+    // تحميل شريط الأخبار
     if (currentUser) {
         setTimeout(function() {
-            initNewsBar();
+            if (typeof initNewsBar === 'function') {
+                initNewsBar();
+            }
         }, 1000);
     }
 }
@@ -1763,16 +1870,23 @@ window.updatePassword = async function() {
 function initDatabase() {
     return new Promise(resolve => {
         try {
-            const req = indexedDB.open('InvoiceDB', 2);
+            const req = indexedDB.open('InvoiceDB', 3);
             req.onerror = () => { useLocalStorageFallback(); resolve(); };
             req.onsuccess = e => { db = e.target.result; console.log('✅ تم فتح قاعدة البيانات'); resolve(); };
             req.onupgradeneeded = e => {
                 const db = e.target.result;
-                if (db.objectStoreNames.contains('invoices')) db.deleteObjectStore('invoices');
-                if (db.objectStoreNames.contains('settings')) db.deleteObjectStore('settings');
-                const store = db.createObjectStore('invoices', { keyPath: 'id', autoIncrement: true });
-                ['final-number', 'draft-number', 'payee-customer-id', 'contract-customer-id', 'created', 'finalized-date'].forEach(idx => store.createIndex(idx, idx, { unique: false }));
-                db.createObjectStore('settings', { keyPath: 'key' });
+                try {
+                    if (db.objectStoreNames.contains('invoices')) db.deleteObjectStore('invoices');
+                    if (db.objectStoreNames.contains('settings')) db.deleteObjectStore('settings');
+                    const store = db.createObjectStore('invoices', { keyPath: 'id', autoIncrement: true });
+                    try { store.createIndex('final-number', 'final-number', { unique: false }); } catch(e) {}
+                    try { store.createIndex('draft-number', 'draft-number', { unique: false }); } catch(e) {}
+                    try { store.createIndex('payee-customer-id', 'payee-customer-id', { unique: false }); } catch(e) {}
+                    try { store.createIndex('contract-customer-id', 'contract-customer-id', { unique: false }); } catch(e) {}
+                    db.createObjectStore('settings', { keyPath: 'key' });
+                } catch(err) {
+                    console.warn('خطأ في IndexedDB:', err);
+                }
             };
         } catch { useLocalStorageFallback(); resolve(); }
     });
@@ -1875,19 +1989,21 @@ function updateDataSource() {
     el.innerHTML = `${db ? '📦' : '💾'} ${formatNumberWithCommas(count)} فاتورة - ${db ? 'قاعدة بيانات محلية' : 'تخزين مؤقت'}${date}`;
 }
 
-// ============================================
-// دوال التبديل بين أنواع الفواتير
-// ============================================
-// ============================================
-// دوال التبديل بين أنواع الفواتير
-// ============================================
+
 // ============================================
 // دوال التبديل بين أنواع الفواتير
 // ============================================
 window.switchInvoiceType = async function(type) {
     console.log('التبويب المحدد:', type);
     currentInvoiceType = type;
-    
+        updateSidebarActive(type);
+		    if (type === 'cash') updatePageTitle('الفواتير النقدية', filteredInvoices.length, document.getElementById('totalSum')?.textContent);
+    if (type === 'postponed') updatePageTitle('الفواتير الآجلة', filteredInvoices.length, document.getElementById('totalSum')?.textContent);
+    if (type === 'credit') updatePageTitle('إشعارات الخصم', filteredCreditData.length, document.getElementById('totalSum')?.textContent);
+	 // ✅ تحميل السدادات أولاً لتحديث حالة الفواتير
+    if (paymentsData.length === 0) {
+        await loadPaymentsFromCloud(currentUser.username);
+    }
     // تحديث مظهر الأزرار
     document.querySelectorAll('.type-tab').forEach((btn, i) => {
         if (type === INVOICE_TYPES.CASH && i === 0) btn.classList.add('active');
@@ -1990,9 +2106,30 @@ window.parseXMLContent = async function(xmlString, source) {
             for (let i = 0; i < nodes.length; i++) { const inv = parseInvoiceNode(nodes[i]); if (inv) newInvoices.push(inv); }
         }
 
-        if (!newInvoices.length) throw new Error('لا توجد فواتير');
-        invoicesData = newInvoices;
+		if (!newInvoices.length) throw new Error('لا توجد فواتير');
+
+		// ✅ إزالة الفواتير المكررة
+		const uniqueInvoices = [];
+		const seenKeys = new Set();
+
+		newInvoices.forEach(inv => {
+			const key = getInvoiceKey(inv);
+			if (!seenKeys.has(key)) {
+				seenKeys.add(key);
+				uniqueInvoices.push(inv);
+			}
+		});
+
+		const duplicateCount = newInvoices.length - uniqueInvoices.length;
+			if (duplicateCount > 0 && currentUser?.userType === 'admin') {
+				showNotification(`⚠️ تم إزالة ${duplicateCount} فاتورة مكررة`, 'warning');
+				console.log(`⚠️ تم إزالة ${duplicateCount} فاتورة مكررة`);
+			}
+
+		invoicesData = uniqueInvoices;
         showProgress('تم التحديث', 100);
+		        // ✅ تحميل السدادات لتحديث حالة السداد في الجدول
+        await loadPaymentsFromCloud(currentUser?.username);
         currentUser?.isGuest ? filterInvoicesByGuest(currentUser.taxNumber, currentUser.blNumber) : filterInvoicesByUser();
         document.getElementById('fileStatus').innerHTML = `<i class="fas fa-check-circle"></i> ✅ تم تحديث ${formatNumberWithCommas(invoicesData.length)} فاتورة من ${source}`;
         updateDataSource();
@@ -2280,6 +2417,7 @@ function parseCreditNode(creditElement) {
 // دوال البحث المتقدم - معدلة لاستخدام finalized-date
 // ============================================
 window.applyAdvancedSearch = async function() {
+	    isSearching = true;  // 👈 أضف هذا السطر هنا
     console.log('🔍 [بحث] بدء البحث');
     console.log('📊 عدد الفواتير الكلي:', invoicesData.length);
     
@@ -2359,7 +2497,13 @@ window.applyAdvancedSearch = async function() {
             if (!found) return false;
         }
         if (contractCustomerId && !(inv['contract-customer-id'] || '').toLowerCase().includes(contractCustomerId)) return false;
-        if (status && inv['status'] !== status) return false;
+        // فلتر حالة المعاينة (بدلاً من فلتر FINAL/DRAFT)
+		if (status) {
+			const viewKey = getInvoiceKey(inv);
+			const isViewed = viewedInvoices.has(viewKey);
+			if (status === 'viewed' && !isViewed) return false;
+			if (status === 'not_viewed' && isViewed) return false;
+		}
         if (invType) {
             const num = inv['final-number'] || '';
             if (invType === 'cash' && !(num.startsWith('C') || num.startsWith('c'))) return false;
@@ -2381,14 +2525,6 @@ window.applyAdvancedSearch = async function() {
             }
         }
         
-        // ✅ شرط حالة المعاينة
-        if (viewedStatus) {
-            const viewKey = getInvoiceKey(inv);
-            const isViewed = viewedInvoices.has(viewKey);
-            
-            if (viewedStatus === 'viewed' && !isViewed) return false;
-            if (viewedStatus === 'not_viewed' && isViewed) return false;
-        }
         
         return true;
     });
@@ -2402,9 +2538,14 @@ window.applyAdvancedSearch = async function() {
     
     console.log('📊 عدد الفواتير المعروضة (filteredInvoices):', filteredInvoices.length);
     showNotification(`تم العثور على ${formatNumberWithCommas(filteredInvoices.length)} فاتورة`, filteredInvoices.length ? 'success' : 'info');
+	    // 👇 أضف هذا السطر في النهاية
+    setTimeout(() => { isSearching = false; }, 500);
+
 };
 
 window.resetAdvancedSearch = function() {
+	    isSearching = true;  // 👈 أضف هذا
+
     const searchFields = ['searchFinalNumber', 'searchDraftNumber', 'searchCustomer', 'searchVessel', 
                       'searchBlNumber', 'searchContainer', 'searchStatus', 'searchDateFrom', 
                       'searchDateTo', 'searchInvoiceType', 'searchContractCustomerId', 'searchViewedStatus'];
@@ -2421,6 +2562,8 @@ window.resetAdvancedSearch = function() {
     currentUser?.isGuest ? filterInvoicesByGuest(currentUser.taxNumber, currentUser.blNumber) : filterInvoicesByUser();
     clearSelectedInvoices();
     showNotification('تم إعادة ضبط البحث', 'info');
+	setTimeout(() => { isSearching = false; }, 500);  // 👈 أضف هذا
+
 };
 
 // ============================================
@@ -2652,14 +2795,13 @@ window.changeItemsPerPage = function() {
 };
 
 window.setViewMode = function(mode) {
-    // تحديث كلا المتغيرين
     viewMode = mode;
     viewModeCredit = mode;
     
     clearSelectedInvoices();
     
-    // تحديث مظهر الأزرار
-    document.querySelectorAll('.btn-view').forEach((btn, i) => {
+    // ✅ تحديث الأزرار في شريط التحكم
+    document.querySelectorAll('.card-header .tabs .tab').forEach((btn, i) => {
         if ((i === 0 && mode === 'table') || (i === 1 && mode === 'cards')) {
             btn.classList.add('active');
         } else {
@@ -2667,11 +2809,10 @@ window.setViewMode = function(mode) {
         }
     });
     
-    // إعادة العرض حسب النوع الحالي
     if (currentInvoiceType === INVOICE_TYPES.CREDIT) {
-        renderCreditData();  // ستستخدم viewModeCredit الجديدة
+        renderCreditData();
     } else {
-        renderData();       // ستستخدم viewMode الجديدة
+        renderData();
     }
 };
 
@@ -2679,8 +2820,15 @@ window.toggleAdvancedSearch = function() {
     const body = document.getElementById('advancedSearchBody');
     const icon = document.getElementById('searchToggleIcon');
     if (body && icon) {
-        body.classList.toggle('show');
-        icon.style.transform = body.classList.contains('show') ? 'rotate(180deg)' : 'rotate(0)';
+        if (body.classList.contains('show')) {
+            body.classList.remove('show');
+            body.style.display = 'none';
+            icon.style.transform = 'rotate(0)';
+        } else {
+            body.classList.add('show');
+            body.style.display = 'block';
+            icon.style.transform = 'rotate(180deg)';
+        }
     }
 };
 
@@ -2701,18 +2849,33 @@ function updateSummary() {
         else { totalEGP += total; taxEGP += taxes; totalEGPWithoutTax += (total - taxes); }
     });
 
-    // عرض الأرقام بدون فواصل الألف وبدون كلمات جنيه/دولار
-    document.getElementById('invoiceCount').textContent = count;
-    document.getElementById('totalSum').innerHTML = totalEGP.toFixed(2);
-    document.getElementById('taxSum').innerHTML = taxEGP.toFixed(2);
-    document.getElementById('totalUSD').innerHTML = totalUSD.toFixed(2);
-    document.getElementById('totalEGPWithoutTax').innerHTML = totalEGPWithoutTax.toFixed(2);
-    document.getElementById('totalMartyr').innerHTML = totalMartyr.toFixed(2);
+    // ✅ استخدام optional chaining لتجنب الخطأ
+    const invoiceCount = document.getElementById('invoiceCount');
+    const totalSum = document.getElementById('totalSum');
+    const taxSum = document.getElementById('taxSum');
+    const totalUSDEl = document.getElementById('totalUSD');
+    const totalEGPWithoutTaxEl = document.getElementById('totalEGPWithoutTax');
+    const totalMartyrEl = document.getElementById('totalMartyr');
+    const totalInvoicesHeader = document.getElementById('totalInvoicesHeader');
+    const totalCustomers = document.getElementById('totalCustomers');
+    const totalVessels = document.getElementById('totalVessels');
+	
+	 // ✅ أضف السطرين هنا 👇
+    const totalCustomersTop = document.getElementById('totalCustomersTop');
+    const totalVesselsTop = document.getElementById('totalVesselsTop');
     
-    // تحديث الإحصائيات في الهيدر
-    document.getElementById('totalInvoicesHeader').textContent = count;
-    document.getElementById('totalCustomers').textContent = new Set(filteredInvoices.map(i => i['payee-customer-id'])).size;
-    document.getElementById('totalVessels').textContent = new Set(filteredInvoices.map(i => i['key-word1']).filter(v => v)).size;
+    if (invoiceCount) invoiceCount.textContent = count;
+    if (totalSum) totalSum.innerHTML = totalEGP.toFixed(2);
+    if (taxSum) taxSum.innerHTML = taxEGP.toFixed(2);
+    if (totalUSDEl) totalUSDEl.innerHTML = totalUSD.toFixed(2);
+    if (totalEGPWithoutTaxEl) totalEGPWithoutTaxEl.innerHTML = totalEGPWithoutTax.toFixed(2);
+    if (totalMartyrEl) totalMartyrEl.innerHTML = totalMartyr.toFixed(2);
+    if (totalInvoicesHeader) totalInvoicesHeader.textContent = count;
+    if (totalCustomers) totalCustomers.textContent = new Set(filteredInvoices.map(i => i['payee-customer-id'])).size;
+    if (totalVessels) totalVessels.textContent = new Set(filteredInvoices.map(i => i['key-word1']).filter(v => v)).size;
+	    // ✅ أضف السطرين هنا 👇
+    if (totalCustomersTop) totalCustomersTop.textContent = new Set(filteredInvoices.map(i => i['payee-customer-id'])).size;
+    if (totalVesselsTop) totalVesselsTop.textContent = new Set(filteredInvoices.map(i => i['key-word1']).filter(v => v)).size;
 }
 
 function renderPagination(totalPages) {
@@ -4346,13 +4509,14 @@ function renderTableView(data) {
                         <th style="width:50px;">معاينة</th>
                         <th>الرقم النهائي</th>
                         <th>رقم المسودة</th>
-                        <th>تاريخ الفاتورة</th>   <!-- ✅ تم النقل إلى هنا -->
+                        <th>تاريخ الفاتورة</th>
                         <th>العميل</th>
                         <th>السفينة</th>
                         <th>${currentInvoiceType === INVOICE_TYPES.POSTPONED ? 'IB ID / OB ID' : 'رقم البوليصة'}</th>
-                        <th>تاريخ الرحله</th>
+                        <th>تاريخ الرحلة</th>
                         <th>الإجمالي (EGP)</th>
                         <th>المبلغ بالعملة</th>
+                        <th>سداد</th>
                     </tr>
                 </thead>
                 <tbody>`;
@@ -4386,25 +4550,65 @@ function renderTableView(data) {
         const invoiceDateRaw = inv['finalized-date'] || inv['created'] || '';
         const invoiceDate = invoiceDateRaw ? new Date(invoiceDateRaw).toLocaleDateString('ar-EG') : '-';
         
+        // ✅ تحضير حالة السداد
+        const key = getInvoiceKey(inv);
+        const customer = inv['payee-customer-id'] || inv['contract-customer-id'] || '';
+        const paymentStatus = getInvoicePaymentStatus(key, customer);
+        const remainingOriginal = Math.max(0, parseFloat(displayAmount) - paymentStatus.paid);
+        const paymentCurrency = displayCurrency;
+        
+        let paymentCell = '';
+			if (remainingOriginal <= 0.01 && !paymentStatus.hasRejected) {
+				// ✅ تم السداد بالكامل
+				paymentCell = `<span style="background:rgba(34,197,94,0.2); color:#22c55e; padding:6px 12px; border-radius:20px; font-size:0.75em; font-weight:700; white-space:nowrap;">
+					<i class="fas fa-check-circle"></i> تم السداد
+				</span>`;
+			} else if (paymentStatus.hasRejected) {
+				// ❌ سداد مرفوض - إعادة السداد
+				const fullAmount = parseFloat(displayAmount);
+				paymentCell = `<button class="pay-btn" style="background:rgba(239,68,68,0.2); color:#ef4444; border:1px solid rgba(239,68,68,0.3);" onclick="event.stopPropagation(); quickPayInvoice('${key}', '${customer}', ${fullAmount.toFixed(2)}, '${displayCurrency}')" title="سداد مرفوض - اضغط لإعادة السداد">
+					<i class="fas fa-exclamation-triangle"></i> سداد مرفوض
+				</button>`;
+			} else if (paymentStatus.hasPending) {
+				// ⏳ في انتظار الموافقة
+				paymentCell = `<span style="background:rgba(245,158,11,0.2); color:#f59e0b; padding:6px 12px; border-radius:20px; font-size:0.75em; font-weight:700; white-space:nowrap;">
+					<i class="fas fa-hourglass-half"></i> بالانتظار
+				</span>`;
+			} else if (paymentStatus.paid > 0) {
+				// 🟡 سداد جزئي
+				paymentCell = `<div style="text-align:center;">
+					<button class="pay-btn" style="background:rgba(59,130,246,0.2); color:#3b82f6; border:1px solid rgba(59,130,246,0.3); margin-bottom:3px;" onclick="event.stopPropagation(); quickPayInvoice('${key}', '${customer}', ${remainingOriginal.toFixed(2)}, '${displayCurrency}')" title="سداد المتبقي">
+						<i class="fas fa-money-bill-wave"></i> سداد جزئي
+					</button>
+					<div style="font-size:0.65em; color:var(--text-muted);">متبقي: ${formatNumberWithCommas(remainingOriginal.toFixed(2))} ${displayCurrency}</div>
+				</div>`;
+			} else {
+				// 🔵 لم يسدد بعد
+				paymentCell = `<button class="pay-btn" style="background:rgba(99,102,241,0.2); color:#818cf8; border:1px solid rgba(99,102,241,0.3);" onclick="event.stopPropagation(); quickPayInvoice('${key}', '${customer}', ${remainingOriginal.toFixed(2)}, '${displayCurrency}')" title="سداد">
+					<i class="fas fa-money-bill-wave"></i> سداد
+				</button>`;
+			}
+        
         html += `<tr onclick="window.handleRowClick(${idx}, event)" class="${selectedClass}" data-index="${idx}" data-key="${viewKey}">
             <td onclick="event.stopPropagation()"><input type="checkbox" class="invoice-checkbox" data-index="${idx}" ${isSelected} onchange="updateSelectedInvoices(${idx}, this.checked)"></td>
             <td class="viewed-cell" onclick="event.stopPropagation()">
                 <input type="checkbox" class="viewed-checkbox" data-key="${viewKey}" ${isViewed} 
                        onchange="toggleInvoiceViewed('${viewKey}', this.checked, '${finalNum}', '${draftNum}')">
-            <\/td>
-            <td>${inv['final-number'] || '-'} (${invoiceTypeDisplay})<\/td>
-            <td>${inv['draft-number'] || '-'}<\/td>
-            <td>${invoiceDate}<\/td>   <!-- ✅ تم النقل إلى هنا -->
-            <td>${(inv['payee-customer-id'] || '-').substring(0,20)}<\/td>
-            <td>${inv['key-word1'] || '-'}<\/td>
-            <td>${inv['key-word2'] || '-'}<\/td>
-            <td>${inv['flex-date-02'] ? new Date(inv['flex-date-02']).toLocaleDateString('ar-EG') : '-'}<\/td>
-            <td>${formatNumberWithCommas(totalOriginal.toFixed(2))}<\/td>
-            <td>${formatNumberWithCommas(displayAmount)} ${displayCurrency}<\/td>
+            </td>
+            <td>${inv['final-number'] || '-'} (${invoiceTypeDisplay})</td>
+            <td>${inv['draft-number'] || '-'}</td>
+            <td>${invoiceDate}</td>
+            <td>${(inv['payee-customer-id'] || '-').substring(0,20)}</td>
+            <td>${inv['key-word1'] || '-'}</td>
+            <td>${inv['key-word2'] || '-'}</td>
+            <td>${inv['flex-date-02'] ? new Date(inv['flex-date-02']).toLocaleDateString('ar-EG') : '-'}</td>
+            <td>${formatNumberWithCommas(totalOriginal.toFixed(2))}</td>
+            <td>${formatNumberWithCommas(displayAmount)} ${displayCurrency}</td>
+            <td>${paymentCell}</td>
         </tr>`;
     });
     
-    html += '</tbody><table></div>';
+    html += '</tbody></table></div>';
     document.getElementById('dataViewContainer').innerHTML = html;
     updateSelectedCount();
 }
@@ -4414,6 +4618,7 @@ function renderTableView(data) {
 // ============================================
 window.showReports = function(type) {
     currentReportType = type;
+	 updateSidebarActive('reports');
     document.querySelectorAll('.report-tab').forEach(t => t.classList.remove('active'));
     event.target.classList.add('active');
     document.getElementById('dataViewContainer').style.display = 'none';
@@ -4924,16 +5129,25 @@ function updateCreditSummary() {
         totalGross += (item.displayAmount + item.displayTax);
     });
 
-    document.getElementById('invoiceCount').textContent = count;
-    document.getElementById('totalSum').innerHTML = totalNet.toFixed(2);
-    document.getElementById('taxSum').innerHTML = totalTax.toFixed(2);
-    document.getElementById('totalUSD').innerHTML = totalGross.toFixed(2);
-    document.getElementById('totalEGPWithoutTax').innerHTML = '0.00';
-    document.getElementById('totalMartyr').innerHTML = '0.00';
+    const invoiceCount = document.getElementById('invoiceCount');
+    const totalSum = document.getElementById('totalSum');
+    const taxSum = document.getElementById('taxSum');
+    const totalUSDEl = document.getElementById('totalUSD');
+    const totalEGPWithoutTaxEl = document.getElementById('totalEGPWithoutTax');
+    const totalMartyrEl = document.getElementById('totalMartyr');
+    const totalInvoicesHeader = document.getElementById('totalInvoicesHeader');
+    const totalCustomers = document.getElementById('totalCustomers');
+    const totalVessels = document.getElementById('totalVessels');
 
-    document.getElementById('totalInvoicesHeader').textContent = count;
-    document.getElementById('totalCustomers').textContent = new Set(filteredCreditData.map(i => i.customer)).size;
-    document.getElementById('totalVessels').textContent = '-';
+    if (invoiceCount) invoiceCount.textContent = count;
+    if (totalSum) totalSum.innerHTML = totalNet.toFixed(2);
+    if (taxSum) taxSum.innerHTML = totalTax.toFixed(2);
+    if (totalUSDEl) totalUSDEl.innerHTML = totalGross.toFixed(2);
+    if (totalEGPWithoutTaxEl) totalEGPWithoutTaxEl.innerHTML = '0.00';
+    if (totalMartyrEl) totalMartyrEl.innerHTML = '0.00';
+    if (totalInvoicesHeader) totalInvoicesHeader.textContent = count;
+    if (totalCustomers) totalCustomers.textContent = new Set(filteredCreditData.map(i => i.customer)).size;
+    if (totalVessels) totalVessels.textContent = '-';
 }
 
 function renderCreditCardsView(data) {
@@ -4986,6 +5200,7 @@ function renderCreditTableView(data) {
                 <thead>
                     <tr>
                         <th style="width:40px;"><input type="checkbox" onclick="toggleAllCreditCheckboxes(this)" id="selectAllCreditCheckbox"></th>
+                        <th style="width:50px;">معاينة</th>
                         <th>رقم الإشعار</th>
                         <th>رقم المسودة</th>
                         <th>رقم الفاتورة الأصلية</th>
@@ -5009,8 +5224,15 @@ function renderCreditTableView(data) {
         const isSelected = selectedCreditNotes.has(item.serial);
         const selectedClass = isSelected ? 'selected-row' : '';
 
+        const viewKey = 'credit_' + (item.serial || item.draftNumber || item.finalNumber);
+        const isViewed = viewedInvoices.has(viewKey) ? 'checked' : '';
+
         html += `<tr onclick="showCreditDetails('${item.serial}')" class="${selectedClass}" data-serial="${item.serial}" style="cursor: pointer;">
             <td onclick="event.stopPropagation()"><input type="checkbox" class="credit-checkbox" data-serial="${item.serial}" ${isSelected ? 'checked' : ''} onchange="updateSelectedCredit('${item.serial}', this.checked)"></td>
+            <td class="viewed-cell" onclick="event.stopPropagation()">
+                <input type="checkbox" class="viewed-checkbox" data-key="${viewKey}" ${isViewed} 
+                       onchange="toggleInvoiceViewed('${viewKey}', this.checked)">
+            </td>
             <td>${item.finalNumber || '-'}${item.draftNumber ? `<br><small>مسودة: ${item.draftNumber}</small>` : ''}</td>
             <td>${item.draftNumber || '-'}</td>
             <td>${item.invoiceFinalNumber || '-'}</td>
@@ -5560,7 +5782,24 @@ async function loadInvoicesFromDrive() {
         }
 
         if (!newInvoices.length) throw new Error('لا توجد فواتير');
-        invoicesData = newInvoices;
+        // ✅ إزالة الفواتير المكررة
+			const uniqueInvoicesRemove = [];
+			const seenKeysRemove = new Set();
+
+			newInvoices.forEach(inv => {
+				const key = getInvoiceKey(inv);
+				if (!seenKeysRemove.has(key)) {
+					seenKeysRemove.add(key);
+					uniqueInvoicesRemove.push(inv);
+				}
+			});
+
+			const duplicateCountRemove = newInvoices.length - uniqueInvoicesRemove.length;
+				if (duplicateCountRemove > 0 && currentUser?.userType === 'admin') {
+					showNotification(`⚠️ تم إزالة ${duplicateCountRemove} فاتورة مكررة`, 'warning');
+				}
+
+			invoicesData = uniqueInvoicesRemove;
         showProgress('تم التحميل', 100);
         
         // ✅ تطبيق تصفية المستخدم أولاً
@@ -6984,16 +7223,1387 @@ function loadViewedInvoices() {
         }
     }
 }
+
+// ============================================
+// دوال نظام السدادات
+// ============================================
+
+// تحميل السدادات من السحابة
+async function loadPaymentsFromCloud(username) {
+    console.log('🔄 جاري تحميل السدادات...');
+    
+    for (let attempt = 1; attempt <= 3; attempt++) {
+        try {
+            // ✅ دائماً نحمل كل السدادات بدون فلتر
+            const response = await fetch(PAYMENTS_API_URL);
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            
+            const data = await response.json();
+            if (data.success) {
+                paymentsData = data.payments || [];
+                console.log(`✅ تم تحميل ${paymentsData.length} سداد`);
+                return true;
+            }
+            return false;
+        } catch (error) {
+            console.warn(`⚠️ محاولة ${attempt} فشلت:`, error.message);
+            if (attempt < 3) {
+                await new Promise(resolve => setTimeout(resolve, 1000));
+            }
+        }
+    }
+    
+    console.error('❌ فشلت جميع محاولات تحميل السدادات');
+    return false;
+}
+
+// حفظ سداد جديد
+async function savePaymentToCloud(paymentData) {
+    console.log('💾 جاري حفظ السداد...');
+    try {
+        const response = await fetch(PAYMENTS_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({
+                action: 'create',
+                ...paymentData
+            })
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            console.log('✅ تم حفظ السداد بنجاح:', data.payment.id);
+            return data;
+        }
+        throw new Error(data.error || 'فشل الحفظ');
+    } catch (error) {
+        console.error('❌ فشل حفظ السداد:', error);
+        return null;
+    }
+}
+
+// تأكيد سداد (للمدير فقط)
+async function confirmPaymentInCloud(paymentId) {
+    if (currentUser?.userType !== 'admin') {
+        showNotification('غير مصرح لك بتأكيد السداد', 'error');
+		// تحديث عرض السدادات مباشرة إذا كان التبويب مفتوحاً
+	if (document.querySelector('.type-tab.active')?.textContent?.includes('السدادات')) {
+		await openAllPaymentsView();
+}
+        return null;
+    }
+    
+    try {
+        const response = await fetch(PAYMENTS_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({
+                action: 'confirm',
+                paymentId: paymentId,
+                confirmedBy: currentUser.username
+            })
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification('✅ تم تأكيد السداد بنجاح', 'success');
+            return data;
+        }
+        throw new Error(data.error || 'فشل التأكيد');
+    } catch (error) {
+        console.error('❌ فشل تأكيد السداد:', error);
+        showNotification('❌ فشل تأكيد السداد', 'error');
+        return null;
+    }
+}
+
+// رفض سداد (للمدير فقط)
+async function rejectPaymentInCloud(paymentId, reason) {
+    if (currentUser?.userType !== 'admin') {
+        showNotification('غير مصرح لك برفض السداد', 'error');
+		// تحديث عرض السدادات مباشرة إذا كان التبويب مفتوحاً
+	if (document.querySelector('.type-tab.active')?.textContent?.includes('السدادات')) {
+		await openAllPaymentsView();
+}
+        return null;
+    }
+    
+    try {
+        const response = await fetch(PAYMENTS_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({
+                action: 'reject',
+                paymentId: paymentId,
+                rejectionReason: reason,
+                confirmedBy: currentUser.username
+            })
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification('تم رفض السداد', 'info');
+            return data;
+        }
+        throw new Error(data.error || 'فشل الرفض');
+    } catch (error) {
+        console.error('❌ فشل رفض السداد:', error);
+        showNotification('❌ فشل رفض السداد', 'error');
+        return null;
+    }
+}
+
+// إلغاء سداد
+async function cancelPaymentInCloud(paymentId) {
+    try {
+        const response = await fetch(PAYMENTS_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify({
+                action: 'cancel',
+                paymentId: paymentId
+            })
+        });
+        
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        const data = await response.json();
+        
+        if (data.success) {
+            showNotification('تم إلغاء السداد', 'info');
+			// تحديث عرض السدادات مباشرة إذا كان التبويب مفتوحاً
+		if (document.querySelector('.type-tab.active')?.textContent?.includes('السدادات')) {
+			await openAllPaymentsView();
+}
+            return data;
+        }
+        throw new Error(data.error || 'فشل الإلغاء');
+    } catch (error) {
+        console.error('❌ فشل إلغاء السداد:', error);
+        showNotification('❌ فشل إلغاء السداد', 'error');
+        return null;
+    }
+}
+
+// ============================================
+// دوال واجهة السدادات
+// ============================================
+
+// فتح نافذة تسجيل سداد جديد
+window.openPaymentModal = function() {
+    if (!currentUser) {
+        showNotification('يرجى تسجيل الدخول أولاً', 'warning');
+        return;
+    }
+    
+    // ✅ إعداد التاريخ الافتراضي (اليوم)
+    document.getElementById('paymentDate').value = new Date().toISOString().slice(0, 10);
+    
+    // ✅ تفريغ جميع الحقول
+    document.getElementById('paymentAmount').value = '';
+    document.getElementById('paymentReference').value = '';
+    document.getElementById('paymentNotes').value = '';
+    document.getElementById('paymentBankName').value = '';
+    document.getElementById('paymentChequeNumber').value = '';
+    document.getElementById('paymentChequeDate').value = '';
+    document.getElementById('paymentChequeBank').value = '';
+    document.getElementById('paymentCardLast4').value = '';
+    document.getElementById('paymentCurrency').value = 'EGP';
+    document.getElementById('paymentMethod').value = 'bank_transfer';
+    document.getElementById('paymentMessage').style.display = 'none';
+    
+    // ✅ إظهار/إخفاء الحقول حسب طريقة السداد
+    onPaymentMethodChange();
+    
+    // ✅ تحميل قائمة العملاء في القائمة المنسدلة
+    loadPaymentCustomers();
+    
+    // ✅ تحميل السدادات ثم الفواتير غير المسددة
+    //    لكن فقط إذا لم يكن سداداً سريعاً
+    if (!isQuickPayment) {
+        loadPaymentsFromCloud(currentUser.username).then(() => {
+            loadUnpaidInvoicesForPayment();
+        });
+    }
+    
+    // ✅ إظهار النافذة
+openModal('paymentModal');
+};
+
+// إغلاق نافذة السداد
+window.closePaymentModal = function() {
+    const modal = document.getElementById('paymentModal');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('show');
+    }
+};
+
+// تغيير طريقة السداد - إظهار/إخفاء الحقول المناسبة
+window.onPaymentMethodChange = function() {
+    const method = document.getElementById('paymentMethod').value;
+    
+    document.getElementById('bankFields').style.display = (method === 'bank_transfer' || method === 'direct_deposit' || method === 'postal_order') ? 'block' : 'none';
+    document.getElementById('chequeFields').style.display = (method === 'cheque') ? 'block' : 'none';
+    document.getElementById('cardFields').style.display = (method === 'credit_card') ? 'block' : 'none';
+};
+
+// تغيير العميل - تحديث الفواتير المرتبطة
+window.onPaymentCustomerChange = async function() {
+    await loadPaymentsFromCloud(currentUser.username);
+    loadUnpaidInvoicesForPayment();
+};
+
+// تحميل قائمة العملاء في نافذة السداد
+function loadPaymentCustomers() {
+    const select = document.getElementById('paymentCustomer');
+    select.innerHTML = '<option value="">اختر العميل...</option>';
+    
+    if (currentUser?.userType === 'admin') {
+        const customers = [...new Set(invoicesData.map(inv => {
+            return inv['payee-customer-id'] || inv['contract-customer-id'] || '';
+        }).filter(c => c))];
+        customers.sort();
+        customers.forEach(c => {
+            select.innerHTML += `<option value="${c}">${c}</option>`;
+        });
+    } else {
+        // ✅ استخدام customerIds الخاصة بالمستخدم
+        if (currentUser.customerIds && currentUser.customerIds.length > 0) {
+            currentUser.customerIds.forEach(id => {
+                select.innerHTML += `<option value="${id}">${id}</option>`;
+            });
+            select.value = currentUser.customerIds[0];
+        } else if (currentUser.contractCustomerId) {
+            select.innerHTML += `<option value="${currentUser.contractCustomerId}">${currentUser.contractCustomerId}</option>`;
+            select.value = currentUser.contractCustomerId;
+        } else if (currentUser.taxNumber) {
+            select.innerHTML += `<option value="${currentUser.taxNumber}">${currentUser.taxNumber}</option>`;
+            select.value = currentUser.taxNumber;
+        }
+    }
+}
+
+// تحميل الفواتير غير المسددة للربط
+function loadUnpaidInvoicesForPayment() {
+    const container = document.getElementById('linkedInvoicesContainer');
+    const customerId = document.getElementById('paymentCustomer').value;
+    
+    if (!customerId) {
+        container.innerHTML = '<p style="color:var(--text-muted);">اختر العميل أولاً لعرض فواتيره</p>';
+        return;
+    }
+    
+    const customerInvoices = invoicesData.filter(inv => {
+        const payee = inv['payee-customer-id'] || '';
+        const contract = inv['contract-customer-id'] || '';
+        return payee.includes(customerId) || contract.includes(customerId);
+    });
+    
+    // ✅ تصفية حسب تاريخ الفاتورة (finalized-date)
+    const dateFrom = document.getElementById('paymentDateFrom')?.value;
+    const dateTo = document.getElementById('paymentDateTo')?.value;
+    
+    let filteredByDate = customerInvoices;
+    if (dateFrom || dateTo) {
+        filteredByDate = customerInvoices.filter(inv => {
+            const invDate = (inv['finalized-date'] || inv['created'] || '').slice(0, 10);
+            if (!invDate) return true;
+            if (dateFrom && invDate < dateFrom) return false;
+            if (dateTo && invDate > dateTo) return false;
+            return true;
+        });
+    }
+    
+    if (filteredByDate.length === 0) {
+        container.innerHTML = '<p style="color:var(--text-muted);">لا توجد فواتير لهذا العميل في هذه الفترة</p>';
+        return;
+    }
+    
+    // ✅ جمع المبالغ المدفوعة والمعلقة لكل فاتورة
+    const invoicePaidAmounts = {};
+    const invoiceHasPending = {};
+    
+    paymentsData.forEach(p => {
+        if (p.linkedInvoices && Array.isArray(p.linkedInvoices)) {
+            p.linkedInvoices.forEach(key => {
+                if (p.status === 'confirmed' || p.isOpeningBalance) {
+                    const amountPerInvoice = p.linkedInvoices.length > 0 ? p.amount / p.linkedInvoices.length : p.amount;
+                    if (!invoicePaidAmounts[key]) invoicePaidAmounts[key] = 0;
+                    invoicePaidAmounts[key] += amountPerInvoice;
+                }
+                if (p.status === 'pending') {
+                    invoiceHasPending[key] = true;
+                }
+            });
+        }
+    });
+    
+    // ✅ تصفية الفواتير
+    const unpaidInvoices = [];
+    filteredByDate.forEach(inv => {
+        const key = getInvoiceKey(inv);
+        
+        // ✅ الفاتورة التي لها سداد معلق لا تظهر
+        if (invoiceHasPending[key]) return;
+        
+        // ✅ حساب المبلغ بالعملة الأصلية
+        const currency = inv['currency'] || 'EGP';
+        const exRate = inv['flex-string-06'] || 48.0215;
+        const originalTotal = inv['total-total'] || 0;
+        const martyr = (inv['final-number'] || '').startsWith('P') ? 0 : 5;
+        
+        let invoiceTotal, displayCurrency;
+        if (currency === 'USAD') {
+            invoiceTotal = (originalTotal + martyr) / exRate;
+            displayCurrency = 'USD';
+        } else {
+            invoiceTotal = originalTotal + martyr;
+            displayCurrency = 'EGP';
+        }
+        
+        const paid = invoicePaidAmounts[key] || 0;
+        const remaining = invoiceTotal - paid;
+        
+        // ✅ الفاتورة المسددة كلياً لا تظهر
+        if (remaining <= 0.01) return;
+        
+        unpaidInvoices.push({
+            invoice: inv,
+            key: key,
+            total: invoiceTotal,
+            currency: displayCurrency,
+            paid: paid,
+            remaining: remaining
+        });
+    });
+    
+    // ✅ ترتيب الفواتير تنازلياً حسب الرقم التسلسلي
+    unpaidInvoices.sort((a, b) => {
+        const getNum = (finalNumber) => {
+            if (!finalNumber) return 0;
+            const parts = finalNumber.split('-');
+            if (parts.length > 1) {
+                return parseInt(parts[parts.length - 1]) || 0;
+            }
+            return 0;
+        };
+        const numA = getNum(a.invoice['final-number']);
+        const numB = getNum(b.invoice['final-number']);
+        return numB - numA;
+    });
+    
+    if (unpaidInvoices.length === 0) {
+        container.innerHTML = '<p style="color:#4ade80;">✅ جميع فواتير هذا العميل تم سدادها أو لها سداد قيد الانتظار</p>';
+        return;
+    }
+    
+    let html = `<p style="font-size:0.8em; color:var(--text-muted); margin-bottom:8px;">
+        ${unpaidInvoices.length} فاتورة متاحة للسداد من أصل ${filteredByDate.length}
+    </p>`;
+    html += '<table style="width:100%; font-size:0.8em;">';
+    html += '<thead><tr><th>تحديد</th><th>رقم الفاتورة</th><th>التاريخ</th><th>السفينة</th><th>تاريخ الرحلة</th><th>الإجمالي</th><th>العملة</th><th>الحالة</th></tr></thead><tbody>';
+    
+    unpaidInvoices.forEach(item => {
+        const invDate = (item.invoice['finalized-date'] || item.invoice['created'] || '').slice(0, 10);
+        const voyageDate = item.invoice['flex-date-02'] ? item.invoice['flex-date-02'].slice(0, 10) : '-';
+        
+        html += `<tr>
+            <td><input type="checkbox" class="link-invoice-check" value="${item.key}" onchange="updateLinkedTotal()" data-remaining="${item.remaining.toFixed(2)}"></td>
+            <td>${item.invoice['final-number'] || item.invoice['draft-number'] || '-'}</td>
+            <td>${invDate || '-'}</td>
+            <td>${item.invoice['key-word1'] || '-'}</td>
+            <td>${voyageDate}</td>
+            <td>${formatNumberWithCommas(item.total.toFixed(2))}</td>
+            <td>${item.currency}</td>
+            <td>${item.paid > 0 ? '<span style="background:rgba(245,158,11,0.15); color:#fbbf24; padding:2px 8px; border-radius:4px; font-size:0.7em; font-weight:600;">مسدد جزئياً</span>' : '-'}</td>
+        </tr>`;
+    });
+    
+    html += '</tbody></table>';
+    container.innerHTML = html;
+}
+
+// تحديث إجمالي الفواتير المرتبطة
+function updateLinkedTotal() {
+    const checks = document.querySelectorAll('.link-invoice-check:checked');
+    let total = 0;
+    let currency = null;
+    
+    checks.forEach(cb => {
+        const row = cb.closest('tr');
+        const cells = row?.querySelectorAll('td');
+        const currencyCell = cells?.[cells.length - 1];
+        const rowCurrency = currencyCell?.textContent?.trim();
+        
+        // ✅ تحديث العملة لكل فاتورة محددة (وليس فقط الأولى)
+        if (rowCurrency && (rowCurrency === 'USD' || rowCurrency === 'EGP')) {
+            currency = rowCurrency;
+        }
+        
+        total += parseFloat(cb.dataset.remaining) || 0;
+    });
+    
+    document.getElementById('paymentAmount').value = total > 0 ? total.toFixed(2) : '';
+    if (currency) {
+        document.getElementById('paymentCurrency').value = currency;
+    }
+}
+
+// إرسال السداد للحفظ
+window.submitPayment = async function() {
+    const customerId = document.getElementById('paymentCustomer').value;
+    const amount = parseFloat(document.getElementById('paymentAmount').value);
+    const currency = document.getElementById('paymentCurrency').value;
+    const date = document.getElementById('paymentDate').value;
+    const method = document.getElementById('paymentMethod').value;
+    const reference = document.getElementById('paymentReference').value;
+    const notes = document.getElementById('paymentNotes').value;
+    
+    // التحقق من الحقول المطلوبة
+    if (!customerId) {
+        showPaymentMessage('الرجاء اختيار العميل', 'error');
+        return;
+    }
+    if (!amount || amount <= 0) {
+        showPaymentMessage('الرجاء إدخال مبلغ صحيح', 'error');
+        return;
+    }
+    if (!date) {
+        showPaymentMessage('الرجاء إدخال تاريخ السداد', 'error');
+        return;
+    }
+    
+    // جمع الفواتير المرتبطة
+    const linkedChecks = document.querySelectorAll('.link-invoice-check:checked');
+    const linkedInvoices = [];
+    const invoiceAmounts = {};
+    let totalRemaining = 0;
+    
+    linkedChecks.forEach(cb => {
+        linkedInvoices.push(cb.value);
+        const remaining = parseFloat(cb.dataset.remaining) || parseFloat(cb.dataset.total) || 0;
+        invoiceAmounts[cb.value] = remaining;
+        totalRemaining += remaining;
+    });
+    
+    // تحديد هل هو سداد جزئي أم كلي
+    const isPartial = linkedInvoices.length > 0 && amount < totalRemaining;
+    
+    // تجهيز بيانات السداد
+    const paymentData = {
+        customerId: customerId,
+        username: currentUser.username,
+        amount: amount,
+        currency: currency,
+        exchangeRate: currency === 'USD' ? (exchangeRate || 48.0215) : 1,
+        date: date,
+        method: method,
+        reference: reference,
+        bankName: document.getElementById('paymentBankName').value,
+        chequeNumber: document.getElementById('paymentChequeNumber').value,
+        chequeDate: document.getElementById('paymentChequeDate').value,
+        chequeBank: document.getElementById('paymentChequeBank').value,
+        cardType: document.getElementById('paymentCardType').value,
+        cardLast4: document.getElementById('paymentCardLast4').value,
+        notes: notes,
+        linkedInvoices: linkedInvoices,
+        partialPayment: isPartial,
+        invoiceAmounts: invoiceAmounts,
+        status: currentUser?.userType === 'admin' ? 'confirmed' : 'pending',
+        createdBy: currentUser.username
+    };
+    
+    showPaymentMessage('جاري حفظ السداد...', 'info');
+    
+    const result = await savePaymentToCloud(paymentData);
+    
+    if (result?.success) {
+        const paymentId = result.payment.id;
+        
+        // ✅ رفع المرفقات إن وجدت
+        const attachmentInput = document.getElementById('paymentAttachment');
+        if (attachmentInput && attachmentInput.files.length > 0) {
+            await uploadPaymentAttachments(paymentId, attachmentInput.files);
+        }
+        
+        // ✅ تحديث فوري للسدادات
+        await loadPaymentsFromCloud(currentUser.username);
+        
+        const statusText = isPartial ? 'سداد جزئي' : (linkedInvoices.length > 0 ? 'سداد كلي' : 'سداد بدون فواتير');
+        showPaymentMessage(`✅ تم تسجيل ${statusText} بنجاح!`, 'success');
+        setTimeout(() => closePaymentModal(), 1500);
+        
+        // ✅ تحديث عرض السدادات إذا كان التبويب مفتوحاً
+        if (document.querySelector('.type-tab.active')?.textContent?.includes('السدادات')) {
+            filteredPayments = [...paymentsData];
+            renderPaymentsView();
+        }
+        
+        // ✅ تحديث عرض الفواتير فوراً (حالة السداد)
+        if (currentUser?.isGuest) {
+            filterInvoicesByGuest(currentUser.taxNumber, currentUser.blNumber);
+        } else {
+            filterInvoicesByUser();
+        }
+    } else {
+        showPaymentMessage('❌ فشل حفظ السداد', 'error');
+    }
+};
+
+// ✅ دالة جديدة: رفع مرفقات السداد
+async function uploadPaymentAttachments(paymentId, files) {
+    const maxFiles = 3;
+    const fileCount = Math.min(files.length, maxFiles);
+    
+    for (let i = 0; i < fileCount; i++) {
+        const file = files[i];
+        
+        // التحقق من نوع الملف
+        const allowedTypes = ['image/jpeg', 'image/png', 'application/pdf'];
+        if (!allowedTypes.includes(file.type)) {
+            console.warn(`⚠️ نوع ملف غير مدعوم: ${file.name}`);
+            continue;
+        }
+        
+        // التحقق من حجم الملف (أقصى 5MB)
+        if (file.size > 5 * 1024 * 1024) {
+            console.warn(`⚠️ حجم الملف كبير جداً: ${file.name}`);
+            continue;
+        }
+        
+        try {
+            // تحويل الملف إلى Base64
+            const base64 = await fileToBase64(file);
+            
+            showPaymentMessage(`جاري رفع المرفق ${i + 1} من ${fileCount}...`, 'info');
+            
+            // إرسال المرفق إلى Apps Script
+            const response = await fetch(PAYMENTS_API_URL, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: JSON.stringify({
+                    action: 'upload_attachment',
+                    paymentId: paymentId,
+                    fileName: `${paymentId}_${file.name}`,
+                    fileContent: base64.split(',')[1], // إزالة رأس data:image/...;base64,
+                    mimeType: file.type
+                })
+            });
+            
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
+            const data = await response.json();
+            
+            if (data.success) {
+                console.log(`✅ تم رفع المرفق: ${file.name}`);
+            } else {
+                console.error(`❌ فشل رفع المرفق: ${data.error}`);
+            }
+        } catch (error) {
+            console.error(`❌ خطأ في رفع المرفق ${file.name}:`, error);
+        }
+    }
+}
+
+// ✅ دالة مساعدة: تحويل File إلى Base64
+function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+        const reader = new FileReader();
+        reader.readAsDataURL(file);
+        reader.onload = () => resolve(reader.result);
+        reader.onerror = error => reject(error);
+    });
+}
+
+// عرض رسالة في نافذة السداد
+function showPaymentMessage(msg, type) {
+    const div = document.getElementById('paymentMessage');
+    div.textContent = msg;
+    div.className = `login-message ${type}`;
+    div.style.display = 'block';
+}
+
+// ============================================
+// دوال كشف الحساب
+// ============================================
+
+// فتح كشف الحساب
+window.openAccountStatement = async function(customerId) {
+    // إذا لم يتم تحديد عميل، استخدم الافتراضي
+    if (!customerId && currentUser) {
+        customerId = currentUser.taxNumber || currentUser.contractCustomerId || 
+                    (currentUser.customerIds && currentUser.customerIds.length > 0 ? currentUser.customerIds[0] : '');
+    }
+    
+    if (!customerId) {
+        showNotification('لا يمكن تحديد العميل', 'error');
+        return;
+    }
+    
+    document.getElementById('statementBody').innerHTML = '<div style="text-align:center; padding: 50px;"><i class="fas fa-spinner fa-spin"></i> جاري تحميل كشف الحساب...</div>';
+    openModal('accountStatementModal');
+	    updatePageTitle('كشف حساب', '', '');
+	    updateSidebarActive('statement');
+
+    
+    // ✅ ملء قائمة الحسابات
+    const select = document.getElementById('statementAccount');
+    if (select && select.options.length <= 1) {
+        select.innerHTML = '<option value="">اختر الحساب...</option>';
+        
+        if (currentUser?.userType === 'admin') {
+            // ✅ المدير يرى كل العملاء
+            const allCustomers = [...new Set(invoicesData.map(inv => 
+                inv['payee-customer-id'] || inv['contract-customer-id'] || ''
+            ).filter(c => c))];
+            allCustomers.sort();
+            allCustomers.forEach(id => {
+                select.innerHTML += `<option value="${id}" ${id === customerId ? 'selected' : ''}>${id}</option>`;
+            });
+        } else if (currentUser.customerIds && currentUser.customerIds.length > 0) {
+            currentUser.customerIds.forEach(id => {
+                select.innerHTML += `<option value="${id}" ${id === customerId ? 'selected' : ''}>${id}</option>`;
+            });
+        } else if (currentUser.contractCustomerId) {
+            select.innerHTML += `<option value="${currentUser.contractCustomerId}" selected>${currentUser.contractCustomerId}</option>`;
+        } else {
+            select.innerHTML += `<option value="${currentUser.taxNumber}" selected>${currentUser.taxNumber}</option>`;
+        }
+    }
+    
+    await loadPaymentsFromCloud(currentUser?.username);
+    
+    const customerInvoices = invoicesData.filter(inv => {
+        const payee = inv['payee-customer-id'] || '';
+        const contract = inv['contract-customer-id'] || '';
+        return payee.includes(customerId) || contract.includes(customerId);
+    });
+    
+    const customerPayments = paymentsData.filter(p => 
+        p.customerId === customerId && (p.status === 'confirmed' || p.isOpeningBalance)
+    );
+    
+    await buildAccountStatement(customerInvoices, customerPayments, customerId, '', '');
+};
+
+// إغلاق كشف الحساب
+window.closeStatementModal = function() {
+    const modal = document.getElementById('accountStatementModal');
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('show');
+    }
+};
+
+// بناء كشف الحساب
+async function buildAccountStatement(invoices, payments, accountId, dateFrom, dateTo) {
+    let transactions = [];
+	    // ✅ تأكد من تحميل بيانات إشعارات الخصم
+    if (typeof creditData !== 'undefined' && creditData.length === 0) {
+        await loadCreditDataFromDrive();
+    }
+    
+    // إضافة الفواتير
+    invoices.forEach(inv => {
+        const currency = inv['currency'] || 'EGP';
+        const exRate = inv['flex-string-06'] || 48.0215;
+        const originalTotal = inv['total-total'] || 0;
+        const martyr = (inv['final-number'] || '').startsWith('P') ? 0 : 5;
+        const total = originalTotal + martyr;
+        
+        let amount, curr;
+        if (currency === 'USAD') {
+            amount = total / exRate;
+            curr = 'USD';
+        } else {
+            amount = total;
+            curr = 'EGP';
+        }
+        
+        transactions.push({
+            date: (inv['finalized-date'] || inv['created'] || '').slice(0, 10),
+            desc: `فاتورة ${inv['final-number'] || inv['draft-number']}`,
+            ref: getInvoiceKey(inv),
+            debit: amount,
+            credit: 0,
+            currency: curr,
+            isOpening: false
+        });
+    });
+	
+	    // ✅ إضافة إشعارات الخصم كحركات دائنة
+    if (typeof creditData !== 'undefined' && creditData.length > 0) {
+        const customerCredits = creditData.filter(c => {
+            // التحقق من أن الإشعار يخص العميل
+            if (!c.customerId) return false;
+            const custId = c.customerId.toLowerCase();
+            const acc = accountId.toLowerCase();
+            return custId.includes(acc) || acc.includes(custId);
+        });
+        
+        customerCredits.forEach(c => {
+            const creditDate = c.date ? c.date.slice(0,10) : '';
+            // فلترة حسب التاريخ إن وجد
+            if (dateFrom && creditDate < dateFrom) return;
+            if (dateTo && creditDate > dateTo) return;
+            
+            const amount = c.displayAmount + c.displayTax; // المبلغ + الضريبة
+            const currency = c.currency === 'USAD' ? 'USD' : 'EGP';
+            
+            transactions.push({
+                date: creditDate,
+                desc: `إشعار خصم: ${c.finalNumber || c.draftNumber || c.serial || '-'}`,
+                ref: c.serial,
+                debit: 0,
+                credit: amount,
+                currency: currency,
+                isOpening: false
+            });
+        });
+    }
+    
+    // إضافة السدادات
+    payments.forEach(p => {
+        if (p.isOpeningBalance && !dateFrom) {
+            const isCredit = p.balanceType !== 'debit';
+            transactions.push({
+                date: p.date,
+                desc: 'رصيد افتتاحي',
+                ref: 'OPEN',
+                debit: isCredit ? 0 : p.amount,
+                credit: isCredit ? p.amount : 0,
+                currency: p.currency,
+                isOpening: true
+            });
+        } else if (!p.isOpeningBalance) {
+            transactions.push({
+                date: p.date,
+                desc: `سداد - ${getPaymentMethodName(p.method)}`,
+                ref: p.id,
+                debit: 0,
+                credit: p.amount,
+                currency: p.currency,
+                isOpening: false
+            });
+        }
+    });
+    
+    // ترتيب حسب التاريخ
+    transactions.sort((a, b) => new Date(a.date) - new Date(b.date));
+    
+    // ✅ حساب الرصيد المرحل (السابق للفترة)
+    let openingBalance = 0;
+    let openingCurrency = 'EGP';
+    
+    if (dateFrom) {
+        // جمع كل الحركات قبل تاريخ البداية
+        const allInvoices = invoicesData.filter(inv => {
+            const payee = (inv['payee-customer-id'] || '').toLowerCase();
+            const contract = (inv['contract-customer-id'] || '').toLowerCase();
+            const acc = accountId.toLowerCase();
+            return payee.includes(acc) || contract.includes(acc);
+        });
+        
+        const allPayments = paymentsData.filter(p => 
+            p.customerId === accountId && (p.status === 'confirmed' || p.isOpeningBalance)
+        );
+        
+        allInvoices.forEach(inv => {
+            const invDate = (inv['finalized-date'] || inv['created'] || '').slice(0, 10);
+            if (invDate && invDate < dateFrom) {
+                const currency = inv['currency'] || 'EGP';
+                const exRate = inv['flex-string-06'] || 48.0215;
+                const originalTotal = inv['total-total'] || 0;
+                const martyr = (inv['final-number'] || '').startsWith('P') ? 0 : 5;
+                const total = originalTotal + martyr;
+                
+                if (currency === 'USAD') {
+                    openingBalance -= total / exRate;
+                    openingCurrency = 'USD';
+                } else {
+                    openingBalance -= total;
+                    openingCurrency = 'EGP';
+                }
+            }
+        });
+        
+        allPayments.forEach(p => {
+            if (p.isOpeningBalance) {
+                const isCredit = p.balanceType !== 'debit';
+                openingBalance += isCredit ? p.amount : -p.amount;
+            } else {
+                const payDate = p.date || '';
+                if (payDate && payDate < dateFrom) {
+                    openingBalance += p.amount;
+                }
+            }
+        });
+		
+		        // ✅ أضف هنا 👇
+        const allCredits = creditData.filter(c => {
+            if (!c.customerId) return false;
+            const custId = c.customerId.toLowerCase();
+            const acc = accountId.toLowerCase();
+            return custId.includes(acc) || acc.includes(custId);
+        });
+        
+        allCredits.forEach(c => {
+            const creditDate = (c.date || '').slice(0, 10);
+            if (creditDate && creditDate < dateFrom) {
+                const amount = c.displayAmount + c.displayTax;
+                const currency = c.currency === 'USAD' ? 'USD' : 'EGP';
+                openingBalance += amount;
+                openingCurrency = currency;
+            }
+        });
+
+    }
+    
+    // بناء HTML
+    let balance = openingBalance;
+    let html = `
+        <h3>كشف حساب: ${accountId}</h3>
+        <p>تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')}</p>
+        ${dateFrom || dateTo ? `<p>الفترة: ${dateFrom || 'البداية'} إلى ${dateTo || 'النهاية'}</p>` : ''}
+        <table class="data-table" style="width:100%; margin-top:15px;">
+            <thead><tr>
+                <th>التاريخ</th><th>البيان</th><th>مدين</th><th>دائن</th><th>الرصيد</th>
+            </tr></thead><tbody>`;
+    
+    // ✅ إضافة صف الرصيد المرحل
+    if (dateFrom && openingBalance !== 0) {
+        html += `<tr style="background:var(--bg-hover); font-weight:700;">
+            <td>${dateFrom}</td>
+            <td>رصيد مرحل</td>
+            <td>${openingBalance < 0 ? formatNumberWithCommas(Math.abs(openingBalance).toFixed(2)) + ' ' + openingCurrency : '-'}</td>
+            <td>${openingBalance > 0 ? formatNumberWithCommas(openingBalance.toFixed(2)) + ' ' + openingCurrency : '-'}</td>
+            <td>${formatNumberWithCommas(Math.abs(openingBalance).toFixed(2))} ${openingBalance >= 0 ? 'دائن' : 'مدين'}</td>
+        </tr>`;
+    }
+    
+    transactions.forEach(t => {
+        balance = balance - t.debit + t.credit;
+        
+        // ✅ تحديد اللون حسب النوع
+        let rowStyle = '';
+        if (t.isOpening) {
+            rowStyle = 'background: rgba(99,102,241,0.08); font-weight:600;'; // بنفسجي للرصيد الافتتاحي
+        } else if (t.desc.startsWith('سداد')) {
+            rowStyle = 'background: rgba(34,197,94,0.06);'; // أخضر فاتح للسداد
+        } else if (t.desc.startsWith('فاتورة')) {
+            rowStyle = ''; // عادي للفواتير
+        }
+        
+        html += `<tr style="${rowStyle}">
+            <td>${t.date}</td><td>${t.desc}</td>
+            <td>${t.debit > 0 ? formatNumberWithCommas(t.debit.toFixed(2)) + ' ' + t.currency : '-'}</td>
+            <td>${t.credit > 0 ? formatNumberWithCommas(t.credit.toFixed(2)) + ' ' + t.currency : '-'}</td>
+            <td style="font-weight:700;">${formatNumberWithCommas(Math.abs(balance).toFixed(2))} ${t.currency}</td>
+        </tr>`;
+    });
+    
+    html += `</tbody></table>
+        <div style="margin-top:15px; padding:12px; background:${balance >= 0 ? 'rgba(34,197,94,0.1)' : 'rgba(239,68,68,0.1)'}; border-radius:8px; text-align:center;">
+            <strong>الرصيد النهائي: ${formatNumberWithCommas(Math.abs(balance).toFixed(2))} ${balance >= 0 ? 'دائن (لصالحك)' : 'مدين (عليك)'}</strong>
+        </div>`;
+    
+    document.getElementById('statementBody').innerHTML = html;
+}
+
+// الحصول على اسم طريقة السداد بالعربية
+function getPaymentMethodName(method) {
+    const names = {
+        'bank_transfer': 'تحويل بنكي',
+        'cash': 'نقدي',
+        'cheque': 'شيك',
+        'credit_card': 'بطاقة ائتمان',
+        'direct_deposit': 'إيداع مباشر',
+        'postal_order': 'حوالة بريدية',
+        'other': 'أخرى',
+        'opening_balance': 'رصيد افتتاحي'
+    };
+    return names[method] || method;
+}
+
+// تصدير كشف الحساب PDF
+window.exportStatementPDF = function() {
+    const content = document.getElementById('statementBody');
+    if (!content || !content.innerHTML.trim()) return;
+    
+    showNotification('جاري تصدير كشف الحساب PDF...', 'info');
+    // يمكن استخدام نفس تقنية html2canvas + jsPDF
+    if (typeof html2canvas !== 'undefined' && typeof jspdf !== 'undefined') {
+        html2canvas(content).then(canvas => {
+            const { jsPDF } = window.jspdf;
+            const pdf = new jsPDF('p', 'mm', 'a4');
+            const imgData = canvas.toDataURL('image/png');
+            const imgWidth = 190;
+            const imgHeight = (canvas.height * imgWidth) / canvas.width;
+            pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+            pdf.save(`كشف_حساب_${new Date().toISOString().slice(0,10)}.pdf`);
+            showNotification('✅ تم التصدير بنجاح', 'success');
+        }).catch(() => {
+            showNotification('❌ فشل التصدير', 'error');
+        });
+    } else {
+        showNotification('مكتبات PDF غير متوفرة', 'error');
+    }
+};
+
+// تصدير كشف الحساب Excel
+window.exportStatementExcel = function() {
+    const table = document.querySelector('#statementBody table');
+    if (!table) return;
+    
+    const wb = XLSX.utils.table_to_book(table, { sheet: 'كشف حساب' });
+    XLSX.writeFile(wb, `كشف_حساب_${new Date().toISOString().slice(0,10)}.xlsx`);
+    showNotification('✅ تم التصدير بنجاح', 'success');
+};
+
+
+// ============================================
+// عرض كل السدادات (للمدير فقط)
+// ============================================
+
+window.openAllPaymentsView = async function() {
+    if (!currentUser) {
+        showNotification('يرجى تسجيل الدخول', 'error');
+        return;
+    }
+    
+    // تحديث مظهر التبويب
+    document.querySelectorAll('.type-tab').forEach(tab => tab.classList.remove('active'));
+    const paymentsTab = document.querySelector('[onclick="openAllPaymentsView()"]');
+    if (paymentsTab) paymentsTab.classList.add('active');
+	    updateSidebarActive('payments');
+    
+    // إخفاء التقارير
+    document.getElementById('reportsContainer').style.display = 'none';
+    document.getElementById('dataViewContainer').style.display = 'block';
+    document.getElementById('pagination').style.display = 'flex';
+    
+    // إظهار رسالة تحميل
+    document.getElementById('dataViewContainer').innerHTML = '<div style="text-align:center; padding: 50px;"><i class="fas fa-spinner fa-spin"></i> جاري تحميل السدادات...</div>';
+    document.getElementById('pagination').innerHTML = '';
+    
+    // تحميل السدادات
+    await loadPaymentsFromCloud(currentUser.username);
+	    updatePageTitle('السدادات', filteredPayments.length, document.getElementById('totalSum')?.textContent);
+    
+    // فلترة حسب صلاحيات المستخدم
+    if (currentUser.userType !== 'admin') {
+        // جمع معرفات المستخدم (رقم ضريبي، رقم عقد، customerIds)
+        let userCustomerIds = [];
+        if (currentUser.taxNumber) userCustomerIds.push(currentUser.taxNumber.toLowerCase());
+        if (currentUser.contractCustomerId) userCustomerIds.push(currentUser.contractCustomerId.toLowerCase());
+        if (currentUser.customerIds && Array.isArray(currentUser.customerIds)) {
+            currentUser.customerIds.forEach(id => userCustomerIds.push(id.toLowerCase()));
+        }
+        userCustomerIds = [...new Set(userCustomerIds)]; // إزالة التكرار
+        
+        console.log('🔍 معرفات المستخدم:', userCustomerIds);
+        console.log('📋 إجمالي السدادات قبل الفلترة:', paymentsData.length);
+        
+        filteredPayments = paymentsData.filter(p => {
+            // السداد الذي سجله المستخدم بنفسه
+            if (p.createdBy === currentUser.username) return true;
+            
+            // السداد المرتبط بأحد معرفات العميل (مطابقة كاملة أو جزئية)
+            const paymentCustomer = (p.customerId || '').toLowerCase();
+            for (const id of userCustomerIds) {
+                if (paymentCustomer.includes(id) || id.includes(paymentCustomer)) {
+                    return true;
+                }
+            }
+            return false;
+        });
+        
+        console.log('📋 السدادات بعد الفلترة:', filteredPayments.length);
+    } else {
+        // المدير يرى كل السدادات
+        filteredPayments = [...paymentsData];
+    }
+    
+    currentPaymentPage = 1;
+    renderPaymentsView();
+};
+
+// عرض السدادات كجدول
+function renderPaymentsView() {
+    if (filteredPayments.length === 0) {
+        document.getElementById('dataViewContainer').innerHTML = '<div class="no-data"><i class="fas fa-inbox"></i><p>لا توجد سدادات</p></div>';
+        document.getElementById('pagination').innerHTML = '';
+        updatePaymentsSummary();
+        return;
+    }
+    
+    // ترتيب حسب التاريخ (الأحدث أولاً)
+    filteredPayments.sort((a, b) => new Date(b.date) - new Date(a.date));
+    
+    // ترقيم الصفحات
+    const totalPages = itemsPerPagePayments === Infinity ? 1 : Math.ceil(filteredPayments.length / itemsPerPagePayments);
+    const start = itemsPerPagePayments === Infinity ? 0 : (currentPaymentPage - 1) * itemsPerPagePayments;
+    const end = itemsPerPagePayments === Infinity ? filteredPayments.length : Math.min(start + itemsPerPagePayments, filteredPayments.length);
+    const pageData = filteredPayments.slice(start, end);
+    
+    let html = `
+        <div class="table-container">
+            <div class="table-toolbar" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px; padding:10px; background:#f8f9fa; border-radius:8px;">
+                <div>
+                    <button class="btn btn-primary" onclick="openPaymentModal()"><i class="fas fa-plus"></i> سداد جديد</button>
+                    <button class="btn btn-info" onclick="openAllPaymentsView()" style="background:#4cc9f0;"><i class="fas fa-sync-alt"></i> تحديث</button>
+                </div>
+                <div>
+                    <span>إجمالي السدادات: <strong>${filteredPayments.length}</strong></span>
+                </div>
+            </div>
+            <table class="data-table">
+                <thead>
+                    <tr>
+                        <th>رقم السداد</th>
+                        <th>العميل</th>
+                        <th>المبلغ</th>
+                        <th>العملة</th>
+                        <th>الطريقة</th>
+                        <th>التاريخ</th>
+                        <th>الحالة</th>
+                        <th>مرفقات</th>
+                        <th>إجراءات</th>
+                    </tr>
+                </thead>
+                <tbody>`;
+    
+    pageData.forEach(p => {
+        const statusLabels = { 'pending': '⏳ قيد الانتظار', 'confirmed': '✅ مؤكد', 'rejected': '❌ مرفوض', 'cancelled': '🚫 ملغي' };
+        const statusColors = { 'pending': '#f39c12', 'confirmed': '#27ae60', 'rejected': '#e74c3c', 'cancelled': '#95a5a6' };
+        const hasInvoices = p.linkedInvoices && p.linkedInvoices.length > 0;
+        
+        html += `<tr onclick="togglePaymentInvoices('${p.id}')" style="cursor:pointer;">
+            <td style="cursor:pointer; color:#4361ee; font-weight:600;">
+                ${p.id}
+                ${hasInvoices ? ` <i class="fas fa-chevron-down" id="paymentIcon-${p.id}" style="font-size:0.7em; color:#999;"></i>` : ''}
+            </td>
+            <td>${p.customerId || '-'}</td>
+            <td>${formatNumberWithCommas(p.amount.toFixed(2))}</td>
+            <td>${p.currency}</td>
+            <td>${getPaymentMethodName(p.method)}</td>
+            <td>${p.date}</td>
+            <td><span style="background:${statusColors[p.status]}; color:white; padding:3px 10px; border-radius:50px; font-size:0.85em;">${statusLabels[p.status] || p.status}</span></td>
+            <td style="text-align:center;">
+                ${p.attachments && p.attachments.length > 0 ? 
+                    `<button class="action-btn" onclick="event.stopPropagation(); viewAttachments('${p.id}')" title="عرض المرفقات (${p.attachments.length})" style="background:#4cc9f0; color:white;">
+                        <i class="fas fa-paperclip"></i> ${p.attachments.length}
+                    </button>` : 
+                    '<span style="font-size:0.8em; color:#999;">-</span>'}
+            </td>
+            <td>
+                ${p.status === 'pending' && currentUser?.userType === 'admin' ? `
+                    <button class="action-btn edit" onclick="event.stopPropagation(); confirmPaymentInCloud('${p.id}')" title="تأكيد"><i class="fas fa-check"></i></button>
+                    <button class="action-btn delete" onclick="event.stopPropagation(); rejectPaymentPrompt('${p.id}')" title="رفض"><i class="fas fa-times"></i></button>
+                ` : ''}
+                ${p.status === 'pending' && currentUser?.userType !== 'admin' && p.createdBy === currentUser?.username ? `
+                    <button class="action-btn delete" onclick="event.stopPropagation(); cancelPaymentInCloud('${p.id}')" title="حذف"><i class="fas fa-trash"></i></button>
+                ` : ''}
+                ${p.status === 'confirmed' || p.status === 'rejected' ? `
+                    <button class="action-btn" onclick="event.stopPropagation(); viewAttachments('${p.id}')" title="عرض"><i class="fas fa-eye"></i></button>
+                ` : ''}
+            </td>
+        </tr>`;
+        
+        // ✅ صف فرعي للفواتير المرتبطة (مخفي افتراضياً)
+        if (hasInvoices) {
+            html += `<tr id="paymentInvoices-${p.id}" style="display:none; background:var(--bg-hover);">
+                <td colspan="10" style="padding:15px;">
+                    <div style="background:var(--bg-card); border-radius:8px; padding:12px; border:1px solid var(--border);">
+                        <h4 style="margin-bottom:10px; color:var(--primary);">الفواتير المرتبطة بالسداد</h4>
+                        <table style="width:100%; font-size:0.8em;">
+                            <thead><tr>
+                                <th>رقم الفاتورة</th>
+                                <th>التاريخ</th>
+                                <th>السفينة</th>
+                                <th>${currentInvoiceType === INVOICE_TYPES.POSTPONED ? 'IB/OB ID' : 'البوليصة'}</th>
+                                <th>تاريخ الرحلة</th>
+                                <th>الإجمالي</th>
+                            </tr></thead>
+                            <tbody>
+                                ${p.linkedInvoices.map(key => {
+                                    const inv = invoicesData.find(i => getInvoiceKey(i) === key);
+                                    if (inv) {
+                                        const currency = inv['currency'] || 'EGP';
+                                        const exRate = inv['flex-string-06'] || 48.0215;
+                                        const total = (inv['total-total'] || 0) + ((inv['final-number'] || '').startsWith('P') ? 0 : 5);
+                                        const invDate = (inv['finalized-date'] || inv['created'] || '').slice(0, 10);
+                                        const voyageDate = inv['flex-date-02'] ? inv['flex-date-02'].slice(0, 10) : '-';
+                                        
+                                        let displayTotal, displayCurrency;
+                                        if (currency === 'USAD') {
+                                            displayTotal = (total / exRate).toFixed(2);
+                                            displayCurrency = 'USD';
+                                        } else {
+                                            displayTotal = total.toFixed(2);
+                                            displayCurrency = 'EGP';
+                                        }
+                                        
+                                        return `<tr>
+                                            <td><strong>${inv['final-number'] || inv['draft-number'] || key}</strong></td>
+                                            <td>${invDate}</td>
+                                            <td>${inv['key-word1'] || '-'}</td>
+                                            <td>${inv['key-word2'] || '-'}</td>
+                                            <td>${voyageDate}</td>
+                                            <td style="font-weight:600;">${formatNumberWithCommas(displayTotal)} ${displayCurrency}</td>
+                                        </tr>`;
+                                    }
+                                    return `<tr><td>${key}</td><td>-</td><td>-</td><td>-</td><td>-</td><td>-</td></tr>`;
+                                }).join('')}
+                            </tbody>
+                        </table>
+                    </div>
+                </td>
+            </tr>`;
+        }
+    });
+    
+    html += `</tbody></table></div>`;
+    
+    document.getElementById('dataViewContainer').innerHTML = html;
+    
+    // ترقيم الصفحات
+    renderPaymentsPagination(totalPages);
+    updatePaymentsSummary();
+}
+
+// ترقيم صفحات السدادات
+function renderPaymentsPagination(totalPages) {
+    if (itemsPerPagePayments === Infinity || totalPages <= 1) {
+        document.getElementById('pagination').innerHTML = '';
+        return;
+    }
+    
+    let html = '';
+    html += `<button class="pagination-btn" onclick="changePaymentPage(${currentPaymentPage - 1})" ${currentPaymentPage === 1 ? 'disabled' : ''}><i class="fas fa-chevron-right"></i></button>`;
+    
+    for (let i = 1; i <= totalPages; i++) {
+        html += `<button class="pagination-btn ${i === currentPaymentPage ? 'active' : ''}" onclick="changePaymentPage(${i})">${i}</button>`;
+    }
+    
+    html += `<button class="pagination-btn" onclick="changePaymentPage(${currentPaymentPage + 1})" ${currentPaymentPage === totalPages ? 'disabled' : ''}><i class="fas fa-chevron-left"></i></button>`;
+    
+    document.getElementById('pagination').innerHTML = html;
+}
+
+// تغيير صفحة السدادات
+function changePaymentPage(page) {
+    const totalPages = itemsPerPagePayments === Infinity ? 1 : Math.ceil(filteredPayments.length / itemsPerPagePayments);
+    if (page >= 1 && page <= totalPages) {
+        currentPaymentPage = page;
+        renderPaymentsView();
+    }
+}
+
+// تحديث ملخص السدادات
+function updatePaymentsSummary() {
+    let totalConfirmed = 0;
+    let totalPending = 0;
+    
+    filteredPayments.forEach(p => {
+        if (p.status === 'confirmed' || p.isOpeningBalance) {
+            totalConfirmed += p.amount;
+        } else if (p.status === 'pending') {
+            totalPending += p.amount;
+        }
+    });
+    
+    document.getElementById('invoiceCount').textContent = filteredPayments.length;
+    document.getElementById('totalSum').innerHTML = totalConfirmed.toFixed(2);
+    document.getElementById('taxSum').innerHTML = totalPending.toFixed(2);
+    document.getElementById('totalUSD').innerHTML = '0.00';
+    document.getElementById('totalEGPWithoutTax').innerHTML = '0.00';
+    document.getElementById('totalMartyr').innerHTML = '0.00';
+}
+
+// طلب سبب الرفض
+window.rejectPaymentPrompt = function(paymentId) {
+    const reason = prompt('أدخل سبب الرفض:');
+    if (reason !== null && reason.trim() !== '') {
+        rejectPaymentInCloud(paymentId, reason).then(result => {
+            if (result?.success) {
+                openAllPaymentsView(); // تحديث العرض
+            }
+        });
+    }
+};
+
+// ============================================
+// إضافة رصيد افتتاحي (للمدير فقط)
+// ============================================
+window.openOpeningBalanceModal = function() {
+    if (currentUser?.userType !== 'admin') {
+        showNotification('غير مصرح', 'error');
+        return;
+    }
+    
+    document.getElementById('openingDate').value = new Date().toISOString().slice(0, 10);
+    document.getElementById('openingAmount').value = '';
+    document.getElementById('openingNotes').value = '';
+    document.getElementById('openingMessage').style.display = 'none';
+    
+    // ملء قائمة العملاء
+    const select = document.getElementById('openingCustomer');
+    select.innerHTML = '<option value="">اختر العميل...</option>';
+    
+    if (currentUser?.userType === 'admin') {
+        const customers = [...new Set(invoicesData.map(inv => 
+            inv['payee-customer-id'] || inv['contract-customer-id'] || ''
+        ).filter(c => c))];
+        customers.sort();
+        customers.forEach(c => {
+            select.innerHTML += `<option value="${c}">${c}</option>`;
+        });
+    }
+    
+    // ✅ عند تغيير العميل، تحميل رصيده الحالي
+    select.onchange = async function() {
+        const customerId = this.value;
+        if (!customerId) return;
+        
+        await loadPaymentsFromCloud(currentUser.username);
+        
+        const existing = paymentsData.find(p => 
+            p.isOpeningBalance === true && p.customerId === customerId
+        );
+        
+        if (existing) {
+            document.getElementById('openingAmount').value = existing.amount;
+            document.getElementById('openingCurrency').value = existing.currency || 'EGP';
+            document.getElementById('openingDate').value = existing.date || '';
+            document.getElementById('openingNotes').value = existing.notes || '';
+            document.getElementById('openingType').value = existing.balanceType || 'credit';
+            showOpeningMessage('⚠️ يوجد رصيد افتتاحي سابق. سيتم تحديثه.', 'info');
+        } else {
+            document.getElementById('openingAmount').value = '';
+            document.getElementById('openingNotes').value = '';
+            document.getElementById('openingMessage').style.display = 'none';
+        }
+    };
+    
+    document.getElementById('openingBalanceModal').style.display = 'block';
+};
+
+window.closeOpeningBalanceModal = function() {
+    document.getElementById('openingBalanceModal').style.display = 'none';
+};
+
+// عرض سداداته (للعميل والمحاسب)
+window.openMyPayments = async function() {
+    if (!currentUser) return;
+    
+    document.getElementById('dataViewContainer').innerHTML = '<div style="text-align:center; padding: 50px;"><i class="fas fa-spinner fa-spin"></i> جاري تحميل سدادتك...</div>';
+    document.getElementById('pagination').innerHTML = '';
+    
+    await loadPaymentsFromCloud(currentUser.username);
+    filteredPayments = [...paymentsData];
+    currentPaymentPage = 1;
+    renderPaymentsView();
+};
+
+// فتح تبويب السدادات (حسب الصلاحية)
+window.openPaymentsTab = async function() {
+    if (!currentUser) return;
+    
+    // تحديث مظهر التبويب
+    document.querySelectorAll('.type-tab').forEach(tab => tab.classList.remove('active'));
+    const paymentsTab = document.querySelector('[onclick="openPaymentsTab()"]');
+    if (paymentsTab) paymentsTab.classList.add('active');
+    
+    // إخفاء تقارير الفواتير إن كانت ظاهرة
+    document.getElementById('reportsContainer').style.display = 'none';
+    document.getElementById('dataViewContainer').style.display = 'block';
+    document.getElementById('pagination').style.display = 'flex';
+    
+    document.getElementById('dataViewContainer').innerHTML = '<div style="text-align:center; padding: 50px;"><i class="fas fa-spinner fa-spin"></i> جاري تحميل السدادات...</div>';
+    document.getElementById('pagination').innerHTML = '';
+    
+    // تحميل السدادات
+    await loadPaymentsFromCloud(currentUser.username);
+    
+    if (currentUser.userType === 'admin') {
+        // المدير يرى كل السدادات
+        filteredPayments = [...paymentsData];
+    } else {
+        // باقي المستخدمين يرون سدادتهم فقط
+        // جمع معرفات المستخدم
+        let userCustomerIds = [];
+        if (currentUser.taxNumber) userCustomerIds.push(currentUser.taxNumber.toLowerCase());
+        if (currentUser.contractCustomerId) userCustomerIds.push(currentUser.contractCustomerId.toLowerCase());
+        if (currentUser.customerIds && Array.isArray(currentUser.customerIds)) {
+            currentUser.customerIds.forEach(id => userCustomerIds.push(id.toLowerCase()));
+        }
+        userCustomerIds = [...new Set(userCustomerIds)]; // إزالة التكرار
+        
+        console.log('🔍 معرفات المستخدم:', userCustomerIds);
+        console.log('📋 إجمالي السدادات قبل الفلترة:', paymentsData.length);
+        
+        filteredPayments = paymentsData.filter(p => {
+            // السداد الذي سجله المستخدم بنفسه
+            if (p.createdBy === currentUser.username) return true;
+            
+            // السداد المرتبط بأحد معرفات العميل
+            const paymentCustomer = (p.customerId || '').toLowerCase();
+            for (const id of userCustomerIds) {
+                if (paymentCustomer.includes(id) || id.includes(paymentCustomer)) {
+                    return true;
+                }
+            }
+            return false;
+        });
+        
+        console.log('📋 السدادات بعد الفلترة:', filteredPayments.length);
+    }
+    
+    currentPaymentPage = 1;
+    renderPaymentsView();
+};
+
+// ✅ تشخيص العناصر المفقودة
+const originalSetInnerHTML = Object.getOwnPropertyDescriptor(Element.prototype, 'innerHTML');
+if (originalSetInnerHTML && originalSetInnerHTML.set) {
+    Object.defineProperty(Element.prototype, 'innerHTML', {
+        set: function(value) {
+            try {
+                originalSetInnerHTML.set.call(this, value);
+            } catch(e) {
+                console.log('❌ innerHTML خطأ:', e.message);
+            }
+        },
+        get: function() {
+            return originalSetInnerHTML.get.call(this);
+        },
+        configurable: true
+    });
+}
 // ============================================
 // التهيئة الرئيسية
 // ============================================
 document.addEventListener('DOMContentLoaded', async () => {
     console.log('بدء تشغيل النظام...');
+	    // ✅ استعادة الوضع المحفوظ (داكن/فاتح)
+    const savedTheme = localStorage.getItem('theme');
+    if (savedTheme === 'light') {
+        document.body.classList.remove('dark-mode');
+        document.body.classList.add('light-mode');
+        const icon = document.getElementById('themeIcon');
+        if (icon) icon.className = 'fas fa-sun';
+    }
     loadDriveSettings();
 	
 	
 	// ✅ استدعاء تحميل التوكن
-    await loadRefreshTokenFromDrive();
+    //await loadRefreshTokenFromDrive();
     
     // تحميل الشعار من Drive
     await loadLogoFromDrive();
@@ -7028,30 +8638,6 @@ function debounce(func, wait) {
     let timeout;
     return (...args) => { clearTimeout(timeout); timeout = setTimeout(() => func(...args), wait); };
 }
-
-
-// ============================================
-// تحميل العلامات مباشرة (مستقل عن باقي البرنامج)
-// ============================================
-(function forceLoadViewed() {
-    console.log('🔄 [forceLoadViewed] بدء التنفيذ');
-    
-    // انتظار وجود currentUser
-    const checkInterval = setInterval(() => {
-        if (currentUser) {
-            clearInterval(checkInterval);
-            console.log('✅ [forceLoadViewed] تم العثور على currentUser:', currentUser.username);
-            
-            // انتظار قليلاً ثم تحميل العلامات
-            setTimeout(() => {
-                console.log('🔄 [forceLoadViewed] جاري تحميل العلامات...');
-                loadViewedFromDrive();
-            }, 2000);
-        } else {
-            console.log('⏳ [forceLoadViewed] انتظار currentUser...');
-        }
-    }, 500);
-})();
 
 
 // دالة للتحقق مما إذا كانت الفاتورة تخص المستخدم الحالي
@@ -7332,7 +8918,7 @@ async function loadNewsFromDrive() {
         return;
     }
 
-    const newsUrl = 'https://raw.githubusercontent.com/revenudchc-boop/dataconnect/main/news.txt';
+    const newsUrl = 'https://raw.githubusercontent.com/revenudchc-boop/DCHC/main/news.txt';
 
     try {
         newsContent.innerHTML = '<div class="news-item"><i class="fas fa-spinner fa-spin"></i> جاري تحميل الأخبار...</div>';
@@ -7405,13 +8991,70 @@ function escapeHtmlNews(str) {
 // تهيئة شريط الأخبار (يتم استدعاؤها بعد تسجيل الدخول)
 function initNewsBar() {
     const newsBar = document.getElementById('newsBar');
-    if (!newsBar) {
-        console.error('❌ لم يتم العثور على شريط الأخبار');
+    const newsContent = document.getElementById('newsTickerContent');
+    
+    if (!newsBar && !newsContent) {
+        console.warn('⚠️ عناصر شريط الأخبار غير موجودة، تجاهل التحميل');
         return;
     }
-    console.log('🔄 جاري تهيئة شريط الأخبار...');
-    newsBar.style.display = 'flex';
-    loadNewsFromDrive();
+
+    const newsUrl = 'https://raw.githubusercontent.com/revenudchc-boop/DCHC/main/news.txt';
+
+    try {
+        if (newsContent) {
+            newsContent.innerHTML = '<div class="news-item"><i class="fas fa-spinner fa-spin"></i> جاري تحميل الأخبار...</div>';
+        }
+        if (newsBar) {
+            newsBar.style.display = 'flex';
+        }
+        
+        fetch(newsUrl)
+            .then(response => {
+                if (!response.ok) throw new Error(`HTTP ${response.status}`);
+                return response.text();
+            })
+            .then(content => {
+                let newsItems = content.split(/\r?\n/).filter(line => line.trim() !== '');
+                if (newsItems.length === 0) newsItems = ['مرحباً بك في نظام الفواتير المتقدم'];
+                
+                let html = '';
+                for (let repeat = 0; repeat < 3; repeat++) {
+                    newsItems.forEach((item, idx) => {
+                        let icon = 'fas fa-star';
+                        if (item.includes('عاجل') || item.includes('هام')) icon = 'fas fa-bolt';
+                        else if (item.includes('تحديث')) icon = 'fas fa-sync-alt';
+                        else if (item.includes('جديد')) icon = 'fas fa-gift';
+                        else if (item.includes('🎉')) icon = 'fas fa-party-horn';
+                        
+                        html += `<div class="news-item"><i class="${icon} news-icon"></i><span>${escapeHtmlNews(item)}</span></div>`;
+                        if (idx < newsItems.length - 1) html += `<span class="news-separator">✦</span>`;
+                    });
+                    if (repeat < 2) html += `<span class="news-separator" style="margin:0 25px;">◆ ◆ ◆</span>`;
+                }
+                
+                if (newsContent) {
+                    newsContent.innerHTML = html;
+                }
+                
+                const ticker = document.querySelector('.news-ticker');
+                if (ticker) {
+                    ticker.style.animation = 'none';
+                    ticker.offsetHeight;
+                    const contentWidth = newsContent ? newsContent.scrollWidth : 1000;
+                    const duration = Math.max(30, Math.min(80, contentWidth / 40));
+                    ticker.style.animation = `tickerScroll ${duration}s linear infinite`;
+                }
+            })
+            .catch(error => {
+                console.error('خطأ في تحميل الأخبار:', error);
+                if (newsContent) {
+                    newsContent.innerHTML = '<div class="news-item">⚠️ تعذر تحميل الأخبار</div>';
+                }
+            });
+            
+    } catch (error) {
+        console.error('خطأ في تهيئة شريط الأخبار:', error);
+    }
 }
 
 // دالة إعادة ضبط سرعة الشريط (اختيارية - يمكن استدعاؤها يدوياً)
@@ -7428,12 +9071,549 @@ function setNewsTickerSpeed(seconds) {
 window.initNewsBar = initNewsBar;
 
 function toggleNewsBar() {
-    const newsBar = document.getElementById('newsBar');
+    const newsBar = document.getElementById('newsBarContainer');
     if (newsBar) {
         if (newsBar.style.display === 'none') {
             newsBar.style.display = 'flex';
         } else {
             newsBar.style.display = 'none';
         }
+    }
+}
+
+// عرض مرفقات السداد
+window.viewAttachments = function(paymentId) {
+    const payment = paymentsData.find(p => p.id === paymentId);
+    if (!payment || !payment.attachments || payment.attachments.length === 0) {
+        showNotification('لا توجد مرفقات لهذا السداد', 'info');
+        return;
+    }
+    
+    let html = '<div style="padding:10px;">';
+    html += `<h4>مرفقات السداد: ${payment.id}</h4>`;
+    html += '<div style="display:flex; flex-wrap:wrap; gap:10px; margin-top:10px;">';
+    
+    payment.attachments.forEach((att, i) => {
+        const isImage = att.name.match(/\.(jpg|jpeg|png|gif)$/i);
+        const isPDF = att.name.match(/\.pdf$/i);
+        
+        html += `<div style="border:1px solid #ddd; border-radius:8px; padding:10px; text-align:center; width:150px;">
+            ${isImage ? 
+                `<img src="https://drive.google.com/thumbnail?id=${att.id}" style="width:100%; height:100px; object-fit:cover; border-radius:4px;" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 width=%22100%22 height=%22100%22><rect fill=%22%23ddd%22 width=%22100%22 height=%22100%22/><text x=%2250%22 y=%2255%22 text-anchor=%22middle%22 fill=%22%23999%22>📄</text></svg>'">` : 
+                `<div style="width:100%; height:100px; background:#f0f0f0; border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:2em;">📄</div>`}
+            <div style="font-size:0.75em; margin-top:5px; word-break:break-all;">${att.name}</div>
+            <a href="${att.url}" target="_blank" style="font-size:0.7em; color:#4361ee;">فتح</a>
+        </div>`;
+    });
+    
+    html += '</div></div>';
+    
+    document.getElementById('modalBody').innerHTML = html;
+    document.getElementById('modalTitle').textContent = 'مرفقات السداد';
+    document.getElementById('invoiceModal').style.display = 'block';
+};
+
+// سداد سريع من جدول الفواتير
+window.quickPayInvoice = async function(invoiceKey, customerId, totalAmount, currency) {
+    if (!currentUser) {
+        showNotification('يرجى تسجيل الدخول', 'warning');
+        return;
+    }
+    
+    // ✅ تصحيح العملة - USAD تصبح USD
+    let correctedCurrency = currency || 'EGP';
+    if (correctedCurrency === 'USAD') correctedCurrency = 'USD';
+    
+    // ✅ تحميل السدادات من السحابة لحساب المبلغ المدفوع
+    await loadPaymentsFromCloud(currentUser.username);
+    
+    // ✅ المبلغ المرسل هو المتبقي بالفعل، لا نحتاج لخصم المدفوع مرة أخرى
+    const remaining = totalAmount;
+    
+    // ✅ لكن نحتاج حساب المدفوع للعرض فقط
+    let totalPaid = 0;
+    paymentsData.forEach(p => {
+        if (p.status === 'confirmed' || p.isOpeningBalance) {
+            if (p.linkedInvoices && Array.isArray(p.linkedInvoices) && p.linkedInvoices.includes(invoiceKey)) {
+                const amountPerInvoice = p.linkedInvoices.length > 0 ? p.amount / p.linkedInvoices.length : p.amount;
+                totalPaid += amountPerInvoice;
+            }
+        }
+    });
+    
+    // ✅ إذا تم السداد كلياً، لا داعي لفتح النافذة
+    if (remaining <= 0.01) {
+        showNotification('✅ هذه الفاتورة مسددة بالكامل', 'success');
+        return;
+    }
+    
+    // ✅ تحديد العميل الصحيح
+    let finalCustomerId = customerId;
+    if (currentUser?.userType === 'admin') {
+        finalCustomerId = customerId;
+    } else if (currentUser && currentUser.customerIds && currentUser.customerIds.length > 0) {
+        const customerLower = customerId.toLowerCase();
+        const matched = currentUser.customerIds.find(id => 
+            customerLower.includes(id.toLowerCase()) || 
+            id.toLowerCase().includes(customerLower)
+        );
+        if (matched) {
+            finalCustomerId = matched;
+        } else {
+            finalCustomerId = currentUser.customerIds[0];
+        }
+    } else if (currentUser && currentUser.contractCustomerId) {
+        finalCustomerId = currentUser.contractCustomerId;
+    }
+    
+    // ✅ تفعيل مؤشر السداد السريع - يمنع openPaymentModal من تحميل الفواتير
+    isQuickPayment = true;
+    
+    // ✅ فتح النافذة (لن تحمل الفواتير بسبب isQuickPayment = true)
+    openPaymentModal();
+    
+    // ✅ انتظار فتح النافذة بالكامل
+    await new Promise(resolve => setTimeout(resolve, 300));
+    
+    // ✅ تعبئة الحقول تلقائياً
+    document.getElementById('paymentCustomer').value = finalCustomerId;
+    document.getElementById('paymentAmount').value = remaining.toFixed(2);
+    document.getElementById('paymentCurrency').value = correctedCurrency;
+    document.getElementById('paymentDate').value = new Date().toISOString().slice(0, 10);
+    
+    // ✅ البحث عن بيانات الفاتورة للعرض
+    const inv = invoicesData.find(i => getInvoiceKey(i) === invoiceKey);
+    const invNum = inv ? (inv['final-number'] || inv['draft-number'] || invoiceKey) : invoiceKey;
+    
+    // ✅ عرض الفاتورة المحددة فقط (وليس كل الفواتير)
+    const container = document.getElementById('linkedInvoicesContainer');
+    container.innerHTML = `
+        <table style="width:100%; font-size:0.85em;">
+            <thead><tr><th>تحديد</th><th>رقم الفاتورة</th><th>الإجمالي</th><th>المدفوع</th><th>المتبقي</th></tr></thead>
+            <tbody>
+                <tr>
+                    <td><input type="checkbox" class="link-invoice-check" value="${invoiceKey}" checked onchange="updateLinkedTotal()" data-remaining="${remaining.toFixed(2)}"></td>
+                    <td><strong>${invNum}</strong></td>
+					<td>${formatNumberWithCommas((totalAmount + totalPaid).toFixed(2))} ${correctedCurrency}</td>
+                    <td style="color:var(--success);">${formatNumberWithCommas(totalPaid.toFixed(2))} ${correctedCurrency}</td>
+                    <td style="color:var(--danger); font-weight:700;">${formatNumberWithCommas(remaining.toFixed(2))} ${correctedCurrency}</td>
+                </tr>
+            </tbody>
+        </table>
+    `;
+    
+    // ✅ تحديث إجمالي المبلغ
+    updateLinkedTotal();
+    
+    // ✅ إعادة تعيين المؤشر بعد الانتهاء
+    isQuickPayment = false;
+};
+
+// حساب حالة السداد لفاتورة
+function getInvoicePaymentStatus(invoiceKey, customerId) {
+    if (!paymentsData || paymentsData.length === 0) {
+        return { status: 'unpaid', paid: 0, hasPending: false, hasRejected: false };
+    }
+    
+    let totalPaid = 0;
+    let hasPending = false;
+    let hasRejected = false;
+    
+    paymentsData.forEach(p => {
+        if (p.linkedInvoices && Array.isArray(p.linkedInvoices) && p.linkedInvoices.includes(invoiceKey)) {
+            if (p.status === 'confirmed' || p.isOpeningBalance) {
+                const amountPerInvoice = p.linkedInvoices.length > 0 ? p.amount / p.linkedInvoices.length : p.amount;
+                totalPaid += amountPerInvoice;
+            } else if (p.status === 'pending') {
+                hasPending = true;
+            } else if (p.status === 'rejected') {
+                hasRejected = true;
+            }
+        }
+    });
+    
+    return { paid: totalPaid, status: totalPaid <= 0 ? 'unpaid' : 'partial', hasPending: hasPending, hasRejected: hasRejected };
+}
+
+// عرض الفواتير المرتبطة بالسداد
+window.showPaymentInvoices = function(paymentId) {
+    const payment = paymentsData.find(p => p.id === paymentId);
+    if (!payment) {
+        showNotification('السداد غير موجود', 'error');
+        return;
+    }
+    
+    if (!payment.linkedInvoices || payment.linkedInvoices.length === 0) {
+        showNotification('هذا السداد غير مرتبط بأي فواتير', 'info');
+        return;
+    }
+    
+    // بناء قائمة الفواتير المرتبطة
+    let html = `
+        <div style="padding:10px;">
+            <h4>فواتير السداد: ${payment.id}</h4>
+            <p style="color:var(--text-muted); font-size:0.85em;">العميل: ${payment.customerId} | المبلغ: ${formatNumberWithCommas(payment.amount.toFixed(2))} ${payment.currency} | الحالة: ${payment.status}</p>
+            <table class="data-table" style="margin-top:10px;">
+                <thead><tr><th>رقم الفاتورة</th><th>الإجمالي</th></tr></thead>
+                <tbody>`;
+    
+    payment.linkedInvoices.forEach(key => {
+        const inv = invoicesData.find(i => getInvoiceKey(i) === key);
+        if (inv) {
+            const total = (inv['total-total'] || 0) + ((inv['final-number'] || '').startsWith('P') ? 0 : 5);
+            html += `<tr>
+                <td>${inv['final-number'] || inv['draft-number'] || key}</td>
+                <td>${formatNumberWithCommas(total.toFixed(2))}</td>
+            </tr>`;
+        } else {
+            html += `<tr><td>${key}</td><td>-</td></tr>`;
+        }
+    });
+    
+    html += '</tbody></table></div>';
+    
+    document.getElementById('modalBody').innerHTML = html;
+    document.getElementById('modalTitle').textContent = 'فواتير السداد';
+    document.getElementById('invoiceModal').style.display = 'block';
+};
+
+// إظهار/إخفاء الفواتير المرتبطة بالسداد
+window.togglePaymentInvoices = function(paymentId) {
+    const row = document.getElementById('paymentInvoices-' + paymentId);
+    const icon = document.getElementById('paymentIcon-' + paymentId);
+    
+    if (row) {
+        if (row.style.display === 'none' || row.style.display === '') {
+            row.style.display = 'table-row';
+            if (icon) {
+                icon.className = 'fas fa-chevron-up';
+            }
+        } else {
+            row.style.display = 'none';
+            if (icon) {
+                icon.className = 'fas fa-chevron-down';
+            }
+        }
+    }
+};
+
+window.updateStatement = async function() {
+    const accountId = document.getElementById('statementAccount').value;
+    if (!accountId) return;
+    
+    const dateFrom = document.getElementById('statementDateFrom').value;
+    const dateTo = document.getElementById('statementDateTo').value;
+    
+    document.getElementById('statementBody').innerHTML = '<div style="text-align:center;padding:40px;"><i class="fas fa-spinner fa-spin"></i> جاري تحميل...</div>';
+    
+    await loadPaymentsFromCloud(currentUser.username);
+    
+    // تصفية فواتير هذا الحساب
+    let accountInvoices = invoicesData.filter(inv => {
+        const payee = (inv['payee-customer-id'] || '').toLowerCase();
+        const contract = (inv['contract-customer-id'] || '').toLowerCase();
+        const acc = accountId.toLowerCase();
+        return payee.includes(acc) || contract.includes(acc);
+    });
+    
+    // تصفية حسب التاريخ (finalized-date)
+    if (dateFrom || dateTo) {
+        accountInvoices = accountInvoices.filter(inv => {
+            const invDate = (inv['finalized-date'] || inv['created'] || '').slice(0, 10);
+            if (!invDate) return true;
+            if (dateFrom && invDate < dateFrom) return false;
+            if (dateTo && invDate > dateTo) return false;
+            return true;
+        });
+    }
+    
+    // تصفية سدادات هذا الحساب
+    let accountPayments = paymentsData.filter(p => 
+        p.customerId === accountId && (p.status === 'confirmed' || p.isOpeningBalance)
+    );
+    
+    if (dateFrom || dateTo) {
+        accountPayments = accountPayments.filter(p => {
+            if (p.isOpeningBalance && !dateFrom) return true; // الرصيد الافتتاحي يظهر دائماً
+            if (p.isOpeningBalance && dateFrom) return false; // إلا إذا كان هناك تاريخ بداية
+            const payDate = p.date || '';
+            if (dateFrom && payDate < dateFrom) return false;
+            if (dateTo && payDate > dateTo) return false;
+            return true;
+        });
+    }
+    
+    await buildAccountStatement(accountInvoices, accountPayments, accountId, dateFrom, dateTo);
+};
+
+window.saveOpeningBalance = async function() {
+    const customerId = document.getElementById('openingCustomer').value;
+    const amount = parseFloat(document.getElementById('openingAmount').value);
+    const currency = document.getElementById('openingCurrency').value;
+    const date = document.getElementById('openingDate').value;
+    const type = document.getElementById('openingType').value;
+    const notes = document.getElementById('openingNotes').value;
+    
+    if (!customerId) return showOpeningMessage('اختر العميل', 'error');
+    if (!amount || amount <= 0) return showOpeningMessage('أدخل مبلغ صحيح', 'error');
+    if (!date) return showOpeningMessage('اختر التاريخ', 'error');
+    
+    showOpeningMessage('جاري الحفظ...', 'info');
+    
+    const body = {
+        action: 'opening_balance',
+        customerId: customerId,
+        username: 'admin',
+        amount: amount,
+        currency: currency,
+        exchangeRate: currency === 'USD' ? 48.0215 : 1,
+        date: date,
+        notes: notes || 'رصيد افتتاحي',
+        createdBy: currentUser.username,
+        balanceType: type
+    };
+    
+    try {
+        const response = await fetch(PAYMENTS_API_URL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: JSON.stringify(body)
+        });
+        const data = await response.json();
+        if (data.success) {
+            showOpeningMessage('✅ تم إضافة الرصيد الافتتاحي', 'success');
+            setTimeout(() => closeOpeningBalanceModal(), 1500);
+        } else {
+            showOpeningMessage('❌ فشل: ' + data.error, 'error');
+        }
+    } catch (e) {
+        showOpeningMessage('❌ خطأ في الاتصال', 'error');
+    }
+};
+
+function showOpeningMessage(msg, type) {
+    const div = document.getElementById('openingMessage');
+    div.textContent = msg;
+    div.className = `login-message ${type}`;
+    div.style.display = 'block';
+}
+
+window.printStatement = function() {
+    const content = document.getElementById('statementBody');
+    if (!content || !content.innerHTML.trim()) {
+        showNotification('لا يوجد كشف حساب للطباعة', 'error');
+        return;
+    }
+    
+    const accountId = document.getElementById('statementAccount').value || '';
+    const dateFrom = document.getElementById('statementDateFrom').value;
+    const dateTo = document.getElementById('statementDateTo').value;
+    
+    const printWindow = window.open('', '_blank', 'width=1100,height=800');
+    printWindow.document.write(`
+        <html dir="rtl">
+        <head>
+            <meta charset="UTF-8">
+            <title>كشف حساب - ${accountId}</title>
+            <style>
+                @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap');
+                body { font-family: 'Cairo', sans-serif; padding: 20px; direction: rtl; }
+                table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                th { background: #1e3c72; color: white; padding: 10px; text-align: right; }
+                td { padding: 8px; border-bottom: 1px solid #ddd; }
+                h3, h4 { color: #1e3c72; }
+                .footer { margin-top: 20px; text-align: center; font-size: 0.8em; color: #666; }
+                @media print { body { padding: 0; } }
+            </style>
+        </head>
+        <body>
+            <h3>شركة دمياط لتداول الحاويات و البضائع</h3>
+            <h4>كشف حساب: ${accountId}</h4>
+            <p>تاريخ التقرير: ${new Date().toLocaleDateString('ar-EG')}</p>
+            ${dateFrom || dateTo ? `<p>الفترة: ${dateFrom || 'البداية'} إلى ${dateTo || 'النهاية'}</p>` : ''}
+            ${content.innerHTML}
+            <div class="footer">
+                <p>شكراً لتعاملكم مع شركة دمياط لتداول الحاويات و البضائع</p>
+            </div>
+            <script>window.onload = function() { window.print(); }</script>
+        </body>
+        </html>
+    `);
+    printWindow.document.close();
+};
+
+function toggleTheme() {
+    const body = document.body;
+    const icon = document.getElementById('themeIcon');
+    if (body.classList.contains('dark-mode')) {
+        body.classList.remove('dark-mode');
+        body.classList.add('light-mode');
+        if (icon) icon.className = 'fas fa-sun';
+        localStorage.setItem('theme', 'light');
+    } else {
+        body.classList.remove('light-mode');
+        body.classList.add('dark-mode');
+        if (icon) icon.className = 'fas fa-moon';
+        localStorage.setItem('theme', 'dark');
+    }
+}
+
+window.closeOpeningBalanceModal = function() {
+    document.getElementById('openingBalanceModal').style.display = 'none';
+};
+
+
+// ✅ دالة مساعدة لفتح النوافذ المنبثقة
+function openModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) {
+        modal.style.display = 'flex';
+        modal.classList.add('show');
+    }
+}
+
+function closeModal(id) {
+    const modal = document.getElementById(id);
+    if (modal) {
+        modal.style.display = 'none';
+        modal.classList.remove('show');
+    }
+}
+
+console.log('✅ script.js تم تحميله بالكامل');
+console.log('العناصر الحرجة:');
+['dataSource', 'fileStatus', 'totalEGPWithoutTax', 'totalMartyr', 'totalValueHeader', 'dataViewInfo', 'selectedCount', 'dbControls', 'exportSelectedBtn', 'exportSelectedExcelBtn', 'exportContainersBtn', 'selectAllCheckbox'].forEach(id => {
+    console.log(id + ':', document.getElementById(id) ? '✅' : '❌ مفقود');
+});
+
+// ✅ تحديث الشريط الجانبي عند تغيير التبويب
+function updateSidebarActive(tab) {
+    document.querySelectorAll('.sidebar-nav a').forEach(a => a.classList.remove('active'));
+    const links = {
+        'cash': 0,
+        'postponed': 1,
+        'credit': 2,
+        'payments': 3,
+        'statement': 4,
+        'reports': 5,
+        'users': 6,
+        'settings': 7
+    };
+    const index = links[tab];
+    if (index !== undefined) {
+        const allLinks = document.querySelectorAll('.sidebar-nav a');
+        if (allLinks[index]) allLinks[index].classList.add('active');
+    }
+}
+
+function updatePageTitle(title, count, value) {
+    const pageTitle = document.getElementById('pageTitle');
+    const totalInvoicesHeader = document.getElementById('totalInvoicesHeader');
+    const totalValueHeader = document.getElementById('totalValueHeader');
+    
+    if (pageTitle) pageTitle.textContent = title;
+    if (totalInvoicesHeader) totalInvoicesHeader.textContent = count || 0;
+    if (totalValueHeader) totalValueHeader.textContent = (value || '0.00') + ' EGP';
+}
+
+// ========================================
+// إصلاح مزامنة وضع العرض مع الأزرار عند تحميل الصفحة
+// ========================================
+function syncViewModeButtons() {
+    // ✅ إذا كان البحث جارياً، لا تغير أي شيء
+    if (isSearching) {
+        console.log('⏸️ تم تخطي تغيير وضع العرض أثناء البحث');
+        return;
+    }
+    
+    // ✅ فقط تأكد من وجود قيمة افتراضية إذا كانت غير معرفة
+    if (typeof viewMode === 'undefined') {
+        viewMode = 'cards';
+    }
+    
+    // العثور على أزرار التبديل بين جدول/بطاقات
+    const tableBtn = document.querySelector('.card-header .tabs .tab:first-child');
+    const cardsBtn = document.querySelector('.card-header .tabs .tab:last-child');
+    
+    if (tableBtn && cardsBtn) {
+        if (viewMode === 'cards') {
+            tableBtn.classList.remove('active');
+            cardsBtn.classList.add('active');
+        } else {
+            tableBtn.classList.add('active');
+            cardsBtn.classList.remove('active');
+        }
+    }
+    
+    console.log('✅ وضع العرض الحالي:', viewMode);
+}
+
+// استدعاء الدالة بعد تحميل الصفحة وبعد تسجيل الدخول
+// نضيفها في دالة checkSession بعد تحميل البيانات
+// ولكن لتجنب تعديل الكود الأصلي كثيراً، نضيف مستمع للحدث
+document.addEventListener('DOMContentLoaded', function() {
+    // ننتظر قليلاً حتى يتم تحميل كل شيء
+    setTimeout(function() {
+        syncViewModeButtons();
+    }, 500);
+});
+
+// أيضاً نضيف استدعاء بعد renderData
+const originalRenderData = window.renderData;
+if (originalRenderData) {
+    window.renderData = function() {
+        originalRenderData.apply(this, arguments);
+        syncViewModeButtons();
+    };
+}
+
+// تحميل إشعارات الخصم بصمت (بدون تغيير واجهة المستخدم)
+async function loadCreditDataFromDriveSilent() {
+    if (!driveConfig.apiKey || !driveConfig.folderId) return false;
+    let fileId = driveConfig.creditFileId;
+    if (!fileId && driveConfig.creditFileName) {
+        try {
+            const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(`'${driveConfig.folderId}' in parents and name='${driveConfig.creditFileName}'`)}&key=${driveConfig.apiKey}&fields=files(id,name)`);
+            if (!res.ok) return false;
+            const data = await res.json();
+            if (!data.files?.length) return false;
+            fileId = data.files[0].id;
+            driveConfig.creditFileId = fileId;
+        } catch { return false; }
+    } else if (!fileId) return false;
+
+    try {
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${driveConfig.apiKey}`);
+        if (!res.ok) return false;
+        const content = await res.text();
+        
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(content, "text/xml");
+        const parseError = xmlDoc.querySelector('parsererror');
+        let newCredits = [];
+
+        if (parseError) {
+            const matches = content.match(/<credit[\s\S]*?<\/credit>/g);
+            if (!matches?.length) return false;
+            const wrapped = parser.parseFromString(`<root>${matches.join('')}</root>`, 'text/xml');
+            const nodes = wrapped.querySelectorAll('credit');
+            for (let i = 0; i < nodes.length; i++) {
+                const credit = parseCreditNode(nodes[i]);
+                if (credit) newCredits.push(credit);
+            }
+        } else {
+            const nodes = xmlDoc.getElementsByTagName('credit');
+            for (let i = 0; i < nodes.length; i++) {
+                const credit = parseCreditNode(nodes[i]);
+                if (credit) newCredits.push(credit);
+            }
+        }
+
+        if (newCredits.length) {
+            creditData = newCredits;
+        }
+        return true;
+    } catch {
+        return false;
     }
 }
