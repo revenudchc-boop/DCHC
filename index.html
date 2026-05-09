@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+	<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
@@ -21,8 +21,47 @@
     <!-- CSS File -->
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
-    <!-- شاشة تسجيل الدخول -->
+<body class="dark-mode">
+
+    <!-- زر القائمة للجوال -->
+    <button class="menu-toggle" onclick="document.getElementById('sidebar').classList.toggle('open')">
+        <i class="fas fa-bars"></i>
+    </button>
+
+    <!-- ==================== الشريط الجانبي ==================== -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-logo"><i class="fas fa-ship"></i></div>
+            <h2>DCHC</h2>
+            <p>DAMIETTA CONTAINER</p>
+        </div>
+        <div class="sidebar-user">
+            <div class="user-avatar" id="sidebarAvatar">م</div>
+            <div class="user-info">
+                <div class="uname" id="sidebarName">مدير النظام</div>
+                <div class="urole" id="sidebarRole">● مدير عام</div>
+            </div>
+        </div>
+        <nav class="sidebar-nav">
+            <div class="nav-section">رئيسية</div>
+            <a href="#" class="active" onclick="switchInvoiceType('cash')"><i class="fas fa-file-invoice"></i> فواتير نقدية</a>
+            <a href="#" onclick="switchInvoiceType('postponed')"><i class="fas fa-clock"></i> فواتير آجلة</a>
+            <a href="#" onclick="switchInvoiceType('credit')"><i class="fas fa-tags"></i> إشعارات خصم</a>
+            <a href="#" onclick="openAllPaymentsView()"><i class="fas fa-money-bill-wave"></i> السدادات <span class="nav-badge" id="paymentsBadge" style="display:none;">0</span></a>
+            <a href="#" onclick="openAccountStatement()"><i class="fas fa-file-invoice-dollar"></i> كشف حساب</a>
+            <div class="nav-section">إدارة</div>
+            <a href="#" onclick="showReports('daily')"><i class="fas fa-chart-bar"></i> التقارير</a>
+            <a href="#" onclick="showUserManagement()" id="sidebarAdminLink"><i class="fas fa-users-cog"></i> المستخدمين</a>
+			<a href="#" onclick="openRefreshSettings()"><i class="fas fa-sync-alt"></i> التحديث التلقائي</a>
+            <a href="#" onclick="openDriveSettings()"><i class="fas fa-cog"></i> الإعدادات</a>
+        </nav>
+        <div class="sidebar-footer">
+            <button onclick="showChangePassword()"><i class="fas fa-key"></i> المرور</button>
+            <button onclick="logout()"><i class="fas fa-sign-out-alt"></i> خروج</button>
+        </div>
+    </aside>
+
+    <!-- ==================== شاشة تسجيل الدخول ==================== -->
     <div id="loginScreen" class="login-screen">
         <div class="login-container">
             <div class="login-header">
@@ -52,319 +91,259 @@
                     <i class="fas fa-sign-in-alt"></i> دخول
                 </button>
             </div>
-			
-           تم ازاله تسجيل الدخول كزائر مؤقتا
-		   
+            
+            <!-- نموذج دخول الزائر -->
+            <div id="guestForm" class="login-form">
+                <div class="form-group">
+                    <label><i class="fas fa-building"></i> الرقم الضريبي</label>
+                    <input type="text" id="guestTaxNumber" placeholder="أدخل الرقم الضريبي">
+                    <small class="form-text">اختياري - للبحث عن فواتيرك النقدية</small>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-barcode"></i> رقم البوليصة</label>
+                    <input type="text" id="guestBlNumber" placeholder="أدخل رقم البوليصة">
+                    <small class="form-text">اختياري - للبحث عن فاتورة محددة</small>
+                </div>
+                <button class="login-btn" onclick="handleGuestLogin()">
+                    <i class="fas fa-user-guest"></i> دخول كزائر
+                </button>
+                <small class="form-text">ملاحظة: الزائر لا يرى الفواتير الآجلة</small>
+            </div>
+            
             <div id="loginMessage" class="login-message"></div>
         </div>
     </div>
 
-    <!-- التطبيق الرئيسي -->
-    <div id="mainApp" style="display: none;">
+    <!-- ==================== التطبيق الرئيسي ==================== -->
+    <main class="main-content" id="mainApp" style="display: none;">
         
-        <!-- شريط المستخدم -->
-        <div class="user-bar">
-            <div class="user-info">
-                <i class="fas fa-user-circle"></i>
-                <span id="currentUserDisplay"></span>
-                <span class="user-badge" id="userTypeBadge"></span>
-                <span class="user-tax" id="userTaxDisplay"></span>
-            </div>
-            <div class="user-actions">
-				<button class="user-btn refresh-settings-btn" onclick="openRefreshSettings()" title="إعدادات التحديث التلقائي">
+        <!-- الشريط العلوي -->
+        <div class="topbar">
+		<div class="topbar-left">
+			<h1 id="pageTitle">الفواتير النقدية</h1>
+			<p>
+				إجمالي: <strong id="totalInvoicesHeader">0</strong> فاتورة | 
+				<strong id="totalCustomersTop">0</strong> عميل | 
+				<strong id="totalVesselsTop">0</strong> سفينة | 
+			</p>
+		</div>
+            <div class="topbar-right">
+                <!-- زر تبديل الوضع -->
+                <button class="btn-icon theme-toggle" onclick="toggleTheme()" title="تبديل الوضع الليلي/النهاري">
+                    <i class="fas fa-moon" id="themeIcon"></i>
+                </button>
+				    <!-- زر إعدادات التحديث التلقائي -->
+				<button class="btn-icon refresh-settings-btn" onclick="openRefreshSettings()" title="إعدادات التحديث التلقائي">
 					<i class="fas fa-clock"></i>
 				</button>
-				
-				<div class="user-actions">
-    <!-- الأزرار الموجودة -->
-    <button class="user-btn" onclick="toggleNewsBar()" title="إظهار/إخفاء الأخبار">
-        <i class="fas fa-newspaper"></i>
-    </button>
-</div>
-                <button class="user-btn drive-settings-btn" id="driveSettingsBtn" onclick="openDriveSettings()" title="إعدادات Google Drive">
-                    <i class="fab fa-google-drive"></i>
+                <!-- زر الإشعارات -->
+                <button class="notif-btn" id="notifBtn" title="الإشعارات">
+                    <i class="fas fa-bell"></i>
+                    <span class="notif-dot" id="notifDot" style="display:none;"></span>
                 </button>
-                <button class="user-btn" onclick="showChangePassword()" title="تغيير كلمة المرور">
-                    <i class="fas fa-key"></i>
-                </button>
-                <button class="user-btn" id="adminPanelBtn" onclick="showUserManagement()" style="display: none;" title="إدارة المستخدمين">
-                    <i class="fas fa-users-cog"></i>
-                </button>
-                <button class="user-btn logout-btn" onclick="logout()" title="تسجيل الخروج">
-                    <i class="fas fa-sign-out-alt"></i>
-                </button>
-
+				<button class="btn-icon" onclick="toggleNewsBar()" title="إظهار/إخفاء الأخبار"><i class="fas fa-newspaper"></i></button>
+                <!-- زر تحديث -->
+                <button class="btn-icon" onclick="location.reload()" title="تحديث"><i class="fas fa-sync-alt"></i></button>
+                <!-- زر تحميل XML -->
+                <label class="btn btn-outline btn-sm" id="uploadXmlBtn" style="cursor:pointer;">
+                    <i class="fas fa-upload"></i> XML
+                    <input type="file" id="fileInput" accept=".xml, .snx, .txt" hidden>
+                </label>
+                <!-- زر تحديث من Drive -->
+                <button class="btn btn-outline btn-sm" id="driveUpdateBtn" onclick="updateFromDrive()"><i class="fab fa-google-drive"></i> Drive</button>
+                <!-- زر تصدير -->
+                <button class="btn btn-outline btn-sm" onclick="exportSelectedInvoices()"><i class="fas fa-file-pdf"></i> PDF</button>
+                <!-- زر سداد جديد -->
+                <button class="btn btn-accent btn-sm" onclick="openPaymentModal()"><i class="fas fa-plus"></i> سداد</button>
             </div>
         </div>
 
-<!-- شريط الأخبار -->
-		<div id="newsBarContainer" style="position: relative;">
-			<div id="newsBar" class="news-ticker-container" style="display: flex;">
-				<div class="news-ticker-header">
-					<i class="fas fa-newspaper"></i>
-					<span>أخبار عاجلة</span>
-					<div class="news-ticker-pulse"></div>
-				</div>
-				<div class="news-ticker-wrapper">
-					<div class="news-ticker" id="newsTicker">
-						<div class="news-ticker-content" id="newsTickerContent">
-							جاري تحميل الأخبار...
-						</div>
-					</div>
-				</div>
-			</div>
-			
+        <!-- شريط الأخبار -->
+        <div id="newsBarContainer" class="news-bar">
+            <div class="news-dot"></div>
+            <div class="news-ticker" id="newsTicker">
+                <div class="news-ticker-content" id="newsTickerContent">جاري تحميل الأخبار...</div>
+            </div>
+        </div>
 
+        <!-- بطاقات الإحصائيات -->
+		<div class="stats-grid" id="summaryCards">
+			<div class="stat-card">
+				<div class="stat-icon indigo"><i class="fas fa-file-invoice"></i></div>
+				<div class="stat-value" id="invoiceCount">0</div>
+				<div class="stat-label">إجمالي الفواتير</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-icon emerald"><i class="fas fa-coins"></i></div>
+				<div class="stat-value" id="totalSum">0.00</div>
+				<div class="stat-label">إجمالي (EGP)</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-icon amber"><i class="fas fa-percent"></i></div>
+				<div class="stat-value" id="taxSum">0.00</div>
+				<div class="stat-label">الضرائب (EGP)</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-icon cyan"><i class="fas fa-file-invoice-dollar"></i></div>
+				<div class="stat-value" id="totalEGPWithoutTax">0.00</div>
+				<div class="stat-label">إجمالي بدون ضريبة</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-icon rose"><i class="fas fa-dollar-sign"></i></div>
+				<div class="stat-value" id="totalUSD">0.00</div>
+				<div class="stat-label">الدولار (USD)</div>
+			</div>
+			<div class="stat-card">
+				<div class="stat-icon red"><i class="fas fa-stamp"></i></div>
+				<div class="stat-value" id="totalMartyr">0.00</div>
+				<div class="stat-label">طابع الشهيد</div>
+			</div>
 		</div>
 
-        <!-- شريط بيانات الشركة -->
-        <div class="company-bar">
-            <div class="company-info">
-                <div class="company-logo">
-                    <i class="fas fa-ship"></i>
-                </div>
-                <div class="company-details">
-                    <h2>شركة دمياط لتداول الحاويات و البضائع</h2>
-                    <p>Damietta Container & Cargo Handling Company</p>
-                    <div class="company-meta">
-                        <span><i class="fas fa-map-marker-alt"></i> دمياط - المنطقة الحرة - ميناء دمياط</span>
-                        <span><i class="fas fa-phone"></i> 0572290103</span>
-                        <span><i class="fas fa-envelope"></i> revenue@dchc-egdam.com</span>
-                        <span><i class="fas fa-building"></i> الرقم الضريبي: 100/221/823</span>
+        <!-- البحث المتقدم -->
+        <div class="card" id="advancedSearch" style="margin-bottom:12px;">
+            <div class="card-header" onclick="toggleAdvancedSearch()" style="cursor:pointer;">
+                <h3><i class="fas fa-search"></i> بحث متقدم <i class="fas fa-chevron-down" id="searchToggleIcon"></i></h3>
+            </div>
+            <div class="card-body padded" id="advancedSearchBody" style="display:none;">
+                <!-- الصف الأول -->
+                <div class="search-row">
+                    <div class="search-field">
+                        <label><i class="fas fa-hashtag"></i> رقم الفاتورة النهائي</label>
+                        <input type="text" id="searchFinalNumber" placeholder="مثال: C25-22491">
                     </div>
+                    <div class="search-field">
+                        <label><i class="fas fa-file-signature"></i> رقم المسودة</label>
+                        <input type="text" id="searchDraftNumber" placeholder="مثال: 263531">
+                    </div>
+                    <div class="search-field">
+                        <label><i class="fas fa-user-tie"></i> اسم العميل</label>
+                        <input type="text" id="searchCustomer" placeholder="اسم العميل...">
+                    </div>
+                    <div class="search-field">
+                        <label><i class="fas fa-ship"></i> اسم السفينة</label>
+                        <input type="text" id="searchVessel" placeholder="اسم السفينة...">
+                    </div>
+                    <div class="search-field">
+                        <label><i class="fas fa-barcode"></i> رقم البوليصة</label>
+                        <input type="text" id="searchBlNumber" placeholder="رقم البوليصة...">
+                    </div>
+                </div>
+                <!-- الصف الثاني -->
+                <div class="search-row">
+                    <div class="search-field">
+                        <label><i class="fas fa-container-storage"></i> رقم الحاوية</label>
+                        <input type="text" id="searchContainer" placeholder="رقم الحاوية...">
+                    </div>
+                    <div class="search-field">
+                        <label><i class="fas fa-tag"></i> الحالة</label>
+                        <select id="searchStatus">
+                            <option value="">الكل</option>
+                            <option value="viewed">تمت المعاينة ✓</option>
+                            <option value="not_viewed">لم تتم المعاينة ☐</option>
+                        </select>
+                    </div>
+                    <div class="search-field">
+                        <label><i class="fas fa-calendar"></i> من تاريخ</label>
+                        <input type="date" id="searchDateFrom">
+                    </div>
+                    <div class="search-field">
+                        <label><i class="fas fa-calendar"></i> إلى تاريخ</label>
+                        <input type="date" id="searchDateTo">
+                    </div>
+                    <div class="search-field">
+                        <label><i class="fas fa-tag"></i> نوع الفاتورة</label>
+                        <select id="searchInvoiceType">
+                            <option value="">الكل</option>
+                            <option value="cash">نقدي</option>
+                            <option value="postponed">أجل</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- أزرار البحث -->
+                <div style="display:flex; gap:8px; margin-top:15px; justify-content:flex-end;">
+                    <button class="btn btn-primary btn-sm" onclick="applyAdvancedSearch()"><i class="fas fa-filter"></i> بحث</button>
+                    <button class="btn btn-outline btn-sm" onclick="resetAdvancedSearch()"><i class="fas fa-undo"></i> إعادة</button>
                 </div>
             </div>
         </div>
 
-        <!-- الحاوية الرئيسية -->
-        <div class="container">
-            <header>
-                <div class="header-content">
-                    <h1><i class="fas fa-file-invoice"></i> نظام إدارة الفواتير المتقدم</h1>
-                    <p>عرض وتحليل وطباعة الفواتير من ملفات XML/SNX</p>
-                </div>
-                <div class="header-stats" id="headerStats">
-                    <span><i class="fas fa-file"></i> <span id="totalInvoicesHeader">0</span> فاتورة</span>
-                    <span><i class="fas fa-users"></i> <span id="totalCustomers">0</span> عميل</span>
-                    <span><i class="fas fa-ship"></i> <span id="totalVessels">0</span> سفينة</span>
-                </div>
-            </header>
-
-            <!-- شريط الأدوات الرئيسي -->
-            <div class="toolbar">
-                <div class="toolbar-section">
-                    <label for="fileInput" class="btn btn-primary">
-                        <i class="fas fa-upload"></i> تحميل ملف XML
-                        <input type="file" id="fileInput" accept=".xml, .snx, .txt" hidden>
-                    </label>
-                    
-                    <button class="btn btn-drive" onclick="updateFromDrive()">
-                        <i class="fab fa-google-drive"></i> تحديث من Drive
-                    </button>
-                    
-                    <button class="btn btn-secondary" onclick="location.reload()">
-                        <i class="fas fa-sync-alt"></i> إعادة تعيين
-                    </button>
-					
-                </div>
-
-                <div class="db-controls" id="dbControls"></div>
-
-                <div class="file-status" id="fileStatus">
-                    <i class="fas fa-info-circle"></i> <span id="dataSource">لم يتم تحميل ملف بعد</span>
-                </div>
-            </div>
-
-            <!-- تبويبات أنواع الفواتير -->
-            <div class="invoice-type-tabs">
-				<button class="type-tab active" onclick="switchInvoiceType('cash')">الفواتير النقدية</button>
-				<button class="type-tab" onclick="switchInvoiceType('postponed')">الفواتير الآجلة</button>
-				<button class="type-tab" onclick="switchInvoiceType('credit')">إشعارات الخصم</button>
-			</div>
-
-            <!-- تبويبات التقارير -->
-            <div class="reports-tabs">
-                <button class="report-tab" onclick="showReports('daily')">التقارير اليومية</button>
-                <button class="report-tab" onclick="showReports('monthly')">التقارير الشهرية</button>
-                <button class="report-tab" onclick="showReports('customer')">تقارير العملاء</button>
-                <button class="report-tab" onclick="showReports('vessel')">تقارير السفن</button>
-            </div>
-
-            <!-- منطقة عرض التقارير -->
-            <div id="reportsContainer" class="reports-container" style="display: none;">
-                <div class="reports-header">
-                    <h2 id="reportTitle">التقارير</h2>
-                    <div class="report-actions">
-                        <button class="btn btn-primary" onclick="exportReportPDF()">
-                            <i class="fas fa-file-pdf"></i> تصدير PDF
-                        </button>
-                        <button class="btn btn-success" onclick="exportReportExcel()">
-                            <i class="fas fa-file-excel"></i> تصدير Excel
-                        </button>
-                        <button class="btn btn-secondary" onclick="closeReports()">
-                            <i class="fas fa-times"></i> إغلاق
-                        </button>
+        <!-- شريط التحكم في العرض -->
+        <div class="card" style="margin-bottom:12px;">
+            <div class="card-header">
+                <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+                    <label style="font-size:0.8em; color:var(--text-muted);">عرض:</label>
+                    <div class="tabs">
+                        <button class="tab active" onclick="setViewMode('table')"><i class="fas fa-table"></i> جدول</button>
+                        <button class="tab" onclick="setViewMode('cards')"><i class="fas fa-th-large"></i> بطاقات</button>
                     </div>
-                </div>
-                <div id="reportContent" class="report-content"></div>
-            </div>
-
-            <!-- البحث المتقدم -->
-            <div class="advanced-search">
-                <div class="search-header" onclick="toggleAdvancedSearch()">
-                    <h3><i class="fas fa-search"></i> بحث متقدم <i class="fas fa-chevron-down" id="searchToggleIcon"></i></h3>
-                </div>
-                <div class="search-body" id="advancedSearchBody">
-                    <div class="search-grid">
-                        <div class="search-field">
-                            <label><i class="fas fa-hashtag"></i> رقم الفاتورة النهائي</label>
-                            <input type="text" id="searchFinalNumber" placeholder="مثال: C25-22491">
-                        </div>
-                        <div class="search-field">
-                            <label><i class="fas fa-file-signature"></i> رقم المسودة</label>
-                            <input type="text" id="searchDraftNumber" placeholder="مثال: 263531">
-                        </div>
-                        <div class="search-field">
-                            <label><i class="fas fa-user-tie"></i> اسم العميل</label>
-                            <input type="text" id="searchCustomer" placeholder="اسم العميل...">
-                        </div>
-                        <div class="search-field">
-                            <label><i class="fas fa-ship"></i> اسم السفينة</label>
-                            <input type="text" id="searchVessel" placeholder="اسم السفينة...">
-                        </div>
-                        <div class="search-field">
-                            <label><i class="fas fa-barcode"></i> رقم البوليصة</label>
-                            <input type="text" id="searchBlNumber" placeholder="رقم البوليصة...">
-                        </div>
-                        <div class="search-field">
-                            <label><i class="fas fa-container-storage"></i> رقم الحاوية</label>
-                            <input type="text" id="searchContainer" placeholder="رقم الحاوية...">
-                        </div>
-                        <div class="search-field">
-                            <label><i class="fas fa-tag"></i> الحالة</label>
-                            <select id="searchStatus">
-                                <option value="">الكل</option>
-                                <option value="FINAL">نهائية (FINAL)</option>
-                                <option value="DRAFT">مسودة (DRAFT)</option>
-                            </select>
-                        </div>
-                        <div class="search-field">
-                            <label><i class="fas fa-calendar"></i> من تاريخ</label>
-                            <input type="date" id="searchDateFrom">
-                        </div>
-                        <div class="search-field">
-                            <label><i class="fas fa-calendar"></i> إلى تاريخ</label>
-                            <input type="date" id="searchDateTo">
-                        </div>
-                        <div class="search-field">
-                            <label><i class="fas fa-tag"></i> نوع الفاتورة</label>
-                            <select id="searchInvoiceType">
-                                <option value="">الكل</option>
-                                <option value="cash">نقدي</option>
-                                <option value="postponed">أجل</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="search-actions">
-                        <button class="btn btn-primary" onclick="applyAdvancedSearch()"><i class="fas fa-filter"></i> تطبيق البحث</button>
-                        <button class="btn btn-secondary" onclick="resetAdvancedSearch()"><i class="fas fa-undo"></i> إعادة ضبط</button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- شريط التحكم في العرض -->
-            <div class="view-controls">
-                <div class="view-options">
-                    <label><i class="fas fa-eye"></i> عرض:</label>
-                    <div class="btn-group">
-                        <button class="btn-view" onclick="setViewMode('table')"><i class="fas fa-table"></i> جدول</button>
-                        <button class="btn-view active" onclick="setViewMode('cards')"><i class="fas fa-th-large"></i> بطاقات</button>
-                    </div>
-                </div>
-                
-                <div class="items-per-page">
-                    <label><i class="fas fa-list"></i> عدد العناصر:</label>
-                    <select id="itemsPerPage" onchange="changeItemsPerPage()">
+                    <label style="font-size:0.8em; color:var(--text-muted); margin-right:10px;">عدد:</label>
+                    <select id="itemsPerPage" onchange="changeItemsPerPage()" style="padding:6px 10px; border-radius:6px; border:1px solid var(--border); background:var(--input-bg); color:var(--text); font-family:'Cairo';">
                         <option value="10">10</option>
                         <option value="25" selected>25</option>
                         <option value="50">50</option>
                         <option value="100">100</option>
                         <option value="all">الكل</option>
                     </select>
-                </div>
-
-                <div class="sort-controls">
-                    <label><i class="fas fa-sort"></i> ترتيب حسب:</label>
-                    <select id="sortSelect">
+                    <label style="font-size:0.8em; color:var(--text-muted); margin-right:10px;">ترتيب:</label>
+                    <select id="sortSelect" onchange="document.getElementById('sortSelect').dispatchEvent(new Event('change'))" style="padding:6px 10px; border-radius:6px; border:1px solid var(--border); background:var(--input-bg); color:var(--text); font-family:'Cairo';">
                         <option value="final-number">الرقم النهائي</option>
                         <option value="total-total">الإجمالي</option>
-                        <option value="payee-customer-id">اسم العميل</option>
-                        <option value="key-word1">اسم السفينة</option>
+                        <option value="payee-customer-id">العميل</option>
+                        <option value="key-word1">السفينة</option>
                         <option value="created">تاريخ الإنشاء</option>
-                        <option value="total-owed">المبلغ المتبقي</option>
-                        <option value="flex-date-02">تاريخ الرحله</option>
                     </select>
-                    <button class="btn-sort" id="sortToggle" onclick="toggleSortOrder()">
-                        <i class="fas fa-sort-amount-down-alt"></i>
-                    </button>
+                    <button class="btn-icon" id="sortToggle" onclick="toggleSortOrder()" style="width:34px; height:34px;"><i class="fas fa-sort-amount-down-alt"></i></button>
                 </div>
             </div>
-
-            <!-- بطاقات الملخص -->
-            <div class="summary-cards">
-                <div class="summary-card gradient-blue">
-                    <div class="card-icon"><i class="fas fa-file-invoice"></i></div>
-                    <div class="card-content">
-                        <h3>إجمالي الفواتير</h3>
-                        <p id="invoiceCount">0</p>
-                    </div>
-                </div>
-                <div class="summary-card gradient-green">
-                    <div class="card-icon"><i class="fas fa-coins"></i></div>
-                    <div class="card-content">
-                        <h3>إجمالي المبالغ (EGP)</h3>
-                        <p id="totalSum">0.00 <small>جنيه</small></p>
-                    </div>
-                </div>
-                <div class="summary-card gradient-orange">
-                    <div class="card-icon"><i class="fas fa-percent"></i></div>
-                    <div class="card-content">
-                        <h3>إجمالي الضرائب (EGP)</h3>
-                        <p id="taxSum">0.00 <small>جنيه</small></p>
-                    </div>
-                </div>
-                <div class="summary-card gradient-teal">
-                    <div class="card-icon"><i class="fas fa-file-invoice-dollar"></i></div>
-                    <div class="card-content">
-                        <h3>إجمالي بدون ضريبة (EGP)</h3>
-                        <p id="totalEGPWithoutTax">0.00 <small>جنيه</small></p>
-                    </div>
-                </div>
-                <div class="summary-card gradient-purple">
-                    <div class="card-icon"><i class="fas fa-dollar-sign"></i></div>
-                    <div class="card-content">
-                        <h3>إجمالي الدولار</h3>
-                        <p id="totalUSD">0.00 <small>دولار</small></p>
-                    </div>
-                </div>
-                <div class="summary-card gradient-martyr">
-                    <div class="card-icon"><i class="fas fa-stamp"></i></div>
-                    <div class="card-content">
-                        <h3>طابع الشهيد</h3>
-                        <p id="totalMartyr">0.00 <small>جنيه</small></p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- عرض البيانات -->
-            <div id="dataViewContainer"></div>
-
-            <!-- أزرار الترقيم -->
-            <div class="pagination" id="pagination"></div>
         </div>
-    </div>
 
-    <!-- نافذة تفاصيل الفاتورة -->
+        <!-- منطقة عرض البيانات -->
+        <div class="card">
+            <div class="card-header">
+                <h3 id="dataViewTitle"><i class="fas fa-table"></i> قائمة الفواتير</h3>
+                <span style="font-size:0.72em; color:var(--text-muted);" id="dataViewInfo"></span>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive" id="dataViewContainer">
+                    <div class="no-data"><i class="fas fa-inbox"></i><p>لم يتم تحميل بيانات بعد</p></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- الترقيم -->
+        <div class="pagination" id="pagination"></div>
+
+        <!-- منطقة عرض التقارير -->
+		<div id="reportsContainer" style="display: none;">
+			<div class="card">
+				<div class="card-header">
+					<h2 id="reportTitle">التقارير</h2>
+					<div style="display:flex; gap:8px;">
+						<button class="btn btn-primary btn-sm" onclick="exportReportPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+						<button class="btn btn-outline btn-sm" onclick="exportReportExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+						<button class="btn btn-outline btn-sm" onclick="closeReports()"><i class="fas fa-times"></i> إغلاق</button>
+					</div>
+				</div>
+				<!-- ✅ تبويبات التقارير -->
+				<div class="reports-tabs" style="padding:10px; display:flex; gap:8px; flex-wrap:wrap;">
+					<button class="report-tab active" onclick="showReports('daily')">التقارير اليومية</button>
+					<button class="report-tab" onclick="showReports('monthly')">التقارير الشهرية</button>
+					<button class="report-tab" onclick="showReports('customer')">تقارير العملاء</button>
+					<button class="report-tab" onclick="showReports('vessel')">تقارير السفن</button>
+				</div>
+				<div class="card-body padded" id="reportContent"></div>
+			</div>
+		</div>
+
+         <span id="dataSource" style="display:none;"></span>
+    </main>
+
+    <!-- عناصر مخفية للتوافق مع التصميم الجديد -->
+    <span id="totalEGPWithoutTax" style="display:none;"></span>
+    <span id="totalMartyr" style="display:none;"></span>
+
+    <!-- ==================== نافذة تفاصيل الفاتورة ==================== -->
     <div id="invoiceModal" class="modal">
         <div class="modal-content modal-lg">
             <div class="modal-header">
@@ -568,6 +547,237 @@
         </div>
     </div>
 	
+	    <!-- نافذة الرصيد الافتتاحي -->
+    <div id="openingBalanceModal" class="modal">
+        <div class="modal-content" style="max-width: 550px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-plus-circle"></i> إضافة رصيد افتتاحي</h2>
+                <span class="close-button" onclick="closeOpeningBalanceModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label>العميل</label>
+                    <select id="openingCustomer"></select>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label>المبلغ</label>
+                            <input type="number" id="openingAmount" placeholder="0.00" step="0.01">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label>العملة</label>
+                            <select id="openingCurrency">
+                                <option value="EGP">جنيه مصري (EGP)</option>
+                                <option value="USD">دولار أمريكي (USD)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="row">
+                    <div class="col">
+                        <div class="form-group">
+                            <label>التاريخ</label>
+                            <input type="date" id="openingDate">
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class="form-group">
+                            <label>النوع</label>
+                            <select id="openingType">
+                                <option value="credit">دائن (لصالح العميل)</option>
+                                <option value="debit">مدين (على العميل)</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>ملاحظات</label>
+                    <input type="text" id="openingNotes" placeholder="ملاحظات (اختياري)">
+                </div>
+                <div style="display:flex; gap:10px; margin-top:20px;">
+                    <button class="btn btn-accent btn-sm" onclick="saveOpeningBalance()" style="flex:1;"><i class="fas fa-save"></i> حفظ</button>
+                    <button class="btn btn-outline btn-sm" onclick="closeOpeningBalanceModal()" style="flex:1;">إلغاء</button>
+                </div>
+                <div id="openingMessage" class="login-message"></div>
+            </div>
+        </div>
+    </div>
+	
+    <!-- نافذة تسجيل سداد جديد -->
+    <div id="paymentModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-money-bill-wave"></i> تسجيل سداد جديد</h2>
+                <span class="close-button" onclick="closePaymentModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> العميل</label>
+                    <select id="paymentCustomer" onchange="onPaymentCustomerChange()">
+                        <option value="">اختر العميل...</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-hashtag"></i> رقم المرجع</label>
+                    <input type="text" id="paymentReference" placeholder="مثال: TRX-12345 (اختياري)">
+                </div>
+                
+                <div class="form-row" style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label><i class="fas fa-coins"></i> المبلغ</label>
+                        <input type="number" id="paymentAmount" placeholder="0.00" step="0.01" min="0">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label><i class="fas fa-dollar-sign"></i> العملة</label>
+                        <select id="paymentCurrency">
+                            <option value="EGP">جنيه مصري (EGP)</option>
+                            <option value="USD">دولار أمريكي (USD)</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-row" style="display: flex; gap: 15px;">
+                    <div class="form-group" style="flex: 1;">
+                        <label><i class="fas fa-calendar"></i> تاريخ السداد</label>
+                        <input type="date" id="paymentDate">
+                    </div>
+                    <div class="form-group" style="flex: 1;">
+                        <label><i class="fas fa-credit-card"></i> طريقة السداد</label>
+                        <select id="paymentMethod" onchange="onPaymentMethodChange()">
+                            <option value="bank_transfer">تحويل بنكي</option>
+                            <option value="cash">نقدي</option>
+                            <option value="cheque">شيك</option>
+                            <option value="credit_card">بطاقة ائتمان</option>
+                            <option value="direct_deposit">إيداع مباشر</option>
+                            <option value="postal_order">حوالة بريدية</option>
+                            <option value="other">أخرى</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <!-- حقول خاصة بالتحويل البنكي -->
+                <div id="bankFields" style="display: block;">
+                    <div class="form-group">
+                        <label><i class="fas fa-university"></i> اسم البنك</label>
+                        <input type="text" id="paymentBankName" placeholder="مثال: البنك الأهلي (اختياري)">
+                    </div>
+                </div>
+                
+                <!-- حقول خاصة بالشيك (مخفية افتراضياً) -->
+                <div id="chequeFields" style="display: none;">
+                    <div class="form-row" style="display: flex; gap: 15px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>رقم الشيك</label>
+                            <input type="text" id="paymentChequeNumber" placeholder="رقم الشيك">
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>تاريخ الشيك</label>
+                            <input type="date" id="paymentChequeDate">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>بنك الشيك</label>
+                        <input type="text" id="paymentChequeBank" placeholder="اسم البنك">
+                    </div>
+                </div>
+                
+                <!-- حقول خاصة ببطاقة الائتمان (مخفية افتراضياً) -->
+                <div id="cardFields" style="display: none;">
+                    <div class="form-row" style="display: flex; gap: 15px;">
+                        <div class="form-group" style="flex: 1;">
+                            <label>نوع البطاقة</label>
+                            <select id="paymentCardType">
+                                <option value="visa">Visa</option>
+                                <option value="mastercard">Mastercard</option>
+                                <option value="other">أخرى</option>
+                            </select>
+                        </div>
+                        <div class="form-group" style="flex: 1;">
+                            <label>آخر 4 أرقام</label>
+                            <input type="text" id="paymentCardLast4" placeholder="1234" maxlength="4">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-file-invoice"></i> ربط بفواتير (اختياري)</label>
+                    <div class="row" style="margin-bottom:8px;">
+                        <div class="col">
+                            <label style="font-size:0.72em;">من تاريخ</label>
+                            <input type="date" id="paymentDateFrom" onchange="loadUnpaidInvoicesForPayment()">
+                        </div>
+                        <div class="col">
+                            <label style="font-size:0.72em;">إلى تاريخ</label>
+                            <input type="date" id="paymentDateTo" onchange="loadUnpaidInvoicesForPayment()">
+                        </div>
+                    </div>
+                    <div id="linkedInvoicesContainer" style="border: 1px solid #ddd; border-radius: 8px; padding: 10px; max-height: 250px; overflow-y: auto;">
+                        <p style="color: #999; font-size: 0.9em;">اختر العميل لعرض فواتيره</p>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-sticky-note"></i> ملاحظات</label>
+                    <textarea id="paymentNotes" rows="3" placeholder="ملاحظات إضافية..."></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <label><i class="fas fa-paperclip"></i> مرفقات</label>
+                    <input type="file" id="paymentAttachment" multiple accept=".jpg,.jpeg,.png,.pdf">
+                    <small>الحد الأقصى 3 ملفات. JPG, PNG, PDF</small>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button class="btn btn-primary" onclick="submitPayment()" style="flex: 1;">
+                        <i class="fas fa-save"></i> تسجيل السداد
+                    </button>
+                    <button class="btn btn-secondary" onclick="closePaymentModal()" style="flex: 1;">
+                        <i class="fas fa-times"></i> إلغاء
+                    </button>
+                </div>
+                <div id="paymentMessage" class="login-message"></div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- نافذة كشف الحساب -->
+    <div id="accountStatementModal" class="modal">
+        <div class="modal-content" style="max-width: 1000px;">
+            <div class="modal-header">
+                <h2><i class="fas fa-file-invoice-dollar"></i> كشف حساب</h2>
+                <div class="modal-actions">
+                    <button class="btn btn-primary" onclick="exportStatementPDF()"><i class="fas fa-file-pdf"></i> PDF</button>
+                    <button class="btn btn-success" onclick="exportStatementExcel()"><i class="fas fa-file-excel"></i> Excel</button>
+					<button class="btn btn-outline btn-sm" onclick="printStatement()"><i class="fas fa-print"></i> طباعة</button>
+                    <span class="close-button" onclick="closeStatementModal()">&times;</span>
+                </div>
+            </div>
+			            <div class="modal-body">
+                <div class="form-group" style="margin-bottom:15px;">
+                    <label>اختر الحساب</label>
+                    <select id="statementAccount" onchange="updateStatement()">
+                        <option value="">اختر الحساب...</option>
+                    </select>
+					                <div class="row" style="margin-bottom:10px;">
+                    <div class="col">
+                        <label style="font-size:0.8em;">من تاريخ</label>
+                        <input type="date" id="statementDateFrom" onchange="updateStatement()" style="width:100%; padding:6px; border-radius:6px;">
+                    </div>
+                    <div class="col">
+                        <label style="font-size:0.8em;">إلى تاريخ</label>
+                        <input type="date" id="statementDateTo" onchange="updateStatement()" style="width:100%; padding:6px; border-radius:6px;">
+                    </div>
+                </div>
+                </div>
+                <div id="statementBody"></div>
+            </div>
+            <div class="modal-body" id="statementBody"></div>
+        </div>
+    </div>
 				<!-- نافذة إعدادات التحديث التلقائي -->
 <div id="refreshSettingsModal" class="modal">
     <div class="modal-content" style="max-width: 450px;">
@@ -612,5 +822,14 @@
 
     <!-- JavaScript File -->
     <script src="script.js"></script>
+	
+	    <!-- عناصر مخفية للتوافق -->
+    <span id="fileStatus" style="display:none;"></span>
+    <span id="selectedCount" style="display:none;"></span>
+    <span id="dbControls" style="display:none;"></span>
+    <span id="exportSelectedBtn" style="display:none;"></span>
+    <span id="exportSelectedExcelBtn" style="display:none;"></span>
+    <span id="exportContainersBtn" style="display:none;"></span>
+    <span id="selectAllCheckbox" style="display:none;"></span>
 </body>
 </html>
