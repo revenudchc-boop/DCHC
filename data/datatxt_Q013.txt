@@ -31191,6 +31191,27 @@
     <parameter metafield-id="bexuObCarrierATA" reportable-field="ObCarrierATA" value="2026-06-02T00:00:00 +0200" />
   </parameters>
 </invoice>
+<invoice draft-number="278865" final-number="P25-14147" finalized-date="2026-06-08T00:00:00" status="FINAL" is-merged="N" invoice-type-id="VSL EXPORT UNIT_STORAGE_FINALOUT" currency="USAD" payee-customer-id="ORCA SHIPPING AND AGENCIES(USAD)" payee-customer-role="AGENT" contract-customer-id="SLS" contract-customer-role="LINEOP" total-charges="29968.3991" total-discounts="0.0" total-taxes="0.0" total-total="29968.3991" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="29968.3991" total-un-rounded="29968.3991" key-word1="" key-word2="FINALOUT20260405" key-word3="SLS" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="1" flex-string-04="" flex-string-05="yasser" flex-string-06="51.9383" flex-string-07="577.0" flex-string-08="577.0" flex-string-09="0.0" flex-string-10="577.0" flex-date-03="2026-06-08T14:46:45" flex-long-03="1" created="2026-06-08T13:52:59" creator="nohanber" changed="2026-06-08T14:44:56" changer="yasser">
+  <charges>
+    <charge event-type-id="YARD_TO_TRUCK_MTY" entity-id="SLVU5011235" tariff-id="YTOT_E40ED " description="تحميل حاويه 40 قدم فارغ" event-performed-from="2026-05-16T14:44:44" extract-class="INV" rate-billed="17.0" quantity-billed="1.0" amount="882.9511" is-flat-rate="Y" flat-rate-amount="17.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9383" extract-gkey="23715821" created="2026-06-08T13:53:08" creator="nohanber">
+      <taxes />
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="SLVU5011235" tariff-id="STORE40ED" description="StorageExport40EmptyDry " paid-thru-day="2026-04-15T18:39:57" event-performed-from="2026-02-19T00:00:00" event-performed-to="2026-04-15T00:00:00" extract-class="INV" rate-billed="10.0" quantity-billed="56.0" amount="29085.448" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="56.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="51.9383" extract-gkey="22859036" changer="nohanber" changed="2026-06-08T13:53:08" created="2026-06-08T13:53:08" creator="nohanber">
+      <taxes />
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuBookingNbr" reportable-field="Booking Number" value="3100131529" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="FlexString03" value="FINALOUT20260405" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="SLS" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="deliver date" value="2026-06-08T00:00:00 +0200" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="Order Number" value="FINALOUT20260405" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" />
+    <parameter metafield-id="bexuEqId" reportable-field="رقم الحاوية" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="line operator" value="SLS" />
+  </parameters>
+</invoice>
 <invoice draft-number="278867" final-number="C25-31552" finalized-date="2026-06-08T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="MOHND FOR TRANSPORT (تحت التسويه)" payee-customer-role="AGENT" contract-customer-id="643411526" contract-customer-role="SHIPPER" total-charges="1297.25" total-discounts="0.0" total-taxes="181.615" total-total="1478.865" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="1478.865" total-un-rounded="1478.865" key-word1="YM WELLNESS" key-word2="M237075365" key-word3="YML" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*14/6*" flex-string-04="YM WELLNESS" flex-string-05="mmosaad" flex-string-06="51.89" flex-string-10="25.0" flex-date-02="2026-06-05T00:00:00" flex-date-03="2026-06-08T14:00:27" created="2026-06-08T13:56:42" creator="asmaafathy" changed="2026-06-08T13:58:38" changer="mmosaad">
   <charges>
     <charge event-type-id="OTHERS_SERVICES" entity-id="YMMU6193666" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-05T06:09:39" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.25" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.89" extract-gkey="23912178" created="2026-06-08T13:56:54" creator="asmaafathy">
