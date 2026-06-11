@@ -123627,6 +123627,36 @@
     <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="U626010531" />
   </parameters>
 </invoice>
+<invoice draft-number="279608" final-number="P25-14360" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="VSL TRANSIT CONTAINER HANDLING" currency="USAD" payee-customer-id="KADMAR SHIPPING EGYPT(USAD)" payee-customer-role="SHIPPER" contract-customer-id="HMM" contract-customer-role="LINEOP" total-charges="5193.83" total-discounts="0.0" total-taxes="0.0" total-total="5193.83" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="5193.83" total-un-rounded="5193.83" key-word1="MSC CHINA" key-word2="6AP9GT621" key-word3="HMM" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="14" flex-string-04="MSC CHINA" flex-string-05="yasser" flex-string-06="51.9383" flex-string-07="100.0" flex-string-08="100.0" flex-string-09="0.0" flex-string-10="100.0" flex-date-02="2026-06-05T00:00:00" flex-date-03="2026-06-11T12:50:20" flex-long-03="14" created="2026-06-11T12:04:26" creator="msalem" changed="2026-06-11T12:48:24" changer="yasser">
+  <charges>
+    <charge event-type-id="UNIT_DISCH" entity-id="HMMU2129810" tariff-id="DT20FD" description="DischargeTransshipment20FullDry  " event-performed-from="2026-06-05T11:06:07" extract-class="INV" rate-billed="100.0" quantity-billed="1.0" amount="5193.83" is-flat-rate="Y" flat-rate-amount="100.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9383" extract-gkey="23915606" created="2026-06-11T12:04:43" creator="msalem">
+      <taxes />
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="HMM" />
+    <parameter metafield-id="bexuIbId" reportable-field="IbId" value="6AP9GT621" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="الخط الملاحي" value="HMM" />
+    <parameter metafield-id="bexuIbId" reportable-field="كود الرحله" value="6AP9GT621" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="MSC CHINA" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-05T05:50:00 +0200" />
+  </parameters>
+</invoice>
+<invoice draft-number="279609" final-number="P25-14359" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="VSL TRANSIT AMOUNT COLLECTED TO OTHERS(DPA)" currency="USAD" payee-customer-id="KADMAR SHIPPING EGYPT(USAD)" payee-customer-role="SHIPPER" contract-customer-id="HMM" contract-customer-role="LINEOP" total-charges="169.8382" total-discounts="0.0" total-taxes="0.0" total-total="169.8382" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="169.8382" total-un-rounded="169.8382" key-word1="MSC CHINA" key-word2="6AP9GT621" key-word3="HMM" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="15" flex-string-04="MSC CHINA" flex-string-05="yasser" flex-string-06="51.9383" flex-string-07="3.27" flex-string-08="3.27" flex-string-09="0.0" flex-string-10="3.27" flex-date-02="2026-06-05T00:00:00" flex-date-03="2026-06-11T12:50:20" flex-long-03="15" created="2026-06-11T12:05:37" creator="msalem" changed="2026-06-11T12:48:24" changer="yasser">
+  <charges>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="HMMU2129810" tariff-id="DPAAMTRAN20F26" description="dpaammounttranstit20Full2026 " event-performed-from="2026-06-05T11:07:10" extract-class="INV" rate-billed="3.27" quantity-billed="1.0" amount="169.8382" is-flat-rate="Y" flat-rate-amount="3.27" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9383" extract-gkey="23915608" created="2026-06-11T12:05:46" creator="msalem">
+      <taxes />
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuIbId" reportable-field="IbId" value="6AP9GT621" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="HMM" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="MSC CHINA" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-05T05:50:00 +0200" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="الخط الملاحي" value="HMM" />
+    <parameter metafield-id="bexuIbId" reportable-field="كود الرحله" value="6AP9GT621" />
+  </parameters>
+</invoice>
 <invoice draft-number="279610" final-number="C25-32039" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="CASH CUSTOMER" payee-customer-role="SHIPPER" contract-customer-id="100180841" contract-customer-role="SHIPPER" total-charges="210197.43" total-discounts="0.0" total-taxes="29427.6402" total-total="239625.0702" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="239625.0702" total-un-rounded="239625.0702" key-word1="YM WISDOM" key-word2="M226217413" key-word3="YML" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*20/6*" flex-string-04="YM WISDOM" flex-string-05="eslamyousri" flex-string-06="51.9006" flex-string-10="4050.0" flex-date-02="2026-06-03T00:00:00" flex-date-03="2026-06-11T12:14:19" created="2026-06-11T12:06:11" creator="asmaafathy" changed="2026-06-11T12:12:24" changer="eslamyousri">
   <charges>
     <charge event-type-id="STORAGE" entity-id="TIIU7392510" tariff-id="STORI40FD " description="تخزين مازاد عن 5 أيام 40 قدم" paid-thru-day="2026-06-11T00:00:00" event-performed-from="2026-06-08T00:00:00" event-performed-to="2026-06-11T00:00:00" extract-class="INV" rate-billed="14.0" quantity-billed="4.0" amount="2906.4336" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="4.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="51.9006" extract-gkey="23888475" changer="asmaafathy" changed="2026-06-11T12:06:41" created="2026-06-11T12:06:25" creator="asmaafathy">
@@ -124346,6 +124376,421 @@
     <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
   </parameters>
 </invoice>
+<invoice draft-number="279611" final-number="P25-14358" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="VSL IMPORT UNLASH" currency="USAD" payee-customer-id="KADMAR SHIPPING EGYPT(USAD)" payee-customer-role="SHIPPER" contract-customer-id="HMM" contract-customer-role="LINEOP" total-charges="5193.83" total-discounts="0.0" total-taxes="0.0" total-total="5193.83" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="5193.83" total-un-rounded="5193.83" key-word1="MSC CHINA" key-word2="6AP9GT621" key-word3="HMM" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="16" flex-string-04="MSC CHINA" flex-string-05="yasser" flex-string-06="51.9383" flex-string-07="100.0" flex-string-08="100.0" flex-string-09="0.0" flex-string-10="100.0" flex-date-02="2026-06-05T00:00:00" flex-date-03="2026-06-11T12:50:20" flex-long-03="16" created="2026-06-11T12:06:29" creator="msalem" changed="2026-06-11T12:48:24" changer="yasser">
+  <charges>
+    <charge event-type-id="UNIT_UNLASH" entity-id="KOCU5028305" tariff-id="UNLASHI40FD " description="UnlashImport40FullDry " event-performed-from="2026-06-05T09:15:18" extract-class="INV" rate-billed="10.0" quantity-billed="1.0" amount="519.383" is-flat-rate="Y" flat-rate-amount="10.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9383" extract-gkey="23914202" created="2026-06-11T12:06:41" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="UNIT_UNLASH" entity-id="GCXU5022155" tariff-id="UNLASHI40FD " description="UnlashImport40FullDry " event-performed-from="2026-06-05T09:20:39" extract-class="INV" rate-billed="10.0" quantity-billed="1.0" amount="519.383" is-flat-rate="Y" flat-rate-amount="10.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9383" extract-gkey="23914281" created="2026-06-11T12:06:41" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="UNIT_UNLASH" entity-id="HMMU6857006" tariff-id="UNLASHI40FD " description="UnlashImport40FullDry " event-performed-from="2026-06-05T09:43:45" extract-class="INV" rate-billed="10.0" quantity-billed="1.0" amount="519.383" is-flat-rate="Y" flat-rate-amount="10.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9383" extract-gkey="23914596" created="2026-06-11T12:06:41" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="UNIT_UNLASH" entity-id="TGBU6481491" tariff-id="UNLASHI40FD " description="UnlashImport40FullDry " event-performed-from="2026-06-05T10:14:58" extract-class="INV" rate-billed="10.0" quantity-billed="1.0" amount="519.383" is-flat-rate="Y" flat-rate-amount="10.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9383" extract-gkey="23914980" created="2026-06-11T12:06:41" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="UNIT_UNLASH" entity-id="HMMU6347419" tariff-id="UNLASHI40FD " description="UnlashImport40FullDry " event-performed-from="2026-06-05T13:57:25" extract-class="INV" rate-billed="10.0" quantity-billed="1.0" amount="519.383" is-flat-rate="Y" flat-rate-amount="10.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9383" extract-gkey="23916789" created="2026-06-11T12:06:41" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="UNIT_UNLASH" entity-id="HMMU6969140" tariff-id="UNLASHI40FD " description="UnlashImport40FullDry " event-performed-from="2026-06-06T13:07:38" extract-class="INV" rate-billed="10.0" quantity-billed="1.0" amount="519.383" is-flat-rate="Y" flat-rate-amount="10.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9383" extract-gkey="23927359" created="2026-06-11T12:06:41" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="UNIT_UNLASH" entity-id="HMMU6067378" tariff-id="UNLASHI40FD " description="UnlashImport40FullDry " event-performed-from="2026-06-05T14:22:45" extract-class="INV" rate-billed="10.0" quantity-billed="1.0" amount="519.383" is-flat-rate="Y" flat-rate-amount="10.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9383" extract-gkey="23917074" created="2026-06-11T12:06:41" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="UNIT_UNLASH" entity-id="HDMU5595813" tariff-id="UNLASHI40FD " description="UnlashImport40FullDry " event-performed-from="2026-06-06T13:17:45" extract-class="INV" rate-billed="10.0" quantity-billed="1.0" amount="519.383" is-flat-rate="Y" flat-rate-amount="10.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9383" extract-gkey="23927404" created="2026-06-11T12:06:41" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="UNIT_UNLASH" entity-id="TEMU7285019" tariff-id="UNLASHI40FD " description="UnlashImport40FullDry " event-performed-from="2026-06-06T13:07:53" extract-class="INV" rate-billed="10.0" quantity-billed="1.0" amount="519.383" is-flat-rate="Y" flat-rate-amount="10.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9383" extract-gkey="23927367" created="2026-06-11T12:06:41" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="UNIT_UNLASH" entity-id="KOCU4811487" tariff-id="UNLASHI40FD " description="UnlashImport40FullDry " event-performed-from="2026-06-06T13:21:52" extract-class="INV" rate-billed="10.0" quantity-billed="1.0" amount="519.383" is-flat-rate="Y" flat-rate-amount="10.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9383" extract-gkey="23927424" created="2026-06-11T12:06:41" creator="msalem">
+      <taxes />
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuIbId" reportable-field="كود الرحله" value="6AP9GT621" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="الخط الملاحي" value="HMM" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="MSC CHINA" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-05T05:50:00 +0200" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="HMM" />
+    <parameter metafield-id="bexuIbId" reportable-field="IbId" value="6AP9GT621" />
+  </parameters>
+</invoice>
+<invoice draft-number="279612" final-number="P25-14357" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="VSL EXPORT LASH" currency="USAD" payee-customer-id="KADMAR SHIPPING EGYPT(USAD)" payee-customer-role="SHIPPER" contract-customer-id="HMM" contract-customer-role="LINEOP" total-charges="7790.745" total-discounts="0.0" total-taxes="0.0" total-total="7790.745" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="7790.745" total-un-rounded="7790.745" key-word1="MSC CHINA" key-word2="6AP9GT621" key-word3="HMM" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="17" flex-string-04="MSC CHINA" flex-string-05="yasser" flex-string-06="51.9383" flex-string-07="150.0" flex-string-08="150.0" flex-string-09="0.0" flex-string-10="150.0" flex-date-02="2026-06-05T00:00:00" flex-date-03="2026-06-11T12:50:20" flex-long-03="17" created="2026-06-11T12:07:55" creator="msalem" changed="2026-06-11T12:48:24" changer="yasser">
+  <charges>
+    <charge event-type-id="UNIT_LASH" entity-id="TGBU6351414" tariff-id="LASHE40ED " description="LashExport40EmptyDry " event-performed-from="2026-06-07T11:27:05" extract-class="INV" rate-billed="15.0" quantity-billed="1.0" amount="779.0745" is-flat-rate="Y" flat-rate-amount="15.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9383" extract-gkey="23937375" created="2026-06-11T12:08:07" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="UNIT_LASH" entity-id="KOCU4433670" tariff-id="LASHE40ED " description="LashExport40EmptyDry " event-performed-from="2026-06-07T11:20:38" extract-class="INV" rate-billed="15.0" quantity-billed="1.0" amount="779.0745" is-flat-rate="Y" flat-rate-amount="15.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9383" extract-gkey="23937365" created="2026-06-11T12:08:07" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="UNIT_LASH" entity-id="KOCU4040414" tariff-id="LASHE40ED " description="LashExport40EmptyDry " event-performed-from="2026-06-07T11:30:17" extract-class="INV" rate-billed="15.0" quantity-billed="1.0" amount="779.0745" is-flat-rate="Y" flat-rate-amount="15.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9383" extract-gkey="23937382" created="2026-06-11T12:08:07" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="UNIT_LASH" entity-id="KOCU4149977" tariff-id="LASHE40ED " description="LashExport40EmptyDry " event-performed-from="2026-06-07T11:28:38" extract-class="INV" rate-billed="15.0" quantity-billed="1.0" amount="779.0745" is-flat-rate="Y" flat-rate-amount="15.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9383" extract-gkey="23937379" created="2026-06-11T12:08:07" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="UNIT_LASH" entity-id="KOCU4753307" tariff-id="LASHE40ED " description="LashExport40EmptyDry " event-performed-from="2026-06-07T11:40:08" extract-class="INV" rate-billed="15.0" quantity-billed="1.0" amount="779.0745" is-flat-rate="Y" flat-rate-amount="15.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9383" extract-gkey="23937394" created="2026-06-11T12:08:08" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="UNIT_LASH" entity-id="HMMU7034039" tariff-id="LASHE40ED " description="LashExport40EmptyDry " event-performed-from="2026-06-07T11:31:58" extract-class="INV" rate-billed="15.0" quantity-billed="1.0" amount="779.0745" is-flat-rate="Y" flat-rate-amount="15.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9383" extract-gkey="23937387" created="2026-06-11T12:08:07" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="UNIT_LASH" entity-id="KOCU5118306" tariff-id="LASHE40ED " description="LashExport40EmptyDry " event-performed-from="2026-06-07T11:55:15" extract-class="INV" rate-billed="15.0" quantity-billed="1.0" amount="779.0745" is-flat-rate="Y" flat-rate-amount="15.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9383" extract-gkey="23937427" created="2026-06-11T12:08:08" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="UNIT_LASH" entity-id="HMMU6522260" tariff-id="LASHE40ED " description="LashExport40EmptyDry " event-performed-from="2026-06-07T11:53:40" extract-class="INV" rate-billed="15.0" quantity-billed="1.0" amount="779.0745" is-flat-rate="Y" flat-rate-amount="15.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9383" extract-gkey="23937422" created="2026-06-11T12:08:08" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="UNIT_LASH" entity-id="HMMU6895583" tariff-id="LASHE40ED " description="LashExport40EmptyDry " event-performed-from="2026-06-07T12:00:05" extract-class="INV" rate-billed="15.0" quantity-billed="1.0" amount="779.0745" is-flat-rate="Y" flat-rate-amount="15.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9383" extract-gkey="23937446" created="2026-06-11T12:08:08" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="UNIT_LASH" entity-id="KOCU4887332" tariff-id="LASHE40ED " description="LashExport40EmptyDry " event-performed-from="2026-06-07T11:17:51" extract-class="INV" rate-billed="15.0" quantity-billed="1.0" amount="779.0745" is-flat-rate="Y" flat-rate-amount="15.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9383" extract-gkey="23937362" created="2026-06-11T12:08:07" creator="msalem">
+      <taxes />
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuObId" reportable-field="ObId" value="6AP9GT621" />
+    <parameter metafield-id="bexuObCarrierATA" reportable-field="ObCarrierATA" value="2026-06-05T05:50:00 +0200" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="الخط الملاحي" value="HMM" />
+    <parameter metafield-id="bexuObId" reportable-field="كود الرحله" value="6AP9GT621" />
+    <parameter metafield-id="bexuObCarrierName" reportable-field="ObCarrierName" value="MSC CHINA" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="HMM" />
+  </parameters>
+</invoice>
+<invoice draft-number="279613" final-number="P25-14356" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="VSL EXPORT AMOUNT COLLECTED TO OTHERS(DPA)" currency="EGP" payee-customer-id="KADMAR SHIPPING EGYPT(EGP)" payee-customer-role="AGENT" contract-customer-id="HMM" contract-customer-role="LINEOP" total-charges="628.5" total-discounts="0.0" total-taxes="0.0" total-total="628.5" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="628.5" total-un-rounded="628.5" key-word1="MSC CHINA" key-word2="6AP9GT621" key-word3="HMM" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="18" flex-string-04="MSC CHINA" flex-string-05="yasser" flex-string-06="N/A" flex-string-10="628.5" flex-date-02="2026-06-05T00:00:00" flex-date-03="2026-06-11T12:49:00" flex-long-03="18" created="2026-06-11T12:08:59" creator="msalem" changed="2026-06-11T12:47:04" changer="yasser">
+  <charges>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="KOCU4433670" tariff-id="DPAAMEXPO40EIVAT26 " description="dpaammountexport40emptyinclude(vat)2026 " event-performed-from="2026-06-07T11:20:38" extract-class="INV" rate-billed="62.85" quantity-billed="1.0" amount="62.85" is-flat-rate="Y" flat-rate-amount="62.85" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23937364" created="2026-06-11T12:09:06" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="KOCU5118306" tariff-id="DPAAMEXPO40EIVAT26 " description="dpaammountexport40emptyinclude(vat)2026 " event-performed-from="2026-06-07T11:55:15" extract-class="INV" rate-billed="62.85" quantity-billed="1.0" amount="62.85" is-flat-rate="Y" flat-rate-amount="62.85" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23937426" created="2026-06-11T12:09:06" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="KOCU4040414" tariff-id="DPAAMEXPO40EIVAT26 " description="dpaammountexport40emptyinclude(vat)2026 " event-performed-from="2026-06-07T11:30:17" extract-class="INV" rate-billed="62.85" quantity-billed="1.0" amount="62.85" is-flat-rate="Y" flat-rate-amount="62.85" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23937381" created="2026-06-11T12:09:06" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="HMMU6895583" tariff-id="DPAAMEXPO40EIVAT26 " description="dpaammountexport40emptyinclude(vat)2026 " event-performed-from="2026-06-07T12:00:05" extract-class="INV" rate-billed="62.85" quantity-billed="1.0" amount="62.85" is-flat-rate="Y" flat-rate-amount="62.85" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23937445" created="2026-06-11T12:09:05" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="KOCU4753307" tariff-id="DPAAMEXPO40EIVAT26 " description="dpaammountexport40emptyinclude(vat)2026 " event-performed-from="2026-06-07T11:40:08" extract-class="INV" rate-billed="62.85" quantity-billed="1.0" amount="62.85" is-flat-rate="Y" flat-rate-amount="62.85" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23937393" created="2026-06-11T12:09:06" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="HMMU7034039" tariff-id="DPAAMEXPO40EIVAT26 " description="dpaammountexport40emptyinclude(vat)2026 " event-performed-from="2026-06-07T11:31:58" extract-class="INV" rate-billed="62.85" quantity-billed="1.0" amount="62.85" is-flat-rate="Y" flat-rate-amount="62.85" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23937386" created="2026-06-11T12:09:06" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="HMMU6522260" tariff-id="DPAAMEXPO40EIVAT26 " description="dpaammountexport40emptyinclude(vat)2026 " event-performed-from="2026-06-07T11:53:40" extract-class="INV" rate-billed="62.85" quantity-billed="1.0" amount="62.85" is-flat-rate="Y" flat-rate-amount="62.85" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23937421" created="2026-06-11T12:09:06" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="KOCU4887332" tariff-id="DPAAMEXPO40EIVAT26 " description="dpaammountexport40emptyinclude(vat)2026 " event-performed-from="2026-06-07T11:17:51" extract-class="INV" rate-billed="62.85" quantity-billed="1.0" amount="62.85" is-flat-rate="Y" flat-rate-amount="62.85" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23937361" created="2026-06-11T12:09:06" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="TGBU6351414" tariff-id="DPAAMEXPO40EIVAT26 " description="dpaammountexport40emptyinclude(vat)2026 " event-performed-from="2026-06-07T11:27:05" extract-class="INV" rate-billed="62.85" quantity-billed="1.0" amount="62.85" is-flat-rate="Y" flat-rate-amount="62.85" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23937374" created="2026-06-11T12:09:06" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="KOCU4149977" tariff-id="DPAAMEXPO40EIVAT26 " description="dpaammountexport40emptyinclude(vat)2026 " event-performed-from="2026-06-07T11:28:38" extract-class="INV" rate-billed="62.85" quantity-billed="1.0" amount="62.85" is-flat-rate="Y" flat-rate-amount="62.85" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23937378" created="2026-06-11T12:09:06" creator="msalem">
+      <taxes />
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuObCarrierName" reportable-field="ObCarrierName" value="MSC CHINA" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="HMM" />
+    <parameter metafield-id="bexuObCarrierATA" reportable-field="ObCarrierATA" value="2026-06-05T05:50:00 +0200" />
+    <parameter metafield-id="bexuObId" reportable-field="ObId" value="6AP9GT621" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="الخط الملاحي" value="HMM" />
+    <parameter metafield-id="bexuObId" reportable-field="كود الرحله" value="6AP9GT621" />
+  </parameters>
+</invoice>
+<invoice draft-number="279614" final-number="P25-14355" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="VSL IMPORT AMOUNT COLLECTED TO OTHERS(DPA)" currency="EGP" payee-customer-id="KADMAR SHIPPING EGYPT(EGP)" payee-customer-role="AGENT" contract-customer-id="HMM" contract-customer-role="LINEOP" total-charges="2451.96" total-discounts="0.0" total-taxes="0.0" total-total="2451.96" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="2451.96" total-un-rounded="2451.96" key-word1="MSC CHINA" key-word2="6AP9GT621" key-word3="HMM" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="19" flex-string-04="MSC CHINA" flex-string-05="yasser" flex-string-06="N/A" flex-string-10="2451.96" flex-date-02="2026-06-05T00:00:00" flex-date-03="2026-06-11T12:49:00" flex-long-03="19" created="2026-06-11T12:09:46" creator="msalem" changed="2026-06-11T12:47:04" changer="yasser">
+  <charges>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="TEMU7285019" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-06-06T13:07:53" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23927366" created="2026-06-11T12:09:52" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="KOCU4339806" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-06-05T19:45:17" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23920512" created="2026-06-11T12:09:52" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="TGBU6481491" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-06-05T10:14:58" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23914979" created="2026-06-11T12:09:52" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="HMMU6859117" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-06-05T19:07:02" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23920011" created="2026-06-11T12:09:52" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="KOCU4848022" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-06-05T18:15:40" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23919497" created="2026-06-11T12:09:52" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="HMMU6067378" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-06-05T14:22:45" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23917073" created="2026-06-11T12:09:52" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="HMMU6969140" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-06-06T13:07:38" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23927358" created="2026-06-11T12:09:52" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="KOCU4815184" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-06-05T18:33:14" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23919664" created="2026-06-11T12:09:52" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="KOCU4343663" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-06-05T18:20:01" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23919547" created="2026-06-11T12:09:52" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="KOCU5028305" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-06-05T09:15:18" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23914201" created="2026-06-11T12:09:52" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="TCNU6874523" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-06-05T18:59:49" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23919949" created="2026-06-11T12:09:52" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="KOCU4811487" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-06-06T13:21:52" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23927423" created="2026-06-11T12:09:52" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="HDMU5595813" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-06-06T13:17:45" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23927403" created="2026-06-11T12:09:52" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="GCXU5022155" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-06-05T09:20:39" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23914280" created="2026-06-11T12:09:52" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="HMMU6857006" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-06-05T09:43:45" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23914595" created="2026-06-11T12:09:52" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="HMMU6679820" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-06-05T18:55:28" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23919887" created="2026-06-11T12:09:52" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="HMMU6347419" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-06-05T13:57:25" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23916788" created="2026-06-11T12:09:52" creator="msalem">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="CAIU4343397" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-06-05T20:41:42" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="23921057" created="2026-06-11T12:09:52" creator="msalem">
+      <taxes />
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="MSC CHINA" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-05T05:50:00 +0200" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="HMM" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="الخط الملاحي" value="HMM" />
+    <parameter metafield-id="bexuIbId" reportable-field="كود الرحله" value="6AP9GT621" />
+    <parameter metafield-id="bexuIbId" reportable-field="IbId" value="6AP9GT621" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" />
+  </parameters>
+</invoice>
+<invoice draft-number="279615" final-number="P25-14354" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="VSL IMPORT HANDLING EGP" currency="EGP" payee-customer-id="KADMAR SHIPPING EGYPT(EGP)" payee-customer-role="AGENT" contract-customer-id="HMM" contract-customer-role="LINEOP" total-charges="184960.1952" total-discounts="0.0" total-taxes="25894.4273" total-total="210854.6225" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="210854.6225" total-un-rounded="210854.6225" key-word1="MSC CHINA" key-word2="6AP9GT621" key-word3="HMM" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="20" flex-string-04="MSC CHINA" flex-string-05="yasser" flex-string-06="51.8968" flex-string-10="3564.0" flex-date-02="2026-06-05T00:00:00" flex-date-03="2026-06-11T12:49:00" flex-long-03="20" created="2026-06-11T12:10:33" creator="msalem" changed="2026-06-11T12:47:04" changer="yasser">
+  <charges>
+    <charge event-type-id="UNIT_DISCH" entity-id="HMMU6857006" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-06-05T09:42:39" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10275.5664" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23914593" created="2026-06-11T12:10:41" creator="msalem">
+      <taxes>
+        <tax amount="1438.579296" created="2026-06-11T12:10:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="KOCU4343663" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-06-05T18:18:47" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10275.5664" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23919545" created="2026-06-11T12:10:41" creator="msalem">
+      <taxes>
+        <tax amount="1438.579296" created="2026-06-11T12:10:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="KOCU4339806" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-06-05T19:44:04" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10275.5664" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23920510" created="2026-06-11T12:10:41" creator="msalem">
+      <taxes>
+        <tax amount="1438.579296" created="2026-06-11T12:10:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="HMMU6859117" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-06-05T19:05:57" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10275.5664" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23920009" created="2026-06-11T12:10:41" creator="msalem">
+      <taxes>
+        <tax amount="1438.579296" created="2026-06-11T12:10:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="HDMU5595813" tariff-id="DI40FR" description="DischargeImport40FullReffer " event-performed-from="2026-06-06T13:16:39" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10275.5664" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23927401" created="2026-06-11T12:10:41" creator="msalem">
+      <taxes>
+        <tax amount="1438.579296" created="2026-06-11T12:10:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="KOCU4811487" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-06-06T13:20:38" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10275.5664" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23927421" created="2026-06-11T12:10:41" creator="msalem">
+      <taxes>
+        <tax amount="1438.579296" created="2026-06-11T12:10:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="KOCU4815184" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-06-05T18:32:03" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10275.5664" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23919662" created="2026-06-11T12:10:41" creator="msalem">
+      <taxes>
+        <tax amount="1438.579296" created="2026-06-11T12:10:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="HMMU6679820" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-06-05T18:54:15" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10275.5664" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23919885" created="2026-06-11T12:10:41" creator="msalem">
+      <taxes>
+        <tax amount="1438.579296" created="2026-06-11T12:10:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="HMMU6347419" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-06-05T13:56:14" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10275.5664" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23916786" created="2026-06-11T12:10:41" creator="msalem">
+      <taxes>
+        <tax amount="1438.579296" created="2026-06-11T12:10:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="CAIU4343397" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-06-05T20:40:37" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10275.5664" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23921055" created="2026-06-11T12:10:41" creator="msalem">
+      <taxes>
+        <tax amount="1438.579296" created="2026-06-11T12:10:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="TCNU6874523" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-06-05T18:58:43" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10275.5664" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23919947" created="2026-06-11T12:10:41" creator="msalem">
+      <taxes>
+        <tax amount="1438.579296" created="2026-06-11T12:10:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="HMMU6067378" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-06-05T14:21:35" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10275.5664" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23917071" created="2026-06-11T12:10:41" creator="msalem">
+      <taxes>
+        <tax amount="1438.579296" created="2026-06-11T12:10:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="GCXU5022155" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-06-05T09:19:33" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10275.5664" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23914278" created="2026-06-11T12:10:41" creator="msalem">
+      <taxes>
+        <tax amount="1438.579296" created="2026-06-11T12:10:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="HMMU6969140" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-06-06T13:06:26" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10275.5664" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23927355" created="2026-06-11T12:10:41" creator="msalem">
+      <taxes>
+        <tax amount="1438.579296" created="2026-06-11T12:10:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="KOCU5028305" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-06-05T09:14:13" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10275.5664" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23914199" created="2026-06-11T12:10:41" creator="msalem">
+      <taxes>
+        <tax amount="1438.579296" created="2026-06-11T12:10:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="TGBU6481491" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-06-05T10:13:51" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10275.5664" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23914977" created="2026-06-11T12:10:41" creator="msalem">
+      <taxes>
+        <tax amount="1438.579296" created="2026-06-11T12:10:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="KOCU4848022" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-06-05T18:14:36" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10275.5664" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23919495" created="2026-06-11T12:10:41" creator="msalem">
+      <taxes>
+        <tax amount="1438.579296" created="2026-06-11T12:10:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="TEMU7285019" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-06-06T13:06:40" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10275.5664" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23927364" created="2026-06-11T12:10:41" creator="msalem">
+      <taxes>
+        <tax amount="1438.579296" created="2026-06-11T12:10:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-05T05:50:00 +0200" />
+    <parameter metafield-id="bexuIbId" reportable-field="IbId" value="6AP9GT621" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="الخط الملاحي" value="HMM" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="MSC CHINA" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="HMM" />
+    <parameter metafield-id="bexuIbId" reportable-field="كود الرحله" value="6AP9GT621" />
+  </parameters>
+</invoice>
+<invoice draft-number="279616" final-number="P25-14353" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="VSL EXPORT EMPTY HANDLING" currency="EGP" payee-customer-id="KADMAR SHIPPING EGYPT(EGP)" payee-customer-role="AGENT" contract-customer-id="HMM" contract-customer-role="LINEOP" total-charges="68503.776" total-discounts="0.0" total-taxes="9590.5286" total-total="78094.3046" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="78094.3046" total-un-rounded="78094.3046" key-word1="MSC CHINA" key-word2="6AP9GT621" key-word3="HMM" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="21" flex-string-04="MSC CHINA" flex-string-05="yasser" flex-string-06="51.8968" flex-string-10="1320.0" flex-date-02="2026-06-05T00:00:00" flex-date-03="2026-06-11T12:49:00" flex-long-03="21" created="2026-06-11T12:11:29" creator="msalem" changed="2026-06-11T12:47:04" changer="yasser">
+  <charges>
+    <charge event-type-id="UNIT_LOAD" entity-id="HMMU6895583" tariff-id="LE40ED " description="LoadExport40EmptyDry " event-performed-from="2026-06-07T11:59:24" extract-class="INV" rate-billed="132.0" quantity-billed="1.0" amount="6850.3776" is-flat-rate="Y" flat-rate-amount="132.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23937444" created="2026-06-11T12:11:41" creator="msalem">
+      <taxes>
+        <tax amount="959.0528640000001" created="2026-06-11T12:11:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_LOAD" entity-id="KOCU4887332" tariff-id="LE40ED " description="LoadExport40EmptyDry " event-performed-from="2026-06-07T11:17:03" extract-class="INV" rate-billed="132.0" quantity-billed="1.0" amount="6850.3776" is-flat-rate="Y" flat-rate-amount="132.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23937360" created="2026-06-11T12:11:41" creator="msalem">
+      <taxes>
+        <tax amount="959.0528640000001" created="2026-06-11T12:11:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_LOAD" entity-id="TGBU6351414" tariff-id="LE40ED " description="LoadExport40EmptyDry " event-performed-from="2026-06-07T11:26:12" extract-class="INV" rate-billed="132.0" quantity-billed="1.0" amount="6850.3776" is-flat-rate="Y" flat-rate-amount="132.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23937373" created="2026-06-11T12:11:41" creator="msalem">
+      <taxes>
+        <tax amount="959.0528640000001" created="2026-06-11T12:11:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_LOAD" entity-id="KOCU4433670" tariff-id="LE40ED " description="LoadExport40EmptyDry " event-performed-from="2026-06-07T11:19:53" extract-class="INV" rate-billed="132.0" quantity-billed="1.0" amount="6850.3776" is-flat-rate="Y" flat-rate-amount="132.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23937363" created="2026-06-11T12:11:41" creator="msalem">
+      <taxes>
+        <tax amount="959.0528640000001" created="2026-06-11T12:11:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_LOAD" entity-id="KOCU4040414" tariff-id="LE40ED " description="LoadExport40EmptyDry " event-performed-from="2026-06-07T11:29:32" extract-class="INV" rate-billed="132.0" quantity-billed="1.0" amount="6850.3776" is-flat-rate="Y" flat-rate-amount="132.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23937380" created="2026-06-11T12:11:41" creator="msalem">
+      <taxes>
+        <tax amount="959.0528640000001" created="2026-06-11T12:11:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_LOAD" entity-id="KOCU4149977" tariff-id="LE40ED " description="LoadExport40EmptyDry " event-performed-from="2026-06-07T11:27:52" extract-class="INV" rate-billed="132.0" quantity-billed="1.0" amount="6850.3776" is-flat-rate="Y" flat-rate-amount="132.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23937377" created="2026-06-11T12:11:41" creator="msalem">
+      <taxes>
+        <tax amount="959.0528640000001" created="2026-06-11T12:11:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_LOAD" entity-id="KOCU4753307" tariff-id="LE40ED " description="LoadExport40EmptyDry " event-performed-from="2026-06-07T11:39:26" extract-class="INV" rate-billed="132.0" quantity-billed="1.0" amount="6850.3776" is-flat-rate="Y" flat-rate-amount="132.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23937392" created="2026-06-11T12:11:41" creator="msalem">
+      <taxes>
+        <tax amount="959.0528640000001" created="2026-06-11T12:11:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_LOAD" entity-id="HMMU7034039" tariff-id="LE40ED " description="LoadExport40EmptyDry " event-performed-from="2026-06-07T11:31:16" extract-class="INV" rate-billed="132.0" quantity-billed="1.0" amount="6850.3776" is-flat-rate="Y" flat-rate-amount="132.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23937385" created="2026-06-11T12:11:41" creator="msalem">
+      <taxes>
+        <tax amount="959.0528640000001" created="2026-06-11T12:11:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_LOAD" entity-id="KOCU5118306" tariff-id="LE40ED " description="LoadExport40EmptyDry " event-performed-from="2026-06-07T11:54:29" extract-class="INV" rate-billed="132.0" quantity-billed="1.0" amount="6850.3776" is-flat-rate="Y" flat-rate-amount="132.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23937425" created="2026-06-11T12:11:41" creator="msalem">
+      <taxes>
+        <tax amount="959.0528640000001" created="2026-06-11T12:11:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_LOAD" entity-id="HMMU6522260" tariff-id="LE40ED " description="LoadExport40EmptyDry " event-performed-from="2026-06-07T11:52:52" extract-class="INV" rate-billed="132.0" quantity-billed="1.0" amount="6850.3776" is-flat-rate="Y" flat-rate-amount="132.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.8968" extract-gkey="23937420" created="2026-06-11T12:11:41" creator="msalem">
+      <taxes>
+        <tax amount="959.0528640000001" created="2026-06-11T12:11:41" creator="msalem">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="الخط الملاحي" value="HMM" />
+    <parameter metafield-id="bexuObId" reportable-field="كود الرحله" value="6AP9GT621" />
+    <parameter metafield-id="bexuObCarrierName" reportable-field="ObCarrierName" value="MSC CHINA" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="HMM" />
+    <parameter metafield-id="bexuObId" reportable-field="ObId" value="6AP9GT621" />
+    <parameter metafield-id="bexuObCarrierATA" reportable-field="ObCarrierATA" value="2026-06-05T05:50:00 +0200" />
+  </parameters>
+</invoice>
 <invoice draft-number="279617" final-number="C25-32040" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="CASH CUSTOMER" payee-customer-role="SHIPPER" contract-customer-id="527751928" contract-customer-role="SHIPPER" total-charges="2127.9246" total-discounts="0.0" total-taxes="297.9094" total-total="2425.834" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="2425.834" total-un-rounded="2425.834" key-word1="YM WELLNESS" key-word2="M228139597" key-word3="YML" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*16/6*" flex-string-04="YM WELLNESS" flex-string-05="mmosaad" flex-string-06="51.9006" flex-string-10="41.0" flex-date-02="2026-06-05T00:00:00" flex-date-03="2026-06-11T12:15:57" created="2026-06-11T12:11:49" creator="hebahkamal" changed="2026-06-11T12:14:01" changer="mmosaad">
   <charges>
     <charge event-type-id="STORAGE" entity-id="YMMU1040200" tariff-id="STORI20FD " description="تخزين وارد مازاد عن 5 أيام" paid-thru-day="2026-06-11T00:00:00" event-performed-from="2026-06-10T00:00:00" event-performed-to="2026-06-11T00:00:00" extract-class="INV" rate-billed="8.0" quantity-billed="2.0" amount="830.4096" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="2.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="51.9006" extract-gkey="23911856" changer="hebahkamal" changed="2026-06-11T12:12:06" created="2026-06-11T12:12:05" creator="hebahkamal">
@@ -124424,6 +124869,1117 @@
     <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[m433106171]" />
     <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
     <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+  </parameters>
+</invoice>
+<invoice draft-number="279634" final-number="C25-32042" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="CASH CUSTOMER" payee-customer-role="SHIPPER" contract-customer-id="449866963" contract-customer-role="SHIPPER" total-charges="3425.4396" total-discounts="0.0" total-taxes="479.5615" total-total="3905.0011" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="3905.0011" total-un-rounded="3905.0011000000004" key-word1="ZIM PACIFIC" key-word2="HLCUBSC2603CZZJ1" key-word3="HLC" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*18/6*" flex-string-04="ZIM PACIFIC" flex-string-05="eslamyousri" flex-string-06="51.9006" flex-string-10="66.0" flex-date-02="2026-06-05T00:00:00" flex-date-03="2026-06-11T12:35:25" created="2026-06-11T12:31:17" creator="asmaafathy" changed="2026-06-11T12:33:29" changer="eslamyousri">
+  <charges>
+    <charge event-type-id="STORAGE" entity-id="HAMU2156086" tariff-id="STORI40FD " description="تخزين مازاد عن 5 أيام 40 قدم" paid-thru-day="2026-06-11T00:00:00" event-performed-from="2026-06-10T00:00:00" event-performed-to="2026-06-11T00:00:00" extract-class="INV" rate-billed="14.0" quantity-billed="2.0" amount="1453.2168" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="2.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="51.9006" extract-gkey="23921513" changer="asmaafathy" changed="2026-06-11T12:31:30" created="2026-06-11T12:31:29" creator="asmaafathy">
+      <taxes>
+        <tax amount="203.450352" created="2026-06-11T12:31:29" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="RENT_3_TON" entity-id="HAMU2156086" tariff-id="RENT3TON" description="كشف ومعاينه ونش 3 طن" event-performed-from="2026-06-06T14:29:11" extract-class="INV" rate-billed="13.0" quantity-billed="1.0" amount="674.7078" is-flat-rate="Y" flat-rate-amount="13.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23928020" created="2026-06-11T12:31:30" creator="asmaafathy">
+      <taxes>
+        <tax amount="94.45909200000001" created="2026-06-11T12:31:30" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="HAMU2156086" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-05T21:28:27" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23921519" created="2026-06-11T12:31:29" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T12:31:29" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[hlcubsc2603czzj1]" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="HLC" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="HLCUBSC2603CZZJ1" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="ZIM PACIFIC" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="360W" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="HLCUBSC2603CZZJ1" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="ZIM PACIFIC" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-05T18:15:00 +0200" />
+  </parameters>
+</invoice>
+<invoice draft-number="279638" final-number="C25-32043" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="ALMASRY FOR TRANSPORT" payee-customer-role="AGENT" contract-customer-id="100029620" contract-customer-role="SHIPPER" total-charges="1297.515" total-discounts="0.0" total-taxes="181.6521" total-total="1479.1671" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="1479.1671" total-un-rounded="1479.1671000000001" key-word1="YM WONDROUS" key-word2="M237076754" key-word3="YML" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*16/6*" flex-string-04="YM WONDROUS" flex-string-05="mmosaad" flex-string-06="51.9006" flex-string-10="25.0" flex-date-02="2026-06-10T00:00:00" flex-date-03="2026-06-11T12:37:57" created="2026-06-11T12:32:46" creator="hebahkamal" changed="2026-06-11T12:36:01" changer="mmosaad">
+  <charges>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="SEGU4570952" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-11T02:16:07" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23980464" created="2026-06-11T12:32:57" creator="hebahkamal">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T12:32:57" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[m237076754]" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="M237076754" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="M237076754" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="YM WONDROUS" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="YML" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-10T10:30:00 +0200" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="YM WONDROUS" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="50W" />
+  </parameters>
+</invoice>
+<invoice draft-number="279656" final-number="C25-32044" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="فاتورة تحصيل نقدى صادر" currency="EGP" payee-customer-id="NAQLA FOR TRANSPORT " payee-customer-role="AGENT" contract-customer-id="640828310" contract-customer-role="SHIPPER" total-charges="1764.6204" total-discounts="0.0" total-taxes="0.0" total-total="1764.6204" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="1764.6204" total-un-rounded="1764.6204" key-word2="ZIMUDMT80034223" key-word3="ZIM" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-04="ZIM AMERICA" flex-string-05="eslamyousri" flex-string-06="51.9006" flex-string-10="34.0" flex-date-02="2026-06-07T11:30:00" flex-date-03="2026-06-11T12:49:39" created="2026-06-11T12:46:24" creator="hebahkamal" changed="2026-06-11T12:47:43" changer="eslamyousri">
+  <charges>
+    <charge event-type-id="STUFF" entity-id="TEMU0130268" tariff-id="STUFF20ED " description="نقل 20فارغ للتعبئه والنقل للمملوء" event-performed-from="2026-06-11T12:32:12" extract-class="INV" rate-billed="30.0" quantity-billed="1.0" amount="1557.018" is-flat-rate="Y" flat-rate-amount="30.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23987155" created="2026-06-11T12:46:26" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="CLEAN" entity-id="TEMU0130268" tariff-id="CLEANT20ED " description="نظافه حاويات 20 قدم" event-performed-from="2026-06-11T12:32:22" extract-class="INV" rate-billed="4.0" quantity-billed="1.0" amount="207.6024" is-flat-rate="Y" flat-rate-amount="4.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23987160" created="2026-06-11T12:46:26" creator="hebahkamal">
+      <taxes />
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuBookingNbr" reportable-field="رقم الحجز" value="ZIMUDMT80034223" />
+    <parameter metafield-id="bexuEqId" reportable-field="ارقام الحاويات" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ تفريغ المشمول" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="order number" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="ZIM" />
+    <parameter metafield-id="bexuBookingNbr" reportable-field="BookingNbr" value="ZIMUDMT80034223" />
+  </parameters>
+</invoice>
+<invoice draft-number="279659" final-number="C25-32045" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="AHMED MAHMOUD ELDAWOUDY COMPANY" payee-customer-role="AGENT" contract-customer-id="686643852" contract-customer-role="SHIPPER" total-charges="1972.2228" total-discounts="0.0" total-taxes="276.1112" total-total="2248.334" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="2248.334" total-un-rounded="2248.334" key-word1="EGY SKY" key-word2="HLCUGOA2604AVEA1" key-word3="HLC" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*27/6*" flex-string-04="EGY SKY" flex-string-05="eslamyousri" flex-string-06="51.9006" flex-string-10="38.0" flex-date-02="2026-06-07T00:00:00" flex-date-03="2026-06-11T12:54:43" created="2026-06-11T12:51:05" creator="hebahkamal" changed="2026-06-11T12:52:47" changer="eslamyousri">
+  <charges>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="HAMU2831517" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-07T21:43:37" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23944056" created="2026-06-11T12:51:18" creator="hebahkamal">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T12:51:18" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="RENT_3_TON" entity-id="HAMU2831517" tariff-id="RENT3TON" description="كشف ومعاينه ونش 3 طن" event-performed-from="2026-06-09T10:31:33" extract-class="INV" rate-billed="13.0" quantity-billed="1.0" amount="674.7078" is-flat-rate="Y" flat-rate-amount="13.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23959228" created="2026-06-11T12:51:18" creator="hebahkamal">
+      <taxes>
+        <tax amount="94.45909200000001" created="2026-06-11T12:51:18" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="HLC" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="HLCUGOA2604AVEA1" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="EGY SKY" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="092" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="HLCUGOA2604AVEA1" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="EGY SKY" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-07T20:30:00 +0200" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[hlcugoa2604avea1]" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+  </parameters>
+</invoice>
+<invoice draft-number="279683" final-number="C25-32047" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="LAHAY FOR TRANSPORT" payee-customer-role="AGENT" contract-customer-id="503897329" contract-customer-role="SHIPPER" total-charges="8407.8972" total-discounts="0.0" total-taxes="1177.1056" total-total="9585.0028" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="9585.0028" total-un-rounded="9585.0028" key-word1="YM WISDOM" key-word2="M240247636" key-word3="YML" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*20/6*" flex-string-04="YM WISDOM" flex-string-05="mmosaad" flex-string-06="51.9006" flex-string-10="162.0" flex-date-02="2026-06-03T00:00:00" flex-date-03="2026-06-11T13:37:10" created="2026-06-11T13:29:12" creator="asmaafathy" changed="2026-06-11T13:35:14" changer="mmosaad">
+  <charges>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="BMOU5745718" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-04T06:25:56" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23900672" created="2026-06-11T13:29:29" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T13:29:29" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="BMOU5745718" tariff-id="STORI40FD " description="تخزين مازاد عن 5 أيام 40 قدم" paid-thru-day="2026-06-11T00:00:00" event-performed-from="2026-06-08T00:00:00" event-performed-to="2026-06-11T00:00:00" extract-class="INV" rate-billed="14.0" quantity-billed="4.0" amount="2906.4336" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="4.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="51.9006" extract-gkey="23900668" changer="asmaafathy" changed="2026-06-11T13:29:29" created="2026-06-11T13:29:29" creator="asmaafathy">
+      <taxes>
+        <tax amount="406.900704" created="2026-06-11T13:29:29" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="TCNU1513298" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-03T16:35:10" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23890501" created="2026-06-11T13:29:29" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T13:29:29" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="TCNU1513298" tariff-id="STORI40FD " description="تخزين مازاد عن 5 أيام 40 قدم" paid-thru-day="2026-06-11T00:00:00" event-performed-from="2026-06-08T00:00:00" event-performed-to="2026-06-11T00:00:00" extract-class="INV" rate-billed="14.0" quantity-billed="4.0" amount="2906.4336" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="4.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="51.9006" extract-gkey="23890498" changer="asmaafathy" changed="2026-06-11T13:29:29" created="2026-06-11T13:29:29" creator="asmaafathy">
+      <taxes>
+        <tax amount="406.900704" created="2026-06-11T13:29:29" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="M240247636" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="YM WISDOM" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="YML" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-03T12:00:00 +0200" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="YM WISDOM" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="26W" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[m240247636]" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="M240247636" />
+  </parameters>
+</invoice>
+<invoice draft-number="279684" final-number="C25-32046" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="ALHILAL COMPANY FOR TRANSPORT" payee-customer-role="AGENT" contract-customer-id="521409152" contract-customer-role="SHIPPER" total-charges="12456.144" total-discounts="0.0" total-taxes="1743.8602" total-total="14200.0042" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="14200.0042" total-un-rounded="14200.0042" key-word1="MITO" key-word2="AD2601301046" key-word3="ADM" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*10/6*" flex-string-04="MITO" flex-string-05="mmosaad" flex-string-06="51.9006" flex-string-10="240.0" flex-date-02="2026-06-04T00:00:00" flex-date-03="2026-06-11T13:35:29" created="2026-06-11T13:31:05" creator="asmaafathy" changed="2026-06-11T13:33:33" changer="mmosaad">
+  <charges>
+    <charge event-type-id="RENT_3_TON" entity-id="ADMU5200351" tariff-id="RENT3TON" description="كشف ومعاينه ونش 3 طن" event-performed-from="2026-06-09T10:39:20" extract-class="INV" rate-billed="13.0" quantity-billed="1.0" amount="674.7078" is-flat-rate="Y" flat-rate-amount="13.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23959269" created="2026-06-11T13:31:19" creator="asmaafathy">
+      <taxes>
+        <tax amount="94.45909200000001" created="2026-06-11T13:31:19" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="RENT_3_TON" entity-id="ADMU5001215" tariff-id="RENT3TON" description="كشف ومعاينه ونش 3 طن" event-performed-from="2026-06-09T10:39:20" extract-class="INV" rate-billed="13.0" quantity-billed="1.0" amount="674.7078" is-flat-rate="Y" flat-rate-amount="13.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23959268" created="2026-06-11T13:31:19" creator="asmaafathy">
+      <taxes>
+        <tax amount="94.45909200000001" created="2026-06-11T13:31:19" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="RENT_3_TON" entity-id="ADMU5210914" tariff-id="RENT3TON" description="كشف ومعاينه ونش 3 طن" event-performed-from="2026-06-09T10:39:20" extract-class="INV" rate-billed="13.0" quantity-billed="1.0" amount="674.7078" is-flat-rate="Y" flat-rate-amount="13.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23959270" created="2026-06-11T13:31:19" creator="asmaafathy">
+      <taxes>
+        <tax amount="94.45909200000001" created="2026-06-11T13:31:19" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="ADMU5001215" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-05T02:55:01" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23910284" created="2026-06-11T13:31:18" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T13:31:18" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="ADMU5001215" tariff-id="STORI40FD " description="تخزين مازاد عن 5 أيام 40 قدم" paid-thru-day="2026-06-11T00:00:00" event-performed-from="2026-06-09T00:00:00" event-performed-to="2026-06-11T00:00:00" extract-class="INV" rate-billed="14.0" quantity-billed="3.0" amount="2179.8251999999998" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="3.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="51.9006" extract-gkey="23910281" changer="asmaafathy" changed="2026-06-11T13:31:19" created="2026-06-11T13:31:18" creator="asmaafathy">
+      <taxes>
+        <tax amount="305.175528" created="2026-06-11T13:31:18" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="ADMU5210914" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-05T02:57:37" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23910293" created="2026-06-11T13:31:19" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T13:31:19" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="ADMU5210914" tariff-id="STORI40FD " description="تخزين مازاد عن 5 أيام 40 قدم" paid-thru-day="2026-06-11T00:00:00" event-performed-from="2026-06-09T00:00:00" event-performed-to="2026-06-11T00:00:00" extract-class="INV" rate-billed="14.0" quantity-billed="3.0" amount="2179.8251999999998" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="3.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="51.9006" extract-gkey="23910289" changer="asmaafathy" changed="2026-06-11T13:31:19" created="2026-06-11T13:31:19" creator="asmaafathy">
+      <taxes>
+        <tax amount="305.175528" created="2026-06-11T13:31:19" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="ADMU5200351" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-05T03:30:27" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23910485" created="2026-06-11T13:31:19" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T13:31:19" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="ADMU5200351" tariff-id="STORI40FD " description="تخزين مازاد عن 5 أيام 40 قدم" paid-thru-day="2026-06-11T00:00:00" event-performed-from="2026-06-09T00:00:00" event-performed-to="2026-06-11T00:00:00" extract-class="INV" rate-billed="14.0" quantity-billed="3.0" amount="2179.8251999999998" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="3.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="51.9006" extract-gkey="23910481" changer="asmaafathy" changed="2026-06-11T13:31:19" created="2026-06-11T13:31:19" creator="asmaafathy">
+      <taxes>
+        <tax amount="305.175528" created="2026-06-11T13:31:19" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="AD2601301046" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="ADM" />
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="MITO" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="MITO" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="AD2601301046" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="063W" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-04T22:15:00 +0200" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[ad2601301046]" />
+  </parameters>
+</invoice>
+<invoice draft-number="279686" final-number="C25-32048" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="CASH CUSTOMER" payee-customer-role="SHIPPER" contract-customer-id="205267572" contract-customer-role="SHIPPER" total-charges="88490.523" total-discounts="0.0" total-taxes="12388.6732" total-total="100879.1962" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="100879.1962" total-un-rounded="100879.1962" key-word1="YM WELLSPRING" key-word2="U594059203" key-word3="YML" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*12/6*" flex-string-04="YM WELLSPRING" flex-string-05="mmosaad" flex-string-06="51.9006" flex-string-10="1705.0" flex-date-02="2026-05-13T00:00:00" flex-date-03="2026-06-11T13:39:12" created="2026-06-11T13:33:10" creator="asmaafathy" changed="2026-06-11T13:37:16" changer="mmosaad">
+  <charges>
+    <charge event-type-id="STORAGE" entity-id="YMLU7026968" tariff-id="STORI40FOFRAM " description="تخزين مازاد عن 5 يوم 40 قدم بالهيكل غير منتظم " paid-thru-day="2026-06-11T00:00:00" event-performed-from="2026-05-18T00:00:00" event-performed-to="2026-06-01T00:00:00" extract-class="INV" rate-billed="56.0" quantity-billed="15.0" amount="43596.504" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="15.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="51.9006" extract-gkey="23690508" changer="asmaafathy" changed="2026-06-11T13:33:24" created="2026-06-11T13:33:24" creator="asmaafathy">
+      <taxes>
+        <tax amount="6103.510560000001" created="2026-06-11T13:33:24" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="YMLU7026968" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-05-14T08:46:37" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23690513" created="2026-06-11T13:33:24" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T13:33:24" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="YMLU7026968" tariff-id="STORI40FOFRAM " description="تخزين مازاد عن 21 يوم 40 قدم بالهيكل غير منتظم " paid-thru-day="2026-06-11T00:00:00" event-performed-from="2026-06-02T00:00:00" event-performed-to="2026-06-11T00:00:00" extract-class="INV" rate-billed="84.0" quantity-billed="10.0" amount="43596.504" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="10.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="51.9006" extract-gkey="23690508" changer="asmaafathy" changed="2026-06-11T13:33:24" created="2026-06-11T13:33:24" creator="asmaafathy">
+      <taxes>
+        <tax amount="6103.510560000001" created="2026-06-11T13:33:24" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="U594059203" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="YM WELLSPRING" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="YML" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-05-13T10:00:00 +0200" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="YM WELLSPRING" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="27E" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[u594059203]" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="U594059203" />
+  </parameters>
+</invoice>
+<invoice draft-number="279688" final-number="C25-32052" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="فاتورة تحصيل نقدى صادر" currency="EGP" payee-customer-id="ELSHROUK FOR TRANSPORT" payee-customer-role="AGENT" contract-customer-id="555436322" contract-customer-role="SHIPPER" total-charges="19566.5262" total-discounts="0.0" total-taxes="0.0" total-total="19566.5262" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="19566.5262" total-un-rounded="19566.5262" key-word2="271241448" key-word3="MSK" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-04="7653 ج ق ر" flex-string-05="eslamyousri" flex-string-06="51.9006" flex-string-10="454.0" flex-date-03="2026-06-11T13:53:22" created="2026-06-11T13:37:33" creator="ezzat" changed="2026-06-11T13:51:27" changer="eslamyousri">
+  <charges>
+    <charge event-type-id="عربة اطفاء" entity-id="CAAU9814429" tariff-id="FIRE CAR" description="عربة اطفاء" event-performed-from="2026-06-11T13:19:34" extract-class="INV" rate-billed="110.0" quantity-billed="1.0" amount="5709.066" is-flat-rate="Y" flat-rate-amount="110.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23987611" created="2026-06-11T13:37:36" creator="ezzat">
+      <taxes />
+    </charge>
+    <charge event-type-id="CLEAN" entity-id="CAAU9814429" tariff-id="CLEANE40ED " description="نظافه حاويات 40 قدم" event-performed-from="2026-06-11T13:19:27" extract-class="INV" rate-billed="4.0" quantity-billed="1.0" amount="207.6024" is-flat-rate="Y" flat-rate-amount="4.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23987608" created="2026-06-11T13:37:36" creator="ezzat">
+      <taxes />
+    </charge>
+    <charge event-type-id="YARD_MOVE" entity-id="CAAU9814429" tariff-id="TRANSPORTE40FD " description="transportExport40FullDry " event-performed-from="2026-06-11T13:19:55" extract-class="INV" rate-billed="44.0" quantity-billed="1.0" amount="2283.6264" is-flat-rate="Y" flat-rate-amount="44.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23987614" created="2026-06-11T13:37:36" creator="ezzat">
+      <taxes />
+    </charge>
+    <charge event-type-id="EMER_STORAGE" entity-id="CAAU9814429" tariff-id="EMERE40STOR " description="StorageEXPORTForEmergencyYard40&quot; " event-performed-from="2026-06-09T23:29:32" extract-class="INV" rate-billed="33.0" quantity-billed="1.0" amount="1712.7198" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="1.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="51.9006" extract-gkey="23963964" changer="ezzat" changed="2026-06-11T13:37:36" created="2026-06-11T13:37:35" creator="ezzat">
+      <taxes />
+    </charge>
+    <charge event-type-id="EMER_STORAGE" entity-id="CAAU9814429" tariff-id="EMERE40STOR " description="StorageEXPORTForEmergencyYard40&quot; " event-performed-from="2026-06-10T10:11:18" extract-class="INV" rate-billed="33.0" quantity-billed="1.0" amount="1712.7198" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="1.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="51.9006" extract-gkey="23970187" changer="ezzat" changed="2026-06-11T13:37:36" created="2026-06-11T13:37:35" creator="ezzat">
+      <taxes />
+    </charge>
+    <charge event-type-id="EMER_STORAGE" entity-id="CAAU9814429" tariff-id="EMERE40STOR " description="StorageEXPORTForEmergencyYard40&quot; " event-performed-from="2026-06-09T23:49:01" extract-class="INV" rate-billed="33.0" quantity-billed="1.0" amount="1712.7198" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="1.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="51.9006" extract-gkey="23964096" changer="ezzat" changed="2026-06-11T13:37:36" created="2026-06-11T13:37:35" creator="ezzat">
+      <taxes />
+    </charge>
+    <charge event-type-id="STRIP" entity-id="CAAU9814429" tariff-id="STRIPE40FD " description="تفريغ مشمول حاويه صادر 40 قدم" event-performed-from="2026-06-11T13:19:06" extract-class="INV" rate-billed="60.0" quantity-billed="1.0" amount="3114.036" is-flat-rate="Y" flat-rate-amount="60.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23987603" changer="ezzat" changed="2026-06-11T13:40:00" created="2026-06-11T13:37:35" creator="ezzat">
+      <taxes />
+    </charge>
+    <charge event-type-id="STUFF" entity-id="CAAU9814429" tariff-id="STUFF40ED " description="نقل 40فارغ للتعبئه والنقل للمملوء" event-performed-from="2026-06-11T13:19:13" extract-class="INV" rate-billed="60.0" quantity-billed="1.0" amount="3114.036" is-flat-rate="Y" flat-rate-amount="60.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23987600" created="2026-06-11T13:37:35" creator="ezzat">
+      <taxes />
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="MSK" />
+    <parameter metafield-id="bexuBookingNbr" reportable-field="BookingNbr" value="271241448" />
+    <parameter metafield-id="bexuBookingNbr" reportable-field="رقم الحجز" value="271241448" />
+    <parameter metafield-id="bexuEqId" reportable-field="ارقام الحاويات" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ تفريغ المشمول" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="order number" />
+  </parameters>
+</invoice>
+<invoice draft-number="279689" final-number="C25-32049" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="ELFAYED FOR IMPORT(تحت التسويه)" payee-customer-role="SHIPPER" contract-customer-id="572434928" contract-customer-role="SHIPPER" total-charges="2750.7318" total-discounts="0.0" total-taxes="385.1025" total-total="3135.8343" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="3135.8343" total-un-rounded="3135.8343" key-word1="YM WELLNESS" key-word2="M226218888" key-word3="YML" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*20/6*" flex-string-04="YM WELLNESS" flex-string-05="eslamyousri" flex-string-06="51.9006" flex-string-10="53.0" flex-date-02="2026-06-05T00:00:00" flex-date-03="2026-06-11T13:42:57" created="2026-06-11T13:37:59" creator="asmaafathy" changed="2026-06-11T13:41:01" changer="eslamyousri">
+  <charges>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="TIIU7252441" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-05T18:31:53" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23919654" created="2026-06-11T13:38:16" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T13:38:16" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="TIIU7252441" tariff-id="STORI40FD " description="تخزين مازاد عن 5 أيام 40 قدم" paid-thru-day="2026-06-11T00:00:00" event-performed-from="2026-06-10T00:00:00" event-performed-to="2026-06-11T00:00:00" extract-class="INV" rate-billed="14.0" quantity-billed="2.0" amount="1453.2168" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="2.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="51.9006" extract-gkey="23919652" changer="asmaafathy" changed="2026-06-11T13:38:17" created="2026-06-11T13:38:16" creator="asmaafathy">
+      <taxes>
+        <tax amount="203.450352" created="2026-06-11T13:38:16" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="M226218888" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="YML" />
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="YM WELLNESS" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="YM WELLNESS" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="M226218888" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="48W" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-05T03:15:00 +0200" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[m226218888]" />
+  </parameters>
+</invoice>
+<invoice draft-number="279690" final-number="C25-32050" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="CASH CUSTOMER" payee-customer-role="SHIPPER" contract-customer-id="504281534" contract-customer-role="SHIPPER" total-charges="2595.03" total-discounts="0.0" total-taxes="363.3042" total-total="2958.3342" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="2958.3342" total-un-rounded="2958.3342000000002" key-word1="YM WONDROUS" key-word2="SZPF42681700" key-word3="HMM" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*18/6*" flex-string-04="YM WONDROUS" flex-string-05="mmosaad" flex-string-06="51.9006" flex-string-10="50.0" flex-date-02="2026-06-10T00:00:00" flex-date-03="2026-06-11T13:44:04" created="2026-06-11T13:39:23" creator="hebahkamal" changed="2026-06-11T13:42:08" changer="mmosaad">
+  <charges>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="HMMU4579349" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-10T12:13:32" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23971443" created="2026-06-11T13:39:35" creator="hebahkamal">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T13:39:35" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="HMMU7002598" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-10T21:36:34" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23977303" created="2026-06-11T13:39:35" creator="hebahkamal">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T13:39:35" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-10T10:30:00 +0200" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[szpf42681700]" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="HMM" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="SZPF42681700" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="YM WONDROUS" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="50W" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="SZPF42681700" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="YM WONDROUS" />
+  </parameters>
+</invoice>
+<invoice draft-number="279691" final-number="C25-32051" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="CASH CUSTOMER" payee-customer-role="SHIPPER" contract-customer-id="264434587" contract-customer-role="SHIPPER" total-charges="6487.575" total-discounts="0.0" total-taxes="908.2605" total-total="7395.8355" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="7395.8355" total-un-rounded="7395.8355" key-word1="YM WONDROUS" key-word2="M239057968" key-word3="YML" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*20/6*" flex-string-04="YM WONDROUS" flex-string-05="mmosaad" flex-string-06="51.9006" flex-string-10="125.0" flex-date-02="2026-06-10T00:00:00" flex-date-03="2026-06-11T13:52:07" created="2026-06-11T13:46:16" creator="hebahkamal" changed="2026-06-11T13:50:11" changer="mmosaad">
+  <charges>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="BSIU9831759" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-11T05:16:18" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23982511" created="2026-06-11T13:46:29" creator="hebahkamal">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T13:46:29" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="DRYU9815990" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-11T05:06:26" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23982411" created="2026-06-11T13:46:29" creator="hebahkamal">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T13:46:29" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="OCGU8050993" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-11T05:35:06" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23982824" created="2026-06-11T13:46:29" creator="hebahkamal">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T13:46:29" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="TCNU3799977" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-11T05:28:02" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23982688" created="2026-06-11T13:46:29" creator="hebahkamal">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T13:46:29" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="MAGU5705446" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-11T06:36:54" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23983771" created="2026-06-11T13:46:30" creator="hebahkamal">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T13:46:30" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="M239057968" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="M239057968" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="YML" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="50W" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-10T10:30:00 +0200" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="YM WONDROUS" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="YM WONDROUS" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[m239057968]" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+  </parameters>
+</invoice>
+<invoice draft-number="279692" final-number="C25-32053" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="ELYAMEN FOR TRANS (تحت التسوية )" payee-customer-role="SHIPPER" contract-customer-id="323647332" contract-customer-role="SHIPPER" total-charges="1712.7198" total-discounts="0.0" total-taxes="239.7808" total-total="1952.5006" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="1952.5006" total-un-rounded="1952.5006" key-word1="NORDLUCHS" key-word2="TAOF68779200" key-word3="HMM" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*14/6*" flex-string-04="NORDLUCHS" flex-string-05="mmosaad" flex-string-06="51.9006" flex-string-10="33.0" flex-date-02="2026-06-06T00:00:00" flex-date-03="2026-06-11T13:58:23" created="2026-06-11T13:49:38" creator="asmaafathy" changed="2026-06-11T13:56:28" changer="mmosaad">
+  <charges>
+    <charge event-type-id="STORAGE" entity-id="HMMU2298363" tariff-id="STORI20FD " description="تخزين وارد مازاد عن 5 أيام" paid-thru-day="2026-06-11T00:00:00" event-performed-from="2026-06-11T00:00:00" event-performed-to="2026-06-11T00:00:00" extract-class="INV" rate-billed="8.0" quantity-billed="1.0" amount="415.2048" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="1.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="51.9006" extract-gkey="23932675" changer="asmaafathy" changed="2026-06-11T13:49:49" created="2026-06-11T13:49:49" creator="asmaafathy">
+      <taxes>
+        <tax amount="58.128672" created="2026-06-11T13:49:49" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="HMMU2298363" tariff-id="OTSI20FD " description="خدمات اخري مؤداه للحاويه 20 " event-performed-from="2026-06-06T23:03:35" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23932678" created="2026-06-11T13:49:49" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T13:49:49" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="TAOF68779200" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="NORDLUCHS" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="HMM" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-06T20:45:00 +0200" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="NORDLUCHS" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="217W" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[taof68779200]" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="TAOF68779200" />
+  </parameters>
+</invoice>
+<invoice draft-number="279693" final-number="C25-32062" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="ELYAMEN FOR TRANS (تحت التسوية )" payee-customer-role="SHIPPER" contract-customer-id="347859216" contract-customer-role="SHIPPER" total-charges="2024.1234" total-discounts="0.0" total-taxes="283.3773" total-total="2307.5007" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="2307.5007" total-un-rounded="2307.5007" key-word1="NORDLUCHS" key-word2="COEU9020807320" key-word3="COE" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*19/6*" flex-string-04="NORDLUCHS" flex-string-05="mmosaad" flex-string-06="51.9006" flex-string-10="39.0" flex-date-02="2026-06-06T00:00:00" flex-date-03="2026-06-11T14:12:55" created="2026-06-11T13:51:31" creator="asmaafathy" changed="2026-06-11T14:10:59" changer="mmosaad">
+  <charges>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="OOLU9143118" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-06T23:12:55" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23932803" created="2026-06-11T13:51:44" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T13:51:44" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="OOLU9143118" tariff-id="STORI40FD " description="تخزين مازاد عن 5 أيام 40 قدم" paid-thru-day="2026-06-11T00:00:00" event-performed-from="2026-06-11T00:00:00" event-performed-to="2026-06-11T00:00:00" extract-class="INV" rate-billed="14.0" quantity-billed="1.0" amount="726.6084" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="1.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="51.9006" extract-gkey="23932796" changer="asmaafathy" changed="2026-06-11T13:51:44" created="2026-06-11T13:51:44" creator="asmaafathy">
+      <taxes>
+        <tax amount="101.725176" created="2026-06-11T13:51:44" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="COEU9020807320" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="COE" />
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="NORDLUCHS" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="NORDLUCHS" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="COEU9020807320" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="217W" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-06T21:00:00 +0200" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[coeu9020807320]" />
+  </parameters>
+</invoice>
+<invoice draft-number="279696" final-number="C25-32060" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="CASH CUSTOMER" payee-customer-role="SHIPPER" contract-customer-id="325141622" contract-customer-role="SHIPPER" total-charges="15051.174" total-discounts="0.0" total-taxes="2107.1644" total-total="17158.3384" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="17158.3384" total-un-rounded="17158.3384" key-word1="EGY SKY" key-word2="HLCUFIH260200354" key-word3="HLC" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*27/6*" flex-string-04="EGY SKY" flex-string-05="mmosaad" flex-string-06="51.9006" flex-string-10="290.0" flex-date-02="2026-06-07T00:00:00" flex-date-03="2026-06-11T14:11:57" created="2026-06-11T13:55:51" creator="hebahkamal" changed="2026-06-11T14:10:01" changer="mmosaad">
+  <charges>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="TXGU7123725" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-08T01:14:26" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23946308" created="2026-06-11T13:56:04" creator="hebahkamal">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T13:56:04" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STRIP" entity-id="TXGU7123725" tariff-id="STRIPI40FD " description="تفريغ مشمول حاويه 40 قدم عاديه" event-performed-from="2026-06-11T13:47:42" extract-class="INV" rate-billed="120.0" quantity-billed="1.0" amount="6228.072" is-flat-rate="Y" flat-rate-amount="120.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23987914" created="2026-06-11T13:56:04" creator="hebahkamal">
+      <taxes>
+        <tax amount="871.9300800000001" created="2026-06-11T13:56:04" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STRIP" entity-id="HAMU2710639" tariff-id="STRIPI40FD " description="تفريغ مشمول حاويه 40 قدم عاديه" event-performed-from="2026-06-11T13:47:42" extract-class="INV" rate-billed="120.0" quantity-billed="1.0" amount="6228.072" is-flat-rate="Y" flat-rate-amount="120.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23987913" created="2026-06-11T13:56:04" creator="hebahkamal">
+      <taxes>
+        <tax amount="871.9300800000001" created="2026-06-11T13:56:04" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="HAMU2710639" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-08T08:51:19" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23949352" created="2026-06-11T13:56:04" creator="hebahkamal">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T13:56:04" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-07T20:30:00 +0200" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="EGY SKY" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="092" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[hlcufih260200354]" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="HLCUFIH260200354" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="HLCUFIH260200354" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="EGY SKY" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="HLC" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+  </parameters>
+</invoice>
+<invoice draft-number="279697" final-number="C25-32056" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="DOAA FOR IMPORT &amp; EXPORT" payee-customer-role="AGENT" contract-customer-id="376806907" contract-customer-role="SHIPPER" total-charges="2024.1234" total-discounts="0.0" total-taxes="283.3773" total-total="2307.5007" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="2307.5007" total-un-rounded="2307.5007" key-word1="NORDLUCHS" key-word2="COSU6445444980" key-word3="COS" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*22/6*" flex-string-04="NORDLUCHS" flex-string-05="eslamyousri" flex-string-06="51.9006" flex-string-10="39.0" flex-date-02="2026-06-06T00:00:00" flex-date-03="2026-06-11T14:09:42" created="2026-06-11T13:56:09" creator="asmaafathy" changed="2026-06-11T14:07:46" changer="eslamyousri">
+  <charges>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="CSNU5691081" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-06T22:53:19" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23932560" created="2026-06-11T13:56:23" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T13:56:23" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="CSNU5691081" tariff-id="STORI40FD " description="تخزين مازاد عن 5 أيام 40 قدم" paid-thru-day="2026-06-11T00:00:00" event-performed-from="2026-06-11T00:00:00" event-performed-to="2026-06-11T00:00:00" extract-class="INV" rate-billed="14.0" quantity-billed="1.0" amount="726.6084" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="1.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="51.9006" extract-gkey="23932548" changer="asmaafathy" changed="2026-06-11T13:56:23" created="2026-06-11T13:56:23" creator="asmaafathy">
+      <taxes>
+        <tax amount="101.725176" created="2026-06-11T13:56:23" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="COSU6445444980" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="COS" />
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="NORDLUCHS" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="NORDLUCHS" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="COSU6445444980" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="217W" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-06T20:45:00 +0200" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[cosu6445444980]" />
+  </parameters>
+</invoice>
+<invoice draft-number="279701" final-number="C25-32057" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="DOAA FOR IMPORT &amp; EXPORT" payee-customer-role="AGENT" contract-customer-id="244047472" contract-customer-role="SHIPPER" total-charges="1297.515" total-discounts="0.0" total-taxes="181.6521" total-total="1479.1671" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="1479.1671" total-un-rounded="1479.1671000000001" key-word1="YM WONDROUS" key-word2="M490363665" key-word3="YML" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*20/6*" flex-string-04="YM WONDROUS" flex-string-05="mmosaad" flex-string-06="51.9006" flex-string-10="25.0" flex-date-02="2026-06-10T00:00:00" flex-date-03="2026-06-11T14:10:13" created="2026-06-11T13:59:44" creator="hebahkamal" changed="2026-06-11T14:08:18" changer="mmosaad">
+  <charges>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="TCNU3091273" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-10T13:49:59" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23972544" created="2026-06-11T13:59:57" creator="hebahkamal">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T13:59:57" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="M490363665" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="M490363665" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="YM WONDROUS" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="YML" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-10T10:30:00 +0200" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="YM WONDROUS" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="50W" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[m490363665]" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+  </parameters>
+</invoice>
+<invoice draft-number="279702" final-number="C25-32058" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="DOAA FOR IMPORT &amp; EXPORT" payee-customer-role="AGENT" contract-customer-id="205125158" contract-customer-role="SHIPPER" total-charges="14272.665" total-discounts="0.0" total-taxes="1998.1731" total-total="16270.8381" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="16270.8381" total-un-rounded="16270.8381" key-word1="EGY FUTURE" key-word2="CAN0967876" key-word3="CMA" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*20/6*" flex-string-04="EGY FUTURE" flex-string-05="eslamyousri" flex-string-06="51.9006" flex-string-10="275.0" flex-date-02="2026-06-09T00:00:00" flex-date-03="2026-06-11T14:10:42" created="2026-06-11T13:59:56" creator="asmaafathy" changed="2026-06-11T14:08:46" changer="eslamyousri">
+  <charges>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="BMOU1298041" tariff-id="OTSI20FD " description="خدمات اخري مؤداه للحاويه 20 " event-performed-from="2026-06-10T05:31:00" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23967761" created="2026-06-11T14:00:10" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:00:10" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="FCGU2242813" tariff-id="OTSI20FD " description="خدمات اخري مؤداه للحاويه 20 " event-performed-from="2026-06-10T04:14:38" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23966957" created="2026-06-11T14:00:09" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:00:09" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="CAAU2823985" tariff-id="OTSI20FD " description="خدمات اخري مؤداه للحاويه 20 " event-performed-from="2026-06-10T08:43:50" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23969643" created="2026-06-11T14:00:10" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:00:10" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="TEMU5878329" tariff-id="OTSI20FD " description="خدمات اخري مؤداه للحاويه 20 " event-performed-from="2026-06-10T06:16:57" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23968421" created="2026-06-11T14:00:10" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:00:10" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="TEMU5444106" tariff-id="OTSI20FD " description="خدمات اخري مؤداه للحاويه 20 " event-performed-from="2026-06-10T14:00:35" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23972681" created="2026-06-11T14:00:10" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:00:10" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="TCKU1616481" tariff-id="OTSI20FD " description="خدمات اخري مؤداه للحاويه 20 " event-performed-from="2026-06-10T11:03:38" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23970482" created="2026-06-11T14:00:10" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:00:10" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="TCLU2303391" tariff-id="OTSI20FD " description="خدمات اخري مؤداه للحاويه 20 " event-performed-from="2026-06-10T18:22:37" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23975264" created="2026-06-11T14:00:11" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:00:11" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="TRHU3503435" tariff-id="OTSI20FD " description="خدمات اخري مؤداه للحاويه 20 " event-performed-from="2026-06-10T18:17:24" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23975221" created="2026-06-11T14:00:11" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:00:11" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="TCKU1068243" tariff-id="OTSI20FD " description="خدمات اخري مؤداه للحاويه 20 " event-performed-from="2026-06-10T23:03:02" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23978312" created="2026-06-11T14:00:11" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:00:11" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="CMAU0378504" tariff-id="OTSI20FD " description="خدمات اخري مؤداه للحاويه 20 " event-performed-from="2026-06-10T19:13:43" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23975785" created="2026-06-11T14:00:11" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:00:11" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="TRHU1125911" tariff-id="OTSI20FD " description="خدمات اخري مؤداه للحاويه 20 " event-performed-from="2026-06-10T01:14:35" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23964747" created="2026-06-11T14:00:12" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:00:12" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="346" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-09T23:15:00 +0200" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" value="CAN0972103" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[*]" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="CAN0967876" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="CMA" />
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="EGY FUTURE" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="EGY FUTURE" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="CAN0967876" />
+  </parameters>
+</invoice>
+<invoice draft-number="279704" final-number="C25-32055" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="DOAA FOR IMPORT &amp; EXPORT" payee-customer-role="AGENT" contract-customer-id="435428160" contract-customer-role="SHIPPER" total-charges="8407.8972" total-discounts="0.0" total-taxes="1177.1056" total-total="9585.0028" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="9585.0028" total-un-rounded="9585.0028" key-word1="YM WISDOM" key-word2="M470042851" key-word3="YML" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*20/6*" flex-string-04="YM WISDOM" flex-string-05="mmosaad" flex-string-06="51.9006" flex-string-10="162.0" flex-date-02="2026-06-03T00:00:00" flex-date-03="2026-06-11T14:09:39" created="2026-06-11T14:01:16" creator="hebahkamal" changed="2026-06-11T14:07:43" changer="mmosaad">
+  <charges>
+    <charge event-type-id="STORAGE" entity-id="FFAU6872908" tariff-id="STORI40FD " description="تخزين مازاد عن 5 أيام 40 قدم" paid-thru-day="2026-06-11T00:00:00" event-performed-from="2026-06-08T00:00:00" event-performed-to="2026-06-11T00:00:00" extract-class="INV" rate-billed="14.0" quantity-billed="4.0" amount="2906.4336" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="4.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="51.9006" extract-gkey="23893997" changer="hebahkamal" changed="2026-06-11T14:01:30" created="2026-06-11T14:01:29" creator="hebahkamal">
+      <taxes>
+        <tax amount="406.900704" created="2026-06-11T14:01:29" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="YMMU7196802" tariff-id="STORI40FD " description="تخزين مازاد عن 5 أيام 40 قدم" paid-thru-day="2026-06-11T00:00:00" event-performed-from="2026-06-08T00:00:00" event-performed-to="2026-06-11T00:00:00" extract-class="INV" rate-billed="14.0" quantity-billed="4.0" amount="2906.4336" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="4.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="51.9006" extract-gkey="23894460" changer="hebahkamal" changed="2026-06-11T14:01:30" created="2026-06-11T14:01:30" creator="hebahkamal">
+      <taxes>
+        <tax amount="406.900704" created="2026-06-11T14:01:30" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="FFAU6872908" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-03T21:26:22" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23894010" created="2026-06-11T14:01:29" creator="hebahkamal">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:01:29" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="YMMU7196802" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-03T21:58:02" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23894468" created="2026-06-11T14:01:30" creator="hebahkamal">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:01:30" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="M470042851" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="M470042851" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="YM WISDOM" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="YML" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-03T12:00:00 +0200" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="YM WISDOM" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="26W" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[m470042851]" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+  </parameters>
+</invoice>
+<invoice draft-number="279706" final-number="C25-32059" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="ELMOASASA FOR CUSTOMS" payee-customer-role="AGENT" contract-customer-id="652973612" contract-customer-role="SHIPPER" total-charges="1972.2228" total-discounts="0.0" total-taxes="276.1112" total-total="2248.334" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="2248.334" total-un-rounded="2248.334" key-word1="EGY SKY" key-word2="HLCUGOA260555973" key-word3="HLC" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*28/6*" flex-string-04="EGY SKY" flex-string-05="eslamyousri" flex-string-06="51.9006" flex-string-10="38.0" flex-date-02="2026-06-07T00:00:00" flex-date-03="2026-06-11T14:11:43" created="2026-06-11T14:02:46" creator="asmaafathy" changed="2026-06-11T14:09:47" changer="eslamyousri">
+  <charges>
+    <charge event-type-id="RENT_3_TON" entity-id="DFSU7319570" tariff-id="RENT3TON" description="كشف ومعاينه ونش 3 طن" event-performed-from="2026-06-09T12:57:04" extract-class="INV" rate-billed="13.0" quantity-billed="1.0" amount="674.7078" is-flat-rate="Y" flat-rate-amount="13.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23960226" created="2026-06-11T14:03:00" creator="asmaafathy">
+      <taxes>
+        <tax amount="94.45909200000001" created="2026-06-11T14:03:00" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="DFSU7319570" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-09T12:49:06" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23960187" created="2026-06-11T14:03:00" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:03:00" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[hlcugoa260555973]" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="HLCUGOA260555973" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="HLCUGOA260555973" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="EGY SKY" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="HLC" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-07T20:30:00 +0200" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="EGY SKY" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="092" />
+  </parameters>
+</invoice>
+<invoice draft-number="279707" final-number="C25-32054" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="AHMED MAHMOUD ELDAWOUDY COMPANY" payee-customer-role="AGENT" contract-customer-id="686643852" contract-customer-role="SHIPPER" total-charges="1297.515" total-discounts="0.0" total-taxes="181.6521" total-total="1479.1671" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="1479.1671" total-un-rounded="1479.1671000000001" key-word1="EGY SKY" key-word2="HLCUGOA260489150" key-word3="HLC" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*28/6*" flex-string-04="EGY SKY" flex-string-05="mmosaad" flex-string-06="51.9006" flex-string-10="25.0" flex-date-02="2026-06-07T00:00:00" flex-date-03="2026-06-11T14:08:53" created="2026-06-11T14:03:14" creator="hebahkamal" changed="2026-06-11T14:06:57" changer="mmosaad">
+  <charges>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="HAMU3233417" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-08T09:33:37" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23949670" created="2026-06-11T14:03:29" creator="hebahkamal">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:03:29" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="HLCUGOA260489150" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="HLCUGOA260489150" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="EGY SKY" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="HLC" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-07T20:30:00 +0200" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="EGY SKY" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="092" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[hlcugoa260489150]" />
+  </parameters>
+</invoice>
+<invoice draft-number="279710" final-number="C25-32061" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="ELMOASASA FOR CUSTOMS" payee-customer-role="AGENT" contract-customer-id="652973612" contract-customer-role="SHIPPER" total-charges="3425.4396" total-discounts="0.0" total-taxes="479.5615" total-total="3905.0011" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="3905.0011" total-un-rounded="3905.0011000000004" key-word1="MSC CHINA" key-word2="ISTF92304200" key-word3="HMM" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*17/6*" flex-string-04="MSC CHINA" flex-string-05="eslamyousri" flex-string-06="51.9006" flex-string-10="66.0" flex-date-02="2026-06-05T00:00:00" flex-date-03="2026-06-11T14:12:23" created="2026-06-11T14:04:43" creator="asmaafathy" changed="2026-06-11T14:10:28" changer="eslamyousri">
+  <charges>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="GCXU5022155" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-05T09:20:39" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23914279" created="2026-06-11T14:05:04" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:05:04" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="GCXU5022155" tariff-id="STORI40FD " description="تخزين مازاد عن 5 أيام 40 قدم" paid-thru-day="2026-06-11T00:00:00" event-performed-from="2026-06-10T00:00:00" event-performed-to="2026-06-11T00:00:00" extract-class="INV" rate-billed="14.0" quantity-billed="2.0" amount="1453.2168" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="2.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="51.9006" extract-gkey="23914276" changer="asmaafathy" changed="2026-06-11T14:05:04" created="2026-06-11T14:05:04" creator="asmaafathy">
+      <taxes>
+        <tax amount="203.450352" created="2026-06-11T14:05:04" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="RENT_3_TON" entity-id="GCXU5022155" tariff-id="RENT3TON" description="كشف ومعاينه ونش 3 طن" event-performed-from="2026-06-10T08:36:23" extract-class="INV" rate-billed="13.0" quantity-billed="1.0" amount="674.7078" is-flat-rate="Y" flat-rate-amount="13.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23969590" created="2026-06-11T14:05:04" creator="asmaafathy">
+      <taxes>
+        <tax amount="94.45909200000001" created="2026-06-11T14:05:04" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="ISTF92304200" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="ISTF92304200" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="MSC CHINA" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="HMM" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-05T05:50:00 +0200" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="MSC CHINA" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="GT621" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[istf92304200]" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+  </parameters>
+</invoice>
+<invoice draft-number="279712" final-number="C25-32063" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="ELMOASASA FOR CUSTOMS" payee-customer-role="AGENT" contract-customer-id="511490798" contract-customer-role="SHIPPER" total-charges="6331.8732" total-discounts="0.0" total-taxes="886.4622" total-total="7218.3354" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="7218.3354" total-un-rounded="7218.3354" key-word1="SIARGAO" key-word2="COEU9020791310" key-word3="COE" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*17/6*" flex-string-04="SIARGAO" flex-string-05="eslamyousri" flex-string-06="51.9006" flex-string-10="122.0" flex-date-02="2026-06-01T00:00:00" flex-date-03="2026-06-11T14:12:59" created="2026-06-11T14:07:33" creator="asmaafathy" changed="2026-06-11T14:11:03" changer="eslamyousri">
+  <charges>
+    <charge event-type-id="RENT_3_TON" entity-id="FFAU2399994" tariff-id="RENT3TON" description="كشف ومعاينه ونش 3 طن" event-performed-from="2026-06-06T08:31:56" extract-class="INV" rate-billed="13.0" quantity-billed="1.0" amount="674.7078" is-flat-rate="Y" flat-rate-amount="13.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23925832" created="2026-06-11T14:07:46" creator="asmaafathy">
+      <taxes>
+        <tax amount="94.45909200000001" created="2026-06-11T14:07:46" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="FFAU2399994" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-01T09:00:12" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23867299" created="2026-06-11T14:07:46" creator="asmaafathy">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:07:46" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="FFAU2399994" tariff-id="STORI40FD " description="تخزين مازاد عن 5 أيام 40 قدم" paid-thru-day="2026-06-11T00:00:00" event-performed-from="2026-06-06T00:00:00" event-performed-to="2026-06-11T00:00:00" extract-class="INV" rate-billed="14.0" quantity-billed="6.0" amount="4359.6503999999995" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="6.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="51.9006" extract-gkey="23867290" changer="asmaafathy" changed="2026-06-11T14:07:46" created="2026-06-11T14:07:46" creator="asmaafathy">
+      <taxes>
+        <tax amount="610.351056" created="2026-06-11T14:07:46" creator="asmaafathy">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-01T00:23:00 +0200" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="SIARGAO" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="045W" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[coeu9020791310]" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="COEU9020791310" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="COEU9020791310" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="SIARGAO" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="COE" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+  </parameters>
+</invoice>
+<invoice draft-number="279714" final-number="C25-32064" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="DOAA FOR IMPORT &amp; EXPORT" payee-customer-role="AGENT" contract-customer-id="202600459" contract-customer-role="SHIPPER" total-charges="4722.9546" total-discounts="0.0" total-taxes="661.2136" total-total="5384.1682" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="5384.1682" total-un-rounded="5384.1682" key-word1="ELBELLA" key-word2="PIR0279249" key-word3="CMA" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*14/6*" flex-string-04="ELBELLA" flex-string-05="mmosaad" flex-string-06="51.9006" flex-string-10="91.0" flex-date-02="2026-06-10T00:00:00" flex-date-03="2026-06-11T14:15:53" created="2026-06-11T14:11:13" creator="hebahkamal" changed="2026-06-11T14:13:57" changer="mmosaad">
+  <charges>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="CAIU5689450" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-10T17:17:27" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23974655" created="2026-06-11T14:11:30" creator="hebahkamal">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:11:30" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="REEFER" entity-id="CAIU5689450" tariff-id="POWI40FR " description="طاقه من 1 الى 7 يوم" paid-thru-day="2026-06-11T00:00:00" event-performed-from="2026-06-10T00:00:00" event-performed-to="2026-06-11T00:00:00" extract-class="INV" rate-billed="33.0" quantity-billed="2.0" amount="3425.4395999999997" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="2.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23974862" changer="hebahkamal" changed="2026-06-11T14:11:30" created="2026-06-11T14:11:30" creator="hebahkamal">
+      <taxes>
+        <tax amount="479.561544" created="2026-06-11T14:11:30" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="PIR0279249" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="PIR0279249" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="ELBELLA" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="CMA" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-10T12:15:00 +0200" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="ELBELLA" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="0BOF3S1MA" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[pir0279249]" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+  </parameters>
+</invoice>
+<invoice draft-number="279715" final-number="C25-32065" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="MOHND FOR TRANSPORT (تحت التسويه)" payee-customer-role="AGENT" contract-customer-id="331726130" contract-customer-role="SHIPPER" total-charges="14376.4662" total-discounts="0.0" total-taxes="2012.7053" total-total="16389.1715" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="16389.1715" total-un-rounded="16389.1715" key-word1="YM WORLD" key-word2="M237072332" key-word3="YML" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*12/6*" flex-string-04="YM WORLD" flex-string-05="mmosaad" flex-string-06="51.9006" flex-string-10="277.0" flex-date-02="2026-05-21T00:00:00" flex-date-03="2026-06-11T14:38:43" created="2026-06-11T14:33:40" creator="nada" changed="2026-06-11T14:36:47" changer="mmosaad">
+  <charges>
+    <charge event-type-id="STORAGE" entity-id="BMOU6270854" tariff-id="STORI40FD " description="تخزين مازاد عن 5 أيام 40 قدم" paid-thru-day="2026-06-11T00:00:00" event-performed-from="2026-05-26T00:00:00" event-performed-to="2026-06-09T00:00:00" extract-class="INV" rate-billed="14.0" quantity-billed="15.0" amount="10899.126" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="15.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="51.9006" extract-gkey="23776310" changer="nada" changed="2026-06-11T14:33:52" created="2026-06-11T14:33:52" creator="nada">
+      <taxes>
+        <tax amount="1525.8776400000002" created="2026-06-11T14:33:52" creator="nada">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="BMOU6270854" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-05-22T10:02:23" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23776320" created="2026-06-11T14:33:52" creator="nada">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:33:52" creator="nada">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="BMOU6270854" tariff-id="STORI40FD " description="تخزين مازاد عن 20 يوم 40 قدم" paid-thru-day="2026-06-11T00:00:00" event-performed-from="2026-06-10T00:00:00" event-performed-to="2026-06-11T00:00:00" extract-class="INV" rate-billed="21.0" quantity-billed="2.0" amount="2179.8251999999998" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="2.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="51.9006" extract-gkey="23776310" changer="nada" changed="2026-06-11T14:33:52" created="2026-06-11T14:33:52" creator="nada">
+      <taxes>
+        <tax amount="305.175528" created="2026-06-11T14:33:52" creator="nada">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="48W" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-05-21T19:30:00 +0200" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[M237072332]" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="M237072332" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="YML" />
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="YM WORLD" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="YM WORLD" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="M237072332" />
+  </parameters>
+</invoice>
+<invoice draft-number="279716" final-number="C25-32066" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="فاتورة مهمل للعميل" currency="EGP" payee-customer-id="CASH CUSTOMER" payee-customer-role="SHIPPER" contract-customer-id="208160876" contract-customer-role="SHIPPER" total-charges="7785.09" total-discounts="0.0" total-taxes="1089.9126" total-total="8875.0026" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="8875.0026" total-un-rounded="8875.0026" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-04="YM WIDTH" flex-string-05="eslamyousri" flex-string-06="51.9006" flex-string-10="150.0" flex-date-02="2026-01-01T13:30:00" flex-date-03="2026-06-11T14:46:21" created="2026-06-11T14:36:20" creator="asaad" changed="2026-06-11T14:44:25" changer="eslamyousri">
+  <charges>
+    <charge event-type-id="YARD_TO_TRUCK_FCL" entity-id="YMMU6679494" tariff-id="YTOT_I40FD " description="تحميل حاويه 40 قدم مملوء" event-performed-from="2026-06-11T14:12:03" extract-class="INV" rate-billed="33.0" quantity-billed="1.0" amount="1712.7198" is-flat-rate="Y" flat-rate-amount="33.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23988188" created="2026-06-11T14:36:25" creator="asaad">
+      <taxes>
+        <tax amount="239.78077200000004" created="2026-06-11T14:36:25" creator="asaad">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="YMMU6679494" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-11T14:11:55" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23988187" created="2026-06-11T14:36:25" creator="asaad">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:36:25" creator="asaad">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="TRUCK _TO_YARD_MTY" entity-id="YMMU6679494" tariff-id="TTOY_E40ED " description="تعتيق حاويه 40 قدم فارغ" event-performed-from="2026-06-11T14:34:03" extract-class="INV" rate-billed="17.0" quantity-billed="1.0" amount="882.3102" is-flat-rate="Y" flat-rate-amount="17.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23988464" created="2026-06-11T14:36:25" creator="asaad">
+      <taxes>
+        <tax amount="123.52342800000001" created="2026-06-11T14:36:25" creator="asaad">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="YMMU6929715" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-11T14:10:52" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23988171" created="2026-06-11T14:36:25" creator="asaad">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:36:25" creator="asaad">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="TRUCK _TO_YARD_MTY" entity-id="YMMU6929715" tariff-id="TTOY_E40ED " description="تعتيق حاويه 40 قدم فارغ" event-performed-from="2026-06-11T14:33:19" extract-class="INV" rate-billed="17.0" quantity-billed="1.0" amount="882.3102" is-flat-rate="Y" flat-rate-amount="17.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23988449" created="2026-06-11T14:36:25" creator="asaad">
+      <taxes>
+        <tax amount="123.52342800000001" created="2026-06-11T14:36:25" creator="asaad">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="YARD_TO_TRUCK_FCL" entity-id="YMMU6929715" tariff-id="YTOT_I40FD " description="تحميل حاويه 40 قدم مملوء" event-performed-from="2026-06-11T14:10:59" extract-class="INV" rate-billed="33.0" quantity-billed="1.0" amount="1712.7198" is-flat-rate="Y" flat-rate-amount="33.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23988172" created="2026-06-11T14:36:25" creator="asaad">
+      <taxes>
+        <tax amount="239.78077200000004" created="2026-06-11T14:36:25" creator="asaad">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuEqId" reportable-field="رقم الحاويه:" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="order No:" />
+    <parameter metafield-id="bexuBookingNbr" reportable-field="رقم البوكينج" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ الصرف" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="M430210104" />
+  </parameters>
+</invoice>
+<invoice draft-number="279717" final-number="C25-32067" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="فاتورة مهمل للعميل" currency="EGP" payee-customer-id="CASH CUSTOMER" payee-customer-role="SHIPPER" contract-customer-id="208160876" contract-customer-role="SHIPPER" total-charges="3010.2348" total-discounts="0.0" total-taxes="421.4329" total-total="3431.6677" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="3431.6677" total-un-rounded="3431.6677" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-04="YM WARMTH" flex-string-05="eslamyousri" flex-string-06="51.9006" flex-string-10="58.0" flex-date-02="2026-01-15T14:00:00" flex-date-03="2026-06-11T14:46:49" created="2026-06-11T14:38:01" creator="asaad" changed="2026-06-11T14:44:53" changer="eslamyousri">
+  <charges>
+    <charge event-type-id="YARD_TO_TRUCK_FCL" entity-id="BEAU5237728" tariff-id="YTOT_I40FD " description="تحميل حاويه 40 قدم مملوء" event-performed-from="2026-06-11T14:15:31" extract-class="INV" rate-billed="33.0" quantity-billed="1.0" amount="1712.7198" is-flat-rate="Y" flat-rate-amount="33.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23988249" created="2026-06-11T14:38:05" creator="asaad">
+      <taxes>
+        <tax amount="239.78077200000004" created="2026-06-11T14:38:05" creator="asaad">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="BEAU5237728" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-11T14:15:25" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23988240" created="2026-06-11T14:38:05" creator="asaad">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:38:05" creator="asaad">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuFlexString03" reportable-field="order No:" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="SUBF37673400" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ الصرف" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuEqId" reportable-field="رقم الحاويه:" />
+    <parameter metafield-id="bexuBookingNbr" reportable-field="رقم البوكينج" />
+  </parameters>
+</invoice>
+<invoice draft-number="279718" final-number="C25-32068" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="فاتورة مهمل للعميل" currency="EGP" payee-customer-id="CASH CUSTOMER" payee-customer-role="SHIPPER" contract-customer-id="208160876" contract-customer-role="SHIPPER" total-charges="6020.4696" total-discounts="0.0" total-taxes="842.8657" total-total="6863.3353" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="6863.3353" total-un-rounded="6863.335300000001" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-04="YM WARMTH" flex-string-05="eslamyousri" flex-string-06="51.9006" flex-string-10="116.0" flex-date-02="2026-01-15T14:00:00" flex-date-03="2026-06-11T14:47:18" created="2026-06-11T14:39:48" creator="asaad" changed="2026-06-11T14:45:22" changer="eslamyousri">
+  <charges>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="ONEU1551576" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-11T14:14:28" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23988225" created="2026-06-11T14:39:51" creator="asaad">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:39:51" creator="asaad">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="YARD_TO_TRUCK_FCL" entity-id="ONEU1551576" tariff-id="YTOT_I40FD " description="تحميل حاويه 40 قدم مملوء" event-performed-from="2026-06-11T14:14:33" extract-class="INV" rate-billed="33.0" quantity-billed="1.0" amount="1712.7198" is-flat-rate="Y" flat-rate-amount="33.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23988229" created="2026-06-11T14:39:51" creator="asaad">
+      <taxes>
+        <tax amount="239.78077200000004" created="2026-06-11T14:39:51" creator="asaad">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="ONEU5845877" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-11T14:13:08" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23988209" created="2026-06-11T14:39:51" creator="asaad">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:39:51" creator="asaad">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="YARD_TO_TRUCK_FCL" entity-id="ONEU5845877" tariff-id="YTOT_I40FD " description="تحميل حاويه 40 قدم مملوء" event-performed-from="2026-06-11T14:13:13" extract-class="INV" rate-billed="33.0" quantity-billed="1.0" amount="1712.7198" is-flat-rate="Y" flat-rate-amount="33.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23988212" created="2026-06-11T14:39:51" creator="asaad">
+      <taxes>
+        <tax amount="239.78077200000004" created="2026-06-11T14:39:51" creator="asaad">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuBookingNbr" reportable-field="رقم البوكينج" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ الصرف" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="SUBF37930700" />
+    <parameter metafield-id="bexuEqId" reportable-field="رقم الحاويه:" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="order No:" />
+  </parameters>
+</invoice>
+<invoice draft-number="279719" final-number="C25-32069" finalized-date="2026-06-11T00:00:00" status="FINAL" is-merged="N" invoice-type-id="فاتورة مهمل للعميل" currency="EGP" payee-customer-id="CASH CUSTOMER" payee-customer-role="SHIPPER" contract-customer-id="208160876" contract-customer-role="SHIPPER" total-charges="3010.2348" total-discounts="0.0" total-taxes="421.4329" total-total="3431.6677" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="3431.6677" total-un-rounded="3431.6677" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-04="REMAH" flex-string-05="eslamyousri" flex-string-06="51.9006" flex-string-10="58.0" flex-date-02="2026-01-21T04:15:00" flex-date-03="2026-06-11T14:48:22" created="2026-06-11T14:41:03" creator="asaad" changed="2026-06-11T14:46:26" changer="eslamyousri">
+  <charges>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="KKFU8110996" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-11T14:16:28" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1297.515" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23988261" created="2026-06-11T14:41:07" creator="asaad">
+      <taxes>
+        <tax amount="181.65210000000002" created="2026-06-11T14:41:07" creator="asaad">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="YARD_TO_TRUCK_FCL" entity-id="KKFU8110996" tariff-id="YTOT_I40FD " description="تحميل حاويه 40 قدم مملوء" event-performed-from="2026-06-11T14:16:35" extract-class="INV" rate-billed="33.0" quantity-billed="1.0" amount="1712.7198" is-flat-rate="Y" flat-rate-amount="33.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="51.9006" extract-gkey="23988263" created="2026-06-11T14:41:07" creator="asaad">
+      <taxes>
+        <tax amount="239.78077200000004" created="2026-06-11T14:41:07" creator="asaad">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ الصرف" value="2026-06-11T00:00:00 +0200" />
+    <parameter metafield-id="bexuEqId" reportable-field="رقم الحاويه:" />
+    <parameter metafield-id="bexuBookingNbr" reportable-field="رقم البوكينج" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="order No:" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="SUBF37070900" />
   </parameters>
 </invoice>
 </argo:snx>
