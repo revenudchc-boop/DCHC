@@ -343,7 +343,10 @@ function sendAdminReport(summaryData) {
 
 function sendTelegramMessage(chatId, message) {
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
-    if (!botToken) return;
+    if (!botToken) {
+        console.log('⚠️ TELEGRAM_BOT_TOKEN غير موجود');
+        return;
+    }
     
     const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
     const payload = {
@@ -363,7 +366,10 @@ function sendTelegramMessage(chatId, message) {
 
 function sendTelegramAlert(summaryData) {
     const chatId = process.env.TELEGRAM_CHAT_ID;
-    if (!chatId) return;
+    if (!chatId) {
+        console.log('⚠️ TELEGRAM_CHAT_ID غير موجود');
+        return;
+    }
     
     let message = '<b>📬 تقرير الفواتير الجديدة</b>\n';
     message += '━━━━━━━━━━━━━━━━\n';
@@ -491,7 +497,7 @@ function sendCreditEmail(toEmail, user, credits) {
 }
 
 // ============================================
-// معالجة Credit Data
+// التنفيذ الرئيسي
 // ============================================
 
 async function processCredits(users, state) {
@@ -545,18 +551,91 @@ async function processCredits(users, state) {
     }
     
     if (summaryData.length > 0) {
-        // إرسال تقرير credit للأدمن
-        const adminEmails = process.env.EMAIL_RECIPIENT ? [process.env.EMAIL_RECIPIENT] : [];
-        if (adminEmails.length > 0) {
-            // يمكن إضافة تقرير credit هنا
-            console.log(`✅ تم إرسال ${summaryData.length} إشعارات خصم`);
-        }
+        console.log(`✅ تم إرسال ${summaryData.length} إشعارات خصم`);
     }
 }
 
+async function main() {
+    console.log('🚀 بدء فحص GitHub...');
+    
+    // 1. تحميل المستخدمين
+    const users = loadUsers();
+    if (users.length === 0) {
+        console.log('⚠️ لا يوجد مستخدمين نشطين');
+        return;
+    }
+    
+    // 2. قراءة أحدث ملف فواتير
+    const latestFile = getLastDataFile();
+    if (!latestFile) {
+        console.log('❌ لا توجد ملفات بيانات');
+        return;
+    }
+    
+    console.log(`📌 أحدث ملف: ${latestFile.name}`);
+    
+    // 3. استخراج الفواتير
+    const allInvoices = await extractInvoices(latestFile.path);
+    console.log(`📄 تم استخراج ${allInvoices.length} فاتورة`);
+    
+    // 4. تحميل الحالة السابقة
+    const state = loadState();
+    
+    // 5. معالجة كل مستخدم
+    const summaryData = [];
+    let sentCount = 0;
+    
+    for (const user of users) {
+        if (user.userType === 'admin') continue;
+        
+        const emailsToSend = [];
+        if (user.email) emailsToSend.push(user.email);
+        if (user.additionalEmails) {
+            user.additionalEmails.forEach(e => { if (e) emailsToSend.push(e); });
+        }
+        if (emailsToSend.length === 0) continue;
+        
+        const userInvoices = filterInvoicesForUser(allInvoices, user);
+        if (userInvoices.length === 0) continue;
+        
+        const newInvoices = filterNewInvoices(userInvoices, user, state);
+        if (newInvoices.length === 0) {
+            console.log(`${user.username}: لا توجد فواتير جديدة`);
+            continue;
+        }
+        
+        console.log(`${user.username}: ${newInvoices.length} فاتورة جديدة`);
+        
+        // إرسال إيميل
+        sendEmail(emailsToSend.join(','), user, newInvoices);
+        sentCount++;
+        
+        summaryData.push({
+            username: user.username,
+            count: newInvoices.length,
+            email: user.email
+        });
+    }
+    
+    // 6. حفظ الحالة
+    saveState(state);
+    
+    // 7. إرسال تقرير للأدمن
+    if (sentCount > 0) {
+        sendAdminReport(summaryData);
+        sendTelegramAlert(summaryData);
+    }
+    
+    // 8. معالجة Credit Data
+    await processCredits(users, state);
+    
+    console.log(`✅ اكتمل الفحص. تم إرسال ${sentCount} إيميلات`);
+}
+
 // ============================================
-// دالة اختبار الإيميل (للتجربة)
+// 🧪 دوال الاختبار
 // ============================================
+
 function sendTestEmail() {
     console.log('🧪 تشغيل اختبار الإيميل...');
     
@@ -578,9 +657,6 @@ function sendTestEmail() {
     console.log('✅ تم إرسال إيميل تجريبي');
 }
 
-// ============================================
-// دالة اختبار تيليجرام (للتجربة)
-// ============================================
 function sendTestTelegram() {
     console.log('🧪 تشغيل اختبار تيليجرام...');
     
@@ -594,9 +670,6 @@ function sendTestTelegram() {
     console.log('✅ تم إرسال اختبار تيليجرام');
 }
 
-// ============================================
-// دالة اختبار النظام بالكامل
-// ============================================
 function sendTestAll() {
     console.log('🧪 تشغيل اختبار النظام بالكامل...');
     sendTestEmail();
