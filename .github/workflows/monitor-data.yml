@@ -4,9 +4,10 @@ on:
   push:
     paths:
       - 'data/datatxt_Q*.txt'
+      - 'data/creditdata.txt'
     branches:
       - main
-  workflow_dispatch:    # ← تم إضافة هذا السطر للتشغيل اليدوي
+  workflow_dispatch:
 
 jobs:
   check-and-notify:
@@ -14,15 +15,16 @@ jobs:
     
     steps:
       - name: 📥 سحب الكود
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4        # ← تم التحديث من v3 إلى v4
         
       - name: 🔧 إعداد Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4      # ← تم التحديث من v3 إلى v4
         with:
-          node-version: '18'
+          node-version: '22'             # ← تم التحديث من 18 إلى 22
+          cache: 'npm'
           
       - name: 📦 تثبيت الاعتماديات
-        run: npm install xml2js nodemailer
+        run: npm install
         
       - name: 🔍 تشغيل سكريبت الفحص
         run: node scripts/check-invoices.js
@@ -35,12 +37,3 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_ACTOR: ${{ github.actor }}
-          
-      - name: 📧 إرسال إيميل التحديث
-        if: success()
-        run: |
-          if [ -f /tmp/invoice_data.env ]; then
-            source /tmp/invoice_data.env
-            echo -e "Subject: 📊 تحديث بيانات DCHC - $FILE_NAME\n\n📁 الملف: $FILE_NAME\n📄 عدد الفواتير: $INVOICE_COUNT\n👤 المستخدم: ${{ github.actor }}\n📅 التاريخ: $(date '+%Y-%m-%d %H:%M:%S')\n\n🔗 عرض الملف: https://github.com/${{ github.repository }}/blob/main/data/$FILE_NAME" | sendmail "${{ secrets.EMAIL_RECIPIENT }}"
-            echo "✅ تم إرسال الإيميل"
-          fi
