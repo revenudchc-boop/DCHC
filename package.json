@@ -1,12 +1,12 @@
 {
-  "name": "dchc-invoice-system",
+  "name": "dchc-invoice-monitor",
   "version": "1.0.0",
-  "description": "Invoice System for DCHC",
-  "main": "server.js",
+  "description": "مراقبة ملفات الفواتير على GitHub",
+  "main": "scripts/check-invoices.js",
   "scripts": {
-    "start": "node server.js"
+    "check": "node scripts/check-invoices.js"
   },
   "dependencies": {
-    "express": "^4.18.2"
+    "xml2js": "^0.6.2"
   }
 }
