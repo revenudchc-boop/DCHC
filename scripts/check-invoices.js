@@ -355,6 +355,7 @@ function sendTelegramMessage(chatId, message) {
     try {
         const { execSync } = require('child_process');
         execSync(`curl -X POST "${url}" -H "Content-Type: application/json" -d '${JSON.stringify(payload)}'`, { stdio: 'pipe' });
+        console.log(`✅ تم إرسال رسالة تيليجرام إلى ${chatId}`);
     } catch(e) {
         console.error('❌ فشل إرسال تيليجرام:', e.message);
     }
@@ -490,87 +491,6 @@ function sendCreditEmail(toEmail, user, credits) {
 }
 
 // ============================================
-// التنفيذ الرئيسي
-// ============================================
-
-async function main() {
-    console.log('🚀 بدء فحص GitHub...');
-    
-    // 1. تحميل المستخدمين
-    const users = loadUsers();
-    if (users.length === 0) {
-        console.log('⚠️ لا يوجد مستخدمين نشطين');
-        return;
-    }
-    
-    // 2. قراءة أحدث ملف فواتير
-    const latestFile = getLastDataFile();
-    if (!latestFile) {
-        console.log('❌ لا توجد ملفات بيانات');
-        return;
-    }
-    
-    console.log(`📌 أحدث ملف: ${latestFile.name}`);
-    
-    // 3. استخراج الفواتير
-    const allInvoices = await extractInvoices(latestFile.path);
-    console.log(`📄 تم استخراج ${allInvoices.length} فاتورة`);
-    
-    // 4. تحميل الحالة السابقة
-    const state = loadState();
-    
-    // 5. معالجة كل مستخدم
-    const summaryData = [];
-    let sentCount = 0;
-    
-    for (const user of users) {
-        if (user.userType === 'admin') continue;
-        
-        const emailsToSend = [];
-        if (user.email) emailsToSend.push(user.email);
-        if (user.additionalEmails) {
-            user.additionalEmails.forEach(e => { if (e) emailsToSend.push(e); });
-        }
-        if (emailsToSend.length === 0) continue;
-        
-        const userInvoices = filterInvoicesForUser(allInvoices, user);
-        if (userInvoices.length === 0) continue;
-        
-        const newInvoices = filterNewInvoices(userInvoices, user, state);
-        if (newInvoices.length === 0) {
-            console.log(`${user.username}: لا توجد فواتير جديدة`);
-            continue;
-        }
-        
-        console.log(`${user.username}: ${newInvoices.length} فاتورة جديدة`);
-        
-        // إرسال إيميل
-        sendEmail(emailsToSend.join(','), user, newInvoices);
-        sentCount++;
-        
-        summaryData.push({
-            username: user.username,
-            count: newInvoices.length,
-            email: user.email
-        });
-    }
-    
-    // 6. حفظ الحالة
-    saveState(state);
-    
-    // 7. إرسال تقرير للأدمن
-    if (sentCount > 0) {
-        sendAdminReport(summaryData);
-        sendTelegramAlert(summaryData);
-    }
-    
-    // 8. معالجة Credit Data
-    await processCredits(users, state);
-    
-    console.log(`✅ اكتمل الفحص. تم إرسال ${sentCount} إيميلات`);
-}
-
-// ============================================
 // معالجة Credit Data
 // ============================================
 
@@ -628,23 +548,18 @@ async function processCredits(users, state) {
         // إرسال تقرير credit للأدمن
         const adminEmails = process.env.EMAIL_RECIPIENT ? [process.env.EMAIL_RECIPIENT] : [];
         if (adminEmails.length > 0) {
-            // ... يمكن إضافة تقرير credit هنا
+            // يمكن إضافة تقرير credit هنا
+            console.log(`✅ تم إرسال ${summaryData.length} إشعارات خصم`);
         }
     }
 }
 
 // ============================================
-// التشغيل
-// ============================================
-
-main().catch(error => {
-    console.error('❌ خطأ:', error);
-    process.exit(1);
-});
-// ============================================
-// دالة اختبار الإيميل
+// دالة اختبار الإيميل (للتجربة)
 // ============================================
 function sendTestEmail() {
+    console.log('🧪 تشغيل اختبار الإيميل...');
+    
     const testUser = {
         username: 'اختبار',
         email: process.env.EMAIL_RECIPIENT || 'kozomoozoo@gmail.com',
@@ -663,6 +578,47 @@ function sendTestEmail() {
     console.log('✅ تم إرسال إيميل تجريبي');
 }
 
-// استدعاء الدالة بدلاً من main()
-sendTestEmail();
-// main();  // علق على السطر الأصلي
+// ============================================
+// دالة اختبار تيليجرام (للتجربة)
+// ============================================
+function sendTestTelegram() {
+    console.log('🧪 تشغيل اختبار تيليجرام...');
+    
+    const testData = [{
+        username: 'اختبار',
+        count: 5,
+        email: 'test@example.com'
+    }];
+    
+    sendTelegramAlert(testData);
+    console.log('✅ تم إرسال اختبار تيليجرام');
+}
+
+// ============================================
+// دالة اختبار النظام بالكامل
+// ============================================
+function sendTestAll() {
+    console.log('🧪 تشغيل اختبار النظام بالكامل...');
+    sendTestEmail();
+    sendTestTelegram();
+    console.log('✅ اكتمل الاختبار');
+}
+
+// ============================================
+// 💡 اختر ما تريد تشغيله:
+// ============================================
+
+// 🔹 الخيار 1: تشغيل النظام الفعلي (للمستخدمين الحقيقيين)
+main().catch(error => {
+    console.error('❌ خطأ:', error);
+    process.exit(1);
+});
+
+// 🔹 الخيار 2: تشغيل اختبار الإيميل فقط (علّق الخيار 1 وافتح هذا)
+// sendTestEmail();
+
+// 🔹 الخيار 3: تشغيل اختبار تيليجرام فقط (علّق الخيار 1 وافتح هذا)
+// sendTestTelegram();
+
+// 🔹 الخيار 4: تشغيل جميع الاختبارات (علّق الخيار 1 وافتح هذا)
+// sendTestAll();
