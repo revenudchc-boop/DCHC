@@ -830,4 +830,4 @@ main().catch(error => {
 // sendTestTelegram();
 
 // 🔹 الخيار 4: تشغيل جميع الاختبارات (علّق الخيار 1 وافتح هذا)
-sendTestAll()
+//sendTestAll()
