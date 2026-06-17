@@ -504,14 +504,14 @@ async function processCredits(users, state) {
     const creditFile = getCreditFile();
     if (!creditFile) {
         console.log('ℹ️ لا يوجد ملف creditdata.txt');
-        return;
+        return [];
     }
     
     console.log('📌 قراءة creditdata.txt');
     const allCredits = await extractCredits(creditFile.path);
     console.log(`📄 تم استخراج ${allCredits.length} إشعار خصم`);
     
-    let summaryData = [];
+    let creditSummaryData = [];
     
     for (const user of users) {
         if (user.userType === 'admin') continue;
@@ -543,7 +543,7 @@ async function processCredits(users, state) {
         
         sendCreditEmail(emailsToSend.join(','), user, newCredits);
         
-        summaryData.push({
+        creditSummaryData.push({
             username: user.username,
             count: newCredits.length,
             email: user.email
@@ -551,29 +551,29 @@ async function processCredits(users, state) {
     }
     
     // ✅ ✅ ✅ إرسال تقرير تيليجرام لإشعارات الخصم ✅ ✅ ✅
-    if (summaryData.length > 0) {
+    if (creditSummaryData.length > 0) {
         const chatId = process.env.TELEGRAM_CHAT_ID;
         if (chatId) {
             let message = '<b>🔴 تقرير إشعارات الخصم الجديدة</b>\n';
             message += '━━━━━━━━━━━━━━━━\n';
             
             let totalCredits = 0;
-            summaryData.forEach(s => {
+            creditSummaryData.forEach(s => {
                 message += `👤 <b>${s.username}</b>: ${s.count} إشعار خصم\n`;
                 totalCredits += s.count;
             });
             
             message += '━━━━━━━━━━━━━━━━\n';
             message += `📊 إجمالي الإشعارات: <b>${totalCredits}</b>\n`;
-            message += `👥 عدد المستخدمين: <b>${summaryData.length}</b>\n`;
+            message += `👥 عدد المستخدمين: <b>${creditSummaryData.length}</b>\n`;
             message += `🕐 ${new Date().toLocaleString('ar-EG')}`;
             
             sendTelegramMessage(chatId, message);
-            console.log(`✅ تم إرسال تقرير تيليجرام لإشعارات الخصم (${summaryData.length} مستخدم)`);
-        } else {
-            console.log('⚠️ TELEGRAM_CHAT_ID غير موجود، لم يتم إرسال تقرير تيليجرام');
+            console.log(`✅ تم إرسال تقرير تيليجرام لإشعارات الخصم (${creditSummaryData.length} مستخدم)`);
         }
     }
+    
+    return creditSummaryData;  // ← إرجاع البيانات
 }
 
 async function main() {
@@ -602,8 +602,8 @@ async function main() {
     // 4. تحميل الحالة السابقة
     const state = loadState();
     
-    // 5. معالجة كل مستخدم
-    const summaryData = [];
+    // 5. معالجة كل مستخدم (الفواتير)
+    const invoiceSummary = [];
     let sentCount = 0;
     
     for (const user of users) {
@@ -627,11 +627,10 @@ async function main() {
         
         console.log(`${user.username}: ${newInvoices.length} فاتورة جديدة`);
         
-        // إرسال إيميل
         sendEmail(emailsToSend.join(','), user, newInvoices);
         sentCount++;
         
-        summaryData.push({
+        invoiceSummary.push({
             username: user.username,
             count: newInvoices.length,
             email: user.email
@@ -641,16 +640,25 @@ async function main() {
     // 6. حفظ الحالة
     saveState(state);
     
-    // 7. إرسال تقرير للأدمن
-    if (sentCount > 0) {
-        sendAdminReport(summaryData);
-        sendTelegramAlert(summaryData);
+    // 7. ✅ إرسال تقرير الفواتير للأدمن (إذا وجدت فواتير جديدة)
+    if (invoiceSummary.length > 0) {
+        sendAdminInvoiceReport(invoiceSummary, latestFile.name, allInvoices.length);
+        sendTelegramAlert(invoiceSummary);
+    } else {
+        console.log('ℹ️ لا توجد فواتير جديدة، لم يتم إرسال تقرير الفواتير');
     }
     
-    // 8. معالجة Credit Data
-    await processCredits(users, state);
+    // 8. معالجة Credit Data والحصول على النتائج
+    const creditSummary = await processCredits(users, state);
     
-    console.log(`✅ اكتمل الفحص. تم إرسال ${sentCount} إيميلات`);
+    // 9. ✅ إرسال تقرير إشعارات الخصم للأدمن (إذا وجدت إشعارات جديدة)
+    if (creditSummary.length > 0) {
+        sendAdminCreditReport(creditSummary);
+    } else {
+        console.log('ℹ️ لا توجد إشعارات خصم جديدة، لم يتم إرسال تقرير الإشعارات');
+    }
+    
+    console.log(`✅ اكتمل الفحص. تم إرسال ${sentCount} إيميلات للمستخدمين`);
 }
 
 // ============================================
@@ -691,6 +699,113 @@ function sendTestTelegram() {
     console.log('✅ تم إرسال اختبار تيليجرام');
 }
 
+// ============================================
+// إرسال تقرير الفواتير للأدمن
+// ============================================
+function sendAdminInvoiceReport(invoiceSummary, latestFile, allInvoices) {
+    const adminEmails = process.env.EMAIL_RECIPIENT ? [process.env.EMAIL_RECIPIENT] : [];
+    if (adminEmails.length === 0) return;
+    
+    const totalInvoices = invoiceSummary.reduce((sum, s) => sum + s.count, 0);
+    
+    let rows = '';
+    invoiceSummary.forEach(s => {
+        rows += `<tr><td style="padding:8px;border-bottom:1px solid #ddd;">${s.username}</td>
+                <td style="padding:8px;border-bottom:1px solid #ddd;">${s.count}</td>
+                <td style="padding:8px;border-bottom:1px solid #ddd;font-size:0.8em;">${s.email}</td></tr>`;
+    });
+    
+    const htmlBody = `<div dir="rtl" style="font-family:Tahoma;max-width:600px;margin:0 auto;background:#f5f5f5;padding:20px;">
+        <div style="background:#1e3c72;color:white;padding:20px;text-align:center;border-radius:10px 10px 0 0;">
+            <h2 style="margin:0;">📊 تقرير الفواتير الجديدة</h2>
+            <p style="margin:10px 0 0;">شركة دمياط لتداول الحاويات و البضائع</p>
+        </div>
+        <div style="background:white;padding:20px;border-radius:0 0 10px 10px;">
+            <div style="text-align:center;padding:15px;background:#e8f4f8;border-radius:8px;margin-bottom:20px;">
+                <div style="font-size:2em;font-weight:bold;color:#1e3c72;">${totalInvoices}</div>
+                <div style="font-size:0.9em;color:#555;">إجمالي الفواتير الجديدة</div>
+            </div>
+            <table style="width:100%;border-collapse:collapse;margin:10px 0;">
+                <thead><tr style="background:#4361ee;color:white;"><th>المستخدم</th><th>عدد الفواتير</th><th>البريد</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
+            <hr>
+            <p style="color:#999;font-size:0.8em;text-align:center;">
+                📁 الملف: ${latestFile || 'غير معروف'} | 
+                📄 إجمالي الفواتير: ${allInvoices || 0}<br>
+                🕐 ${new Date().toLocaleString('ar-EG')}
+            </p>
+            <p style="color:#999;font-size:0.7em;text-align:center;">رسالة تلقائية من نظام الفواتير</p>
+        </div>
+    </div>`;
+    
+    const transporter = getEmailTransporter();
+    const subject = `📊 تقرير الفواتير - ${new Date().toLocaleDateString('ar-EG')}`;
+    
+    if (transporter) {
+        transporter.sendMail({
+            to: adminEmails.join(','),
+            subject: subject,
+            html: htmlBody
+        }, (error) => {
+            if (!error) console.log('✅ تم إرسال تقرير الفواتير للأدمن');
+            else console.error('❌ فشل إرسال تقرير الفواتير:', error.message);
+        });
+    }
+}
+
+// ============================================
+// إرسال تقرير إشعارات الخصم للأدمن
+// ============================================
+function sendAdminCreditReport(creditSummary) {
+    const adminEmails = process.env.EMAIL_RECIPIENT ? [process.env.EMAIL_RECIPIENT] : [];
+    if (adminEmails.length === 0) return;
+    
+    const totalCredits = creditSummary.reduce((sum, s) => sum + s.count, 0);
+    
+    let rows = '';
+    creditSummary.forEach(s => {
+        rows += `<tr><td style="padding:8px;border-bottom:1px solid #ddd;">${s.username}</td>
+                <td style="padding:8px;border-bottom:1px solid #ddd;">${s.count}</td>
+                <td style="padding:8px;border-bottom:1px solid #ddd;font-size:0.8em;">${s.email}</td></tr>`;
+    });
+    
+    const htmlBody = `<div dir="rtl" style="font-family:Tahoma;max-width:600px;margin:0 auto;background:#f5f5f5;padding:20px;">
+        <div style="background:#c62828;color:white;padding:20px;text-align:center;border-radius:10px 10px 0 0;">
+            <h2 style="margin:0;">🔴 تقرير إشعارات الخصم الجديدة</h2>
+            <p style="margin:10px 0 0;">شركة دمياط لتداول الحاويات و البضائع</p>
+        </div>
+        <div style="background:white;padding:20px;border-radius:0 0 10px 10px;">
+            <div style="text-align:center;padding:15px;background:#fce4ec;border-radius:8px;margin-bottom:20px;">
+                <div style="font-size:2em;font-weight:bold;color:#c62828;">${totalCredits}</div>
+                <div style="font-size:0.9em;color:#555;">إجمالي إشعارات الخصم الجديدة</div>
+            </div>
+            <table style="width:100%;border-collapse:collapse;margin:10px 0;">
+                <thead><tr style="background:#c62828;color:white;"><th>المستخدم</th><th>عدد الإشعارات</th><th>البريد</th></tr></thead>
+                <tbody>${rows}</tbody>
+            </table>
+            <hr>
+            <p style="color:#999;font-size:0.8em;text-align:center;">
+                🕐 ${new Date().toLocaleString('ar-EG')}
+            </p>
+            <p style="color:#999;font-size:0.7em;text-align:center;">رسالة تلقائية من نظام الفواتير</p>
+        </div>
+    </div>`;
+    
+    const transporter = getEmailTransporter();
+    const subject = `🔴 تقرير إشعارات الخصم - ${new Date().toLocaleDateString('ar-EG')}`;
+    
+    if (transporter) {
+        transporter.sendMail({
+            to: adminEmails.join(','),
+            subject: subject,
+            html: htmlBody
+        }, (error) => {
+            if (!error) console.log('✅ تم إرسال تقرير إشعارات الخصم للأدمن');
+            else console.error('❌ فشل إرسال تقرير إشعارات الخصم:', error.message);
+        });
+    }
+}
 function sendTestAll() {
     console.log('🧪 تشغيل اختبار النظام بالكامل...');
     sendTestEmail();
