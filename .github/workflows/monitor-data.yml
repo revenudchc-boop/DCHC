@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'data/datatxt_Q*.txt'
+      - 'data/creditdata.txt'
     branches:
       - main
 
@@ -15,17 +16,22 @@ jobs:
       - name: 📥 سحب الكود
         uses: actions/checkout@v3
         
+      - name: 🔧 إعداد Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+          
       - name: 📦 تثبيت الاعتماديات
-        run: npm install xml2js
+        run: npm install xml2js nodemailer
         
       - name: 🔍 تشغيل سكريبت الفحص
         run: node scripts/check-invoices.js
-        
-      - name: 📧 إرسال إيميل التحديث
-        if: success()
-        run: |
-          if [ -f /tmp/invoice_data.env ]; then
-            source /tmp/invoice_data.env
-            echo -e "Subject: 📊 تحديث بيانات DCHC - $FILE_NAME\n\n📁 الملف: $FILE_NAME\n📄 عدد الفواتير: $INVOICE_COUNT\n👤 المستخدم: ${{ github.actor }}\n📅 التاريخ: $(date '+%Y-%m-%d %H:%M:%S')\n\n🔗 عرض الملف: https://github.com/${{ github.repository }}/blob/main/data/$FILE_NAME" | sendmail "${{ secrets.EMAIL_RECIPIENT }}"
-            echo "✅ تم إرسال الإيميل"
-          fi
+        env:
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_ACTOR: ${{ github.actor }}
