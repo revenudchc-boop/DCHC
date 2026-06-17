@@ -1,12 +1,10 @@
 {
   "name": "dchc-invoice-monitor",
   "version": "1.0.0",
-  "description": "مراقبة ملفات الفواتير على GitHub",
-  "main": "scripts/check-invoices.js",
-  "scripts": {
-    "check": "node scripts/check-invoices.js"
-  },
+  "description": "مراقبة ملفات الفواتير وإرسال إيميلات",
+  "main": "check-invoices.js",
   "dependencies": {
-    "xml2js": "^0.6.2"
+    "xml2js": "^0.6.2",
+    "nodemailer": "^6.9.7"
   }
 }
