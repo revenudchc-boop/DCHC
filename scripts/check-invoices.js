@@ -550,8 +550,29 @@ async function processCredits(users, state) {
         });
     }
     
+    // ✅ ✅ ✅ إرسال تقرير تيليجرام لإشعارات الخصم ✅ ✅ ✅
     if (summaryData.length > 0) {
-        console.log(`✅ تم إرسال ${summaryData.length} إشعارات خصم`);
+        const chatId = process.env.TELEGRAM_CHAT_ID;
+        if (chatId) {
+            let message = '<b>🔴 تقرير إشعارات الخصم الجديدة</b>\n';
+            message += '━━━━━━━━━━━━━━━━\n';
+            
+            let totalCredits = 0;
+            summaryData.forEach(s => {
+                message += `👤 <b>${s.username}</b>: ${s.count} إشعار خصم\n`;
+                totalCredits += s.count;
+            });
+            
+            message += '━━━━━━━━━━━━━━━━\n';
+            message += `📊 إجمالي الإشعارات: <b>${totalCredits}</b>\n`;
+            message += `👥 عدد المستخدمين: <b>${summaryData.length}</b>\n`;
+            message += `🕐 ${new Date().toLocaleString('ar-EG')}`;
+            
+            sendTelegramMessage(chatId, message);
+            console.log(`✅ تم إرسال تقرير تيليجرام لإشعارات الخصم (${summaryData.length} مستخدم)`);
+        } else {
+            console.log('⚠️ TELEGRAM_CHAT_ID غير موجود، لم يتم إرسال تقرير تيليجرام');
+        }
     }
 }
 
@@ -694,4 +715,4 @@ main().catch(error => {
 // sendTestTelegram();
 
 // 🔹 الخيار 4: تشغيل جميع الاختبارات (علّق الخيار 1 وافتح هذا)
-//sendTestAll()
+sendTestAll()
