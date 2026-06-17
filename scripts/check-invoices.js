@@ -641,3 +641,28 @@ main().catch(error => {
     console.error('❌ خطأ:', error);
     process.exit(1);
 });
+// ============================================
+// دالة اختبار الإيميل
+// ============================================
+function sendTestEmail() {
+    const testUser = {
+        username: 'اختبار',
+        email: process.env.EMAIL_RECIPIENT || 'kozomoozoo@gmail.com',
+        language: 'ar'
+    };
+    
+    const testInvoice = [{
+        'final-number': 'C25-99999',
+        'key-word1': 'سفينة اختبار',
+        'key-word2': 'TEST123',
+        'total-total': '5000.00',
+        'currency': 'EGP'
+    }];
+    
+    sendEmail(testUser.email, testUser, testInvoice);
+    console.log('✅ تم إرسال إيميل تجريبي');
+}
+
+// استدعاء الدالة بدلاً من main()
+sendTestEmail();
+// main();  // علق على السطر الأصلي
