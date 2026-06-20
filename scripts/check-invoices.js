@@ -579,15 +579,15 @@ async function processCredits(users, state) {
 async function main() {
     console.log('🚀 بدء فحص GitHub...');
     
-    // ✅ ✅ ✅ تحميل state.json من المستودع قبل التشغيل ✅ ✅ ✅
-    console.log('📥 جاري تحميل state.json من المستودع...');
-    try {
-        const { execSync } = require('child_process');
-        execSync('git pull origin main', { stdio: 'pipe' });
-        console.log('✅ تم تحديث state.json من المستودع');
-    } catch (error) {
-        console.log('⚠️ فشل تحميل state.json:', error.message);
-    }
+   // ✅ ✅ ✅ تحميل state.json من المستودع قبل التشغيل ✅ ✅ ✅
+console.log('📥 جاري تحميل state.json من المستودع...');
+try {
+    const { execSync } = require('child_process');
+    execSync('git pull origin main', { stdio: 'pipe' });
+    console.log('✅ تم تحديث state.json من المستودع');
+} catch (error) {
+    console.log('⚠️ فشل تحميل state.json:', error.message);
+}
     
     // 1. تحميل المستخدمين
     const users = loadUsers();
