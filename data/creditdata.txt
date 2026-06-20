@@ -7800,5 +7800,41 @@
     <credit-item amount-credited="49237.51" effective-date="2026-06-10T00:00:00" quantity="1.0" rate-credited="49237.51" tariff-description="LoadExport40FullDry" tariff-currency="USD" contract-id="GENERAL TARIFF" type="REGULAR" tariff-id="LE40FD" tax-credited="0.0" exchange-rate="46.8467" />
   </credit-items>
 </credit>
+<credit currency="USAD" customer-name="ينج مينج شيبنج مصر للملاحة (دولار)" date="2026-06-17T00:00:00" type="OAC" customer-id="YANG MING SHIPPING EGYPT(USAD)" customer-role="AGENT" draft-number="100712" final-number="100148" finalized-date="2026-06-17T10:46:50" open-credit="N" notes="53" status="FINAL" total-credit="8018.835" total-tax-credit="0.0">
+  <credit-items>
+    <credit-item amount-credited="8018.835" quantity="1.0" rate-credited="150.0" credit-by="FULL" tax-credited="0.0" exchange-rate="53.4589" invoice-draft-number="277599" invoice-final-number="P25-13724" invoice-item-gkey="10446370" />
+  </credit-items>
+</credit>
+<credit currency="USAD" customer-name="ينج مينج شيبنج مصر للملاحة (دولار)" date="2026-06-17T00:00:00" type="OAC" customer-id="YANG MING SHIPPING EGYPT(USAD)" customer-role="AGENT" draft-number="100713" final-number="100149" finalized-date="2026-06-17T10:46:50" open-credit="N" notes="54" status="FINAL" total-credit="174.8106" total-tax-credit="0.0">
+  <credit-items>
+    <credit-item amount-credited="174.8106" quantity="1.0" rate-credited="3.27" credit-by="FULL" tax-credited="0.0" exchange-rate="53.4589" invoice-draft-number="277602" invoice-final-number="P25-13725" invoice-item-gkey="10446942" />
+  </credit-items>
+</credit>
+<credit currency="USAD" customer-name="ينج مينج شيبنج مصر للملاحة (دولار)" date="2026-06-17T00:00:00" type="OAC" customer-id="YANG MING SHIPPING EGYPT(USAD)" customer-role="AGENT" draft-number="100714" final-number="100150" finalized-date="2026-06-17T10:48:53" open-credit="N" notes="55" status="FINAL" total-credit="15581.49" total-tax-credit="0.0">
+  <credit-items>
+    <credit-item amount-credited="7790.745" quantity="1.0" rate-credited="150.0" credit-by="FULL" tax-credited="0.0" exchange-rate="51.9383" invoice-draft-number="279144" invoice-final-number="P25-14310" invoice-item-gkey="10544722" />
+    <credit-item amount-credited="7790.745" quantity="1.0" rate-credited="150.0" credit-by="FULL" tax-credited="0.0" exchange-rate="51.9383" invoice-draft-number="279144" invoice-final-number="P25-14310" invoice-item-gkey="10544723" />
+  </credit-items>
+</credit>
+<credit currency="USAD" customer-name="ينج مينج شيبنج مصر للملاحة (دولار)" date="2026-06-17T00:00:00" type="OAC" customer-id="YANG MING SHIPPING EGYPT(USAD)" customer-role="AGENT" draft-number="100715" final-number="100151" finalized-date="2026-06-17T10:48:53" open-credit="N" notes="56" status="FINAL" total-credit="339.6764" total-tax-credit="0.0">
+  <credit-items>
+    <credit-item amount-credited="169.8382" quantity="1.0" rate-credited="3.27" credit-by="FULL" tax-credited="0.0" exchange-rate="51.9383" invoice-draft-number="279146" invoice-final-number="P25-14311" invoice-item-gkey="10545105" />
+    <credit-item amount-credited="169.8382" quantity="1.0" rate-credited="3.27" credit-by="FULL" tax-credited="0.0" exchange-rate="51.9383" invoice-draft-number="279146" invoice-final-number="P25-14311" invoice-item-gkey="10545121" />
+  </credit-items>
+</credit>
+<credit currency="USAD" customer-name="ينج مينج شيبنج مصر للملاحة (دولار)" date="2026-06-17T00:00:00" type="OAC" customer-id="YANG MING SHIPPING EGYPT(USAD)" customer-role="AGENT" draft-number="100716" final-number="100152" finalized-date="2026-06-17T10:51:57" open-credit="N" notes="57" status="FINAL" total-credit="23372.235" total-tax-credit="0.0">
+  <credit-items>
+    <credit-item amount-credited="7790.745" quantity="1.0" rate-credited="150.0" credit-by="FULL" tax-credited="0.0" exchange-rate="51.9383" invoice-draft-number="278853" invoice-final-number="P25-14155" invoice-item-gkey="10536679" />
+    <credit-item amount-credited="7790.745" quantity="1.0" rate-credited="150.0" credit-by="FULL" tax-credited="0.0" exchange-rate="51.9383" invoice-draft-number="278853" invoice-final-number="P25-14155" invoice-item-gkey="10536681" />
+    <credit-item amount-credited="7790.745" quantity="1.0" rate-credited="150.0" credit-by="FULL" tax-credited="0.0" exchange-rate="51.9383" invoice-draft-number="278853" invoice-final-number="P25-14155" invoice-item-gkey="10536657" />
+  </credit-items>
+</credit>
+<credit currency="USAD" customer-name="ينج مينج شيبنج مصر للملاحة (دولار)" date="2026-06-17T00:00:00" type="OAC" customer-id="YANG MING SHIPPING EGYPT(USAD)" customer-role="AGENT" draft-number="100717" final-number="100153" finalized-date="2026-06-17T10:51:57" open-credit="N" notes="58" status="FINAL" total-credit="610.7943" total-tax-credit="0.0">
+  <credit-items>
+    <credit-item amount-credited="169.8382" quantity="1.0" rate-credited="3.27" credit-by="FULL" tax-credited="0.0" exchange-rate="51.9383" invoice-draft-number="278854" invoice-final-number="P25-14156" invoice-item-gkey="10537099" />
+    <credit-item amount-credited="169.8382" quantity="1.0" rate-credited="3.27" credit-by="FULL" tax-credited="0.0" exchange-rate="51.9383" invoice-draft-number="278854" invoice-final-number="P25-14156" invoice-item-gkey="10537044" />
+    <credit-item amount-credited="271.1179" quantity="1.0" rate-credited="5.22" credit-by="FULL" tax-credited="0.0" exchange-rate="51.9383" invoice-draft-number="278854" invoice-final-number="P25-14156" invoice-item-gkey="10537030" />
+  </credit-items>
+</credit>
 </argo:snx>
 
