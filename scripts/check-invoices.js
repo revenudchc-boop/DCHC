@@ -744,9 +744,16 @@ function initializeLastInvoice(invoices, users) {
     for (const user of users) {
         if (user.userType === 'admin') continue;
         
+        console.log(`🔍 [${user.username}] جاري البحث عن فواتير...`);
+        
         // فلترة الفواتير الخاصة بهذا المستخدم
         const userInvoices = filterInvoicesForUser(invoices, user);
-        if (userInvoices.length === 0) continue;
+        console.log(`📊 [${user.username}] عدد الفواتير: ${userInvoices.length}`);
+        
+        if (userInvoices.length === 0) {
+            console.log(`⚠️ [${user.username}] لا توجد فواتير للمستخدم`);
+            continue;
+        }
         
         // تجميع الفواتير حسب النوع (C / P)
         const byType = {};
@@ -756,6 +763,8 @@ function initializeLastInvoice(invoices, users) {
             if (!byType[parsed.type]) byType[parsed.type] = [];
             byType[parsed.type].push(inv);
         });
+        
+        console.log(`📊 [${user.username}] الأنواع:`, Object.keys(byType));
         
         // لكل نوع، خذ أعلى رقم
         for (const typeKey in byType) {
@@ -767,10 +776,13 @@ function initializeLastInvoice(invoices, users) {
                 initialLastInvoice[user.username] = {};
             }
             initialLastInvoice[user.username][typeKey] = lastFullKey;
+            console.log(`✅ [${user.username}] نوع ${typeKey}: آخر فاتورة = ${lastFullKey}`);
         }
     }
     
+    console.log('📂 initialLastInvoice النهائي:', JSON.stringify(initialLastInvoice, null, 2));
     return initialLastInvoice;
+}
 }
 function sendTestAll() {
     console.log('🧪 تشغيل اختبار النظام بالكامل...');
