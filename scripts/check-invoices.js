@@ -739,11 +739,28 @@ function sendAdminCreditReport(creditSummary) {
 function initializeLastInvoice(invoices, users) {
     const initialLastInvoice = {};
     
+    console.log(`📊 إجمالي الفواتير في الملف: ${invoices.length}`);
+    if (invoices.length > 0) {
+        console.log('📊 عينة من الفواتير (أول 3):');
+        for (let i = 0; i < Math.min(3, invoices.length); i++) {
+            console.log(`  ${i+1}. payee-customer-id: "${invoices[i]['payee-customer-id']}", contract-customer-id: "${invoices[i]['contract-customer-id']}"`);
+        }
+    }
+    
     for (const user of users) {
         if (user.userType === 'admin') continue;
         
+        console.log(`🔍 [${user.username}] جاري البحث عن فواتير...`);
+        console.log(`   customerIds: ${JSON.stringify(user.customerIds)}`);
+        console.log(`   contractCustomerId: ${user.contractCustomerId}`);
+        
         const userInvoices = filterInvoicesForUser(invoices, user);
-        if (userInvoices.length === 0) continue;
+        console.log(`📊 [${user.username}] عدد الفواتير: ${userInvoices.length}`);
+        
+        if (userInvoices.length === 0) {
+            console.log(`⚠️ [${user.username}] لا توجد فواتير للمستخدم`);
+            continue;
+        }
         
         const byType = {};
         userInvoices.forEach(inv => {
@@ -762,9 +779,11 @@ function initializeLastInvoice(invoices, users) {
                 initialLastInvoice[user.username] = {};
             }
             initialLastInvoice[user.username][typeKey] = lastFullKey;
+            console.log(`✅ [${user.username}] نوع ${typeKey}: آخر فاتورة = ${lastFullKey}`);
         }
     }
     
+    console.log('📂 initialLastInvoice النهائي:', JSON.stringify(initialLastInvoice, null, 2));
     return initialLastInvoice;
 }
 function sendTestAll() {
