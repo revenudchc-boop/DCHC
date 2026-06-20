@@ -14,9 +14,6 @@ const STATE_FILE = path.join(__dirname, '../state.json');
 // دوال GitHub
 // ============================================
 
-/**
- * الحصول على قائمة الملفات من مجلد data
- */
 function getDataFiles() {
     const files = fs.readdirSync(DATA_DIR)
         .filter(f => f.startsWith('datatxt_Q') && f.endsWith('.txt'))
@@ -28,52 +25,31 @@ function getDataFiles() {
                 path: path.join(DATA_DIR, f)
             };
         });
-    
     return files;
 }
 
-/**
- * الحصول على أحدث ملف (أعلى رقم Q)
- */
 function getLastDataFile() {
     const files = getDataFiles();
     if (files.length === 0) return null;
-    
     files.sort((a, b) => b.number - a.number);
     return files[0];
 }
 
-/**
- * الحصول على معلومات ملف creditdata.txt
- */
 function getCreditFile() {
     const creditPath = path.join(DATA_DIR, 'creditdata.txt');
     if (!fs.existsSync(creditPath)) return null;
-    return {
-        name: 'creditdata.txt',
-        path: creditPath
-    };
+    return { name: 'creditdata.txt', path: creditPath };
 }
 
-// ============================================
-// قراءة وتحليل الملفات
-// ============================================
-
-/**
- * قراءة محتوى ملف XML واستخراج الفواتير
- */
 async function extractInvoices(filePath) {
     const content = fs.readFileSync(filePath, 'utf8');
     const parser = new xml2js.Parser({ explicitArray: false });
-    
     try {
         const result = await parser.parseStringPromise(content);
         let invoices = [];
-        
         if (result && result.root && result.root.invoice) {
             invoices = Array.isArray(result.root.invoice) ? result.root.invoice : [result.root.invoice];
         } else {
-            // طريقة بديلة باستخدام Regex
             const matches = content.match(/<invoice[^>]*>/g);
             if (matches) {
                 invoices = matches.map(tag => {
@@ -87,7 +63,6 @@ async function extractInvoices(filePath) {
                 });
             }
         }
-        
         return invoices;
     } catch (error) {
         console.error('❌ خطأ في تحليل XML:', error.message);
@@ -95,15 +70,11 @@ async function extractInvoices(filePath) {
     }
 }
 
-/**
- * قراءة ملف users.json
- */
 function loadUsers() {
     if (!fs.existsSync(USERS_FILE)) {
         console.log('⚠️ users.json غير موجود');
         return [];
     }
-    
     try {
         const content = fs.readFileSync(USERS_FILE, 'utf8');
         const users = JSON.parse(content);
@@ -114,17 +85,10 @@ function loadUsers() {
     }
 }
 
-/**
- * استخراج رقم الفاتورة للترتيب
- */
 function parseInvoiceNumber(finalNumber) {
     const match = (finalNumber || '').match(/^([CP])(\d+)-(\d+)$/i);
     if (match) {
-        return {
-            type: match[1].toUpperCase(),
-            year: parseInt(match[2], 10),
-            number: parseInt(match[3], 10)
-        };
+        return { type: match[1].toUpperCase(), year: parseInt(match[2], 10), number: parseInt(match[3], 10) };
     }
     return null;
 }
@@ -135,9 +99,6 @@ function getSortKey(finalNumber) {
     return p.year * 1000000 + p.number;
 }
 
-/**
- * فلترة الفواتير حسب المستخدم
- */
 function filterInvoicesForUser(allInvoices, user) {
     const allowedIds = [];
     if (user.taxNumber) allowedIds.push(user.taxNumber.toLowerCase());
@@ -145,19 +106,13 @@ function filterInvoicesForUser(allInvoices, user) {
     if (user.customerIds && Array.isArray(user.customerIds)) {
         user.customerIds.forEach(id => allowedIds.push(id.toLowerCase()));
     }
-    
     if (allowedIds.length === 0) return [];
-    
     return allInvoices.filter(inv => {
         const payee = (inv['payee-customer-id'] || '').toLowerCase();
         const contract = (inv['contract-customer-id'] || '').toLowerCase();
         return allowedIds.some(id => payee === id || contract === id);
     });
 }
-
-// ============================================
-// نظام تتبع الفواتير المرسلة
-// ============================================
 
 function loadState() {
     if (!fs.existsSync(STATE_FILE)) {
@@ -186,9 +141,6 @@ function saveState(state) {
     }
 }
 
-/**
- * تصفية الفواتير الجديدة فقط
- */
 function filterNewInvoices(invoices, user, state) {
     const key = user.username;
     const byType = {};
@@ -227,19 +179,13 @@ function filterNewInvoices(invoices, user, state) {
     return newInvoices;
 }
 
-// ============================================
-// إرسال الإيميلات
-// ============================================
-
 function getEmailTransporter() {
     const emailUser = process.env.EMAIL_USER;
     const emailPass = process.env.EMAIL_PASS;
-    
     if (!emailUser || !emailPass) {
         console.warn('⚠️ إعدادات الإيميل غير متوفرة، سيتم استخدام sendmail');
         return null;
     }
-    
     return nodemailer.createTransport({
         service: 'gmail',
         auth: { user: emailUser, pass: emailPass }
@@ -289,7 +235,6 @@ function sendEmail(toEmail, user, invoices) {
     </div>`;
     
     const transporter = getEmailTransporter();
-    
     if (transporter) {
         transporter.sendMail({
             to: toEmail,
@@ -301,7 +246,6 @@ function sendEmail(toEmail, user, invoices) {
             else console.log(`✅ تم إرسال الإيميل إلى ${username}`);
         });
     } else {
-        // استخدام sendmail كبديل
         const cmd = `echo -e "Subject: ${subject}\nTo: ${toEmail}\nContent-Type: text/html\n\n${htmlBody}" | sendmail -t`;
         const { execSync } = require('child_process');
         try {
@@ -313,65 +257,14 @@ function sendEmail(toEmail, user, invoices) {
     }
 }
 
-function sendAdminReport(summaryData) {
-    const adminEmails = process.env.EMAIL_RECIPIENT ? [process.env.EMAIL_RECIPIENT] : [];
-    
-    if (adminEmails.length === 0) return;
-    
-    let rows = '';
-    summaryData.forEach(s => {
-        rows += `<tr><td style="padding:8px;border-bottom:1px solid #ddd;">${s.username}</td>
-                <td style="padding:8px;border-bottom:1px solid #ddd;">${s.count}</td>
-                <td style="padding:8px;border-bottom:1px solid #ddd;font-size:0.8em;">${s.email}</td></tr>`;
-    });
-    
-    const htmlBody = `<div dir="rtl" style="font-family:Tahoma;max-width:600px;margin:0 auto;background:#f5f5f5;padding:20px;">
-        <div style="background:#1e3c72;color:white;padding:20px;text-align:center;border-radius:10px 10px 0 0;">
-            <h2 style="margin:0;">📊 تقرير إرسال الفواتير</h2>
-            <p style="margin:10px 0 0;">شركة دمياط لتداول الحاويات و البضائع</p>
-        </div>
-        <div style="background:white;padding:20px;border-radius:0 0 10px 10px;">
-            <p>تم إرسال <strong>${summaryData.length}</strong> إيميل اليوم</p>
-            <table style="width:100%;border-collapse:collapse;margin:20px 0;">
-                <thead><tr style="background:#4361ee;color:white;"><th>المستخدم</th><th>عدد الفواتير</th><th>البريد</th></tr></thead>
-                <tbody>${rows}</tbody>
-            </table>
-            <hr><p style="color:#999;font-size:0.8em;text-align:center;">رسالة تلقائية من نظام الفواتير</p>
-        </div>
-    </div>`;
-    
-    const transporter = getEmailTransporter();
-    const subject = `📊 تقرير إرسال الفواتير - ${new Date().toLocaleDateString('ar-EG')}`;
-    
-    if (transporter) {
-        transporter.sendMail({
-            to: adminEmails.join(','),
-            subject: subject,
-            html: htmlBody
-        }, (error) => {
-            if (!error) console.log('✅ تم إرسال تقرير الأدمن');
-        });
-    }
-}
-
-// ============================================
-// نظام تيليجرام
-// ============================================
-
 function sendTelegramMessage(chatId, message) {
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
     if (!botToken) {
         console.log('⚠️ TELEGRAM_BOT_TOKEN غير موجود');
         return;
     }
-    
     const url = `https://api.telegram.org/bot${botToken}/sendMessage`;
-    const payload = {
-        chat_id: chatId,
-        text: message,
-        parse_mode: 'HTML'
-    };
-    
+    const payload = { chat_id: chatId, text: message, parse_mode: 'HTML' };
     try {
         const { execSync } = require('child_process');
         execSync(`curl -X POST "${url}" -H "Content-Type: application/json" -d '${JSON.stringify(payload)}'`, { stdio: 'pipe' });
@@ -387,21 +280,17 @@ function sendTelegramAlert(summaryData) {
         console.log('⚠️ TELEGRAM_CHAT_ID غير موجود');
         return;
     }
-    
     let message = '<b>📬 تقرير الفواتير الجديدة</b>\n';
     message += '━━━━━━━━━━━━━━━━\n';
-    
     let totalInvoices = 0;
     summaryData.forEach(s => {
         message += `👤 <b>${s.username}</b>: ${s.count} فاتورة\n`;
         totalInvoices += s.count;
     });
-    
     message += '━━━━━━━━━━━━━━━━\n';
     message += `📊 إجمالي الفواتير: <b>${totalInvoices}</b>\n`;
     message += `👥 عدد المستخدمين: <b>${summaryData.length}</b>\n`;
     message += `🕐 ${new Date().toLocaleString('ar-EG')}`;
-    
     sendTelegramMessage(chatId, message);
 }
 
@@ -412,11 +301,9 @@ function sendTelegramAlert(summaryData) {
 async function extractCredits(filePath) {
     const content = fs.readFileSync(filePath, 'utf8');
     const parser = new xml2js.Parser({ explicitArray: false });
-    
     try {
         const result = await parser.parseStringPromise(content);
         let credits = [];
-        
         if (result && result.root && result.root.credit) {
             credits = Array.isArray(result.root.credit) ? result.root.credit : [result.root.credit];
         } else {
@@ -433,7 +320,6 @@ async function extractCredits(filePath) {
                 });
             }
         }
-        
         return credits;
     } catch (error) {
         console.error('❌ خطأ في تحليل Credit XML:', error.message);
@@ -447,9 +333,7 @@ function filterCreditsForUser(allCredits, user) {
     if (user.customerIds && Array.isArray(user.customerIds)) {
         user.customerIds.forEach(id => allowedIds.push(id.toLowerCase()));
     }
-    
     if (allowedIds.length === 0) return [];
-    
     return allCredits.filter(cr => {
         const customerId = (cr['customer-id'] || '').toLowerCase();
         return allowedIds.some(id => customerId === id);
@@ -514,7 +398,7 @@ function sendCreditEmail(toEmail, user, credits) {
 }
 
 // ============================================
-// التنفيذ الرئيسي
+// ✅ الدالة الأساسية لمعالجة الإشعارات (المعدلة)
 // ============================================
 
 async function processCredits(users, state) {
@@ -543,23 +427,30 @@ async function processCredits(users, state) {
         const userCredits = filterCreditsForUser(allCredits, user);
         if (userCredits.length === 0) continue;
         
-        // ✅ ✅ ✅ المفتاح الصحيح (نفس مفتاح lastInvoice)
+        // ✅ المفتاح الموحد (نفس مفتاح lastInvoice)
         const key = user.username;
         const lastStored = state.lastCredit[key] || 0;
         
         console.log(`🔍 [${user.username}] lastStored للـ Credit = ${lastStored}`);
         
+        // ترتيب الإشعارات حسب draft-number
         userCredits.sort((a, b) => (parseInt(a['draft-number']) || 0) - (parseInt(b['draft-number']) || 0));
         
+        // تصفية الإشعارات الجديدة فقط
         const newCredits = userCredits.filter(c => (parseInt(c['draft-number']) || 0) > lastStored);
         
-        if (newCredits.length === 0) continue;
+        if (newCredits.length === 0) {
+            console.log(`ℹ️ [${user.username}] لا توجد إشعارات خصم جديدة`);
+            continue;
+        }
         
+        // تحديث آخر رقم تم إرساله
         const lastCredit = userCredits[userCredits.length - 1];
         state.lastCredit[key] = parseInt(lastCredit['draft-number']) || 0;
         
-        console.log(`${user.username}: ${newCredits.length} إشعار خصم جديد (lastStored=${lastStored}, newLast=${state.lastCredit[key]})`);
+        console.log(`✅ ${user.username}: ${newCredits.length} إشعار خصم جديد (lastStored=${lastStored}, newLast=${state.lastCredit[key]})`);
         
+        // إرسال الإيميلات
         sendCreditEmail(emailsToSend.join(','), user, newCredits);
         
         creditSummaryData.push({
@@ -569,24 +460,21 @@ async function processCredits(users, state) {
         });
     }
     
-    // ✅ ✅ ✅ إرسال تقرير تيليجرام لإشعارات الخصم ✅ ✅ ✅
+    // ✅ إرسال تقرير تيليجرام
     if (creditSummaryData.length > 0) {
         const chatId = process.env.TELEGRAM_CHAT_ID;
         if (chatId) {
             let message = '<b>🔴 تقرير إشعارات الخصم الجديدة</b>\n';
             message += '━━━━━━━━━━━━━━━━\n';
-            
             let totalCredits = 0;
             creditSummaryData.forEach(s => {
                 message += `👤 <b>${s.username}</b>: ${s.count} إشعار خصم\n`;
                 totalCredits += s.count;
             });
-            
             message += '━━━━━━━━━━━━━━━━\n';
             message += `📊 إجمالي الإشعارات: <b>${totalCredits}</b>\n`;
             message += `👥 عدد المستخدمين: <b>${creditSummaryData.length}</b>\n`;
             message += `🕐 ${new Date().toLocaleString('ar-EG')}`;
-            
             sendTelegramMessage(chatId, message);
             console.log(`✅ تم إرسال تقرير تيليجرام لإشعارات الخصم (${creditSummaryData.length} مستخدم)`);
         }
@@ -595,10 +483,14 @@ async function processCredits(users, state) {
     return creditSummaryData;
 }
 
+// ============================================
+// الدالة الرئيسية
+// ============================================
+
 async function main() {
     console.log('🚀 بدء فحص GitHub...');
     
-    // ✅ ✅ ✅ تحميل state.json من المستودع قبل التشغيل ✅ ✅ ✅
+    // تحميل state.json من المستودع
     console.log('📥 جاري تحميل state.json من المستودع...');
     try {
         const { execSync } = require('child_process');
@@ -608,14 +500,12 @@ async function main() {
         console.log('⚠️ فشل تحميل state.json:', error.message);
     }
     
-    // 1. تحميل المستخدمين
     const users = loadUsers();
     if (users.length === 0) {
         console.log('⚠️ لا يوجد مستخدمين نشطين');
         return;
     }
     
-    // 2. قراءة أحدث ملف فواتير
     const latestFile = getLastDataFile();
     if (!latestFile) {
         console.log('❌ لا توجد ملفات بيانات');
@@ -624,14 +514,12 @@ async function main() {
     
     console.log(`📌 أحدث ملف: ${latestFile.name}`);
     
-    // 3. استخراج الفواتير
     const allInvoices = await extractInvoices(latestFile.path);
     console.log(`📄 تم استخراج ${allInvoices.length} فاتورة`);
     
-    // 4. تحميل الحالة السابقة
     const state = loadState();
     
-    // 5. معالجة كل مستخدم (الفواتير)
+    // معالجة الفواتير
     const invoiceSummary = [];
     let sentCount = 0;
     
@@ -666,10 +554,10 @@ async function main() {
         });
     }
     
-    // 6. حفظ الحالة
+    // حفظ الحالة (حتى لو لم توجد فواتير)
     saveState(state);
     
-    // ✅ ✅ ✅ رفع state.json إلى المستودع بعد التحديث ✅ ✅ ✅
+    // رفع state.json إلى المستودع
     console.log('📤 جاري رفع state.json إلى المستودع...');
     try {
         const { execSync } = require('child_process');
@@ -686,7 +574,7 @@ async function main() {
         console.error('⚠️ فشل رفع state.json:', error.message);
     }
     
-    // 7. ✅ إرسال تقرير الفواتير للأدمن (إذا وجدت فواتير جديدة)
+    // تقرير الفواتير
     if (invoiceSummary.length > 0) {
         sendAdminInvoiceReport(invoiceSummary, latestFile.name, allInvoices.length);
         sendTelegramAlert(invoiceSummary);
@@ -694,10 +582,10 @@ async function main() {
         console.log('ℹ️ لا توجد فواتير جديدة، لم يتم إرسال تقرير الفواتير');
     }
     
-    // 8. معالجة Credit Data والحصول على النتائج
+    // معالجة Credit Data
     const creditSummary = await processCredits(users, state);
     
-    // 9. ✅ إرسال تقرير إشعارات الخصم للأدمن (إذا وجدت إشعارات جديدة)
+    // تقرير إشعارات الخصم
     if (creditSummary.length > 0) {
         sendAdminCreditReport(creditSummary);
     } else {
@@ -708,18 +596,16 @@ async function main() {
 }
 
 // ============================================
-// 🧪 دوال الاختبار
+// دوال الاختبار
 // ============================================
 
 function sendTestEmail() {
     console.log('🧪 تشغيل اختبار الإيميل...');
-    
     const testUser = {
         username: 'اختبار',
         email: process.env.EMAIL_RECIPIENT || 'kozomoozoo@gmail.com',
         language: 'ar'
     };
-    
     const testInvoice = [{
         'final-number': 'C25-99999',
         'key-word1': 'سفينة اختبار',
@@ -727,27 +613,17 @@ function sendTestEmail() {
         'total-total': '5000.00',
         'currency': 'EGP'
     }];
-    
     sendEmail(testUser.email, testUser, testInvoice);
     console.log('✅ تم إرسال إيميل تجريبي');
 }
 
 function sendTestTelegram() {
     console.log('🧪 تشغيل اختبار تيليجرام...');
-    
-    const testData = [{
-        username: 'اختبار',
-        count: 5,
-        email: 'test@example.com'
-    }];
-    
+    const testData = [{ username: 'اختبار', count: 5, email: 'test@example.com' }];
     sendTelegramAlert(testData);
     console.log('✅ تم إرسال اختبار تيليجرام');
 }
 
-// ============================================
-// إرسال تقرير الفواتير للأدمن
-// ============================================
 function sendAdminInvoiceReport(invoiceSummary, latestFile, allInvoices) {
     const adminEmails = process.env.EMAIL_RECIPIENT ? [process.env.EMAIL_RECIPIENT] : [];
     if (adminEmails.length === 0) return;
@@ -777,8 +653,7 @@ function sendAdminInvoiceReport(invoiceSummary, latestFile, allInvoices) {
             </table>
             <hr>
             <p style="color:#999;font-size:0.8em;text-align:center;">
-                📁 الملف: ${latestFile || 'غير معروف'} | 
-                📄 إجمالي الفواتير: ${allInvoices || 0}<br>
+                📁 الملف: ${latestFile || 'غير معروف'} | 📄 إجمالي الفواتير: ${allInvoices || 0}<br>
                 🕐 ${new Date().toLocaleString('ar-EG')}
             </p>
             <p style="color:#999;font-size:0.7em;text-align:center;">رسالة تلقائية من نظام الفواتير</p>
@@ -800,9 +675,6 @@ function sendAdminInvoiceReport(invoiceSummary, latestFile, allInvoices) {
     }
 }
 
-// ============================================
-// إرسال تقرير إشعارات الخصم للأدمن
-// ============================================
 function sendAdminCreditReport(creditSummary) {
     const adminEmails = process.env.EMAIL_RECIPIENT ? [process.env.EMAIL_RECIPIENT] : [];
     if (adminEmails.length === 0) return;
@@ -831,9 +703,7 @@ function sendAdminCreditReport(creditSummary) {
                 <tbody>${rows}</tbody>
             </table>
             <hr>
-            <p style="color:#999;font-size:0.8em;text-align:center;">
-                🕐 ${new Date().toLocaleString('ar-EG')}
-            </p>
+            <p style="color:#999;font-size:0.8em;text-align:center;">🕐 ${new Date().toLocaleString('ar-EG')}</p>
             <p style="color:#999;font-size:0.7em;text-align:center;">رسالة تلقائية من نظام الفواتير</p>
         </div>
     </div>`;
