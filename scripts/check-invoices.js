@@ -158,8 +158,8 @@ function filterNewInvoices(invoices, user, state) {
         const list = byType[typeKey];
         list.sort((a, b) => getSortKey(a['final-number']) - getSortKey(b['final-number']));
         
-        const lastKey = (state.lastInvoice[key] || {});
-        const lastStored = lastKey[typeKey] || 0;
+        // ✅ نفس منطق Google Apps Script
+        const lastStored = (state.lastInvoice[key] && state.lastInvoice[key][typeKey]) || 0;
         const lastFullKey = getSortKey(list[list.length - 1]['final-number']);
         
         console.log(`🔍 [${user.username}] نوع ${typeKey}: lastStored=${lastStored}, lastFullKey=${lastFullKey}`);
@@ -171,8 +171,6 @@ function filterNewInvoices(invoices, user, state) {
             state.lastInvoice[key][typeKey] = lastFullKey;
             newInvoices.push(...newOfType);
             console.log(`✅ [${user.username}] نوع ${typeKey}: ${newOfType.length} فواتير جديدة`);
-        } else {
-            console.log(`ℹ️ [${user.username}] نوع ${typeKey}: لا توجد فواتير جديدة`);
         }
     }
     
@@ -744,18 +742,9 @@ function initializeLastInvoice(invoices, users) {
     for (const user of users) {
         if (user.userType === 'admin') continue;
         
-        console.log(`🔍 [${user.username}] جاري البحث عن فواتير...`);
-        
-        // فلترة الفواتير الخاصة بهذا المستخدم
         const userInvoices = filterInvoicesForUser(invoices, user);
-        console.log(`📊 [${user.username}] عدد الفواتير: ${userInvoices.length}`);
+        if (userInvoices.length === 0) continue;
         
-        if (userInvoices.length === 0) {
-            console.log(`⚠️ [${user.username}] لا توجد فواتير للمستخدم`);
-            continue;
-        }
-        
-        // تجميع الفواتير حسب النوع (C / P)
         const byType = {};
         userInvoices.forEach(inv => {
             const parsed = parseInvoiceNumber(inv['final-number']);
@@ -764,9 +753,6 @@ function initializeLastInvoice(invoices, users) {
             byType[parsed.type].push(inv);
         });
         
-        console.log(`📊 [${user.username}] الأنواع:`, Object.keys(byType));
-        
-        // لكل نوع، خذ أعلى رقم
         for (const typeKey in byType) {
             const list = byType[typeKey];
             list.sort((a, b) => getSortKey(a['final-number']) - getSortKey(b['final-number']));
@@ -776,13 +762,10 @@ function initializeLastInvoice(invoices, users) {
                 initialLastInvoice[user.username] = {};
             }
             initialLastInvoice[user.username][typeKey] = lastFullKey;
-            console.log(`✅ [${user.username}] نوع ${typeKey}: آخر فاتورة = ${lastFullKey}`);
         }
     }
     
-    console.log('📂 initialLastInvoice النهائي:', JSON.stringify(initialLastInvoice, null, 2));
     return initialLastInvoice;
-}
 }
 function sendTestAll() {
     console.log('🧪 تشغيل اختبار النظام بالكامل...');
