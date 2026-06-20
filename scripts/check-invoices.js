@@ -518,16 +518,25 @@ async function main() {
     const allInvoices = await extractInvoices(latestFile.path);
     console.log(`📄 تم استخراج ${allInvoices.length} فاتورة`);
     
+    // ✅ ✅ ✅ عرض عينة من الفواتير ✅ ✅ ✅
+    if (allInvoices.length > 0) {
+        console.log('📊 عينة من الفواتير المستخرجة (أول 3):');
+        for (let i = 0; i < Math.min(3, allInvoices.length); i++) {
+            console.log(`  ${i+1}. payee-customer-id: "${allInvoices[i]['payee-customer-id']}", contract-customer-id: "${allInvoices[i]['contract-customer-id']}"`);
+        }
+    }
+    
     // 4. تحميل الحالة السابقة
-    // 4. تحميل الحالة السابقة
-const state = loadState();
-
-// ✅ ✅ ✅ إذا كان lastInvoice فارغاً، قم بتعبئته من الملف الحالي ✅ ✅ ✅
-if (Object.keys(state.lastInvoice).length === 0) {
-    console.log('📂 lastInvoice فارغ، جاري تعبئته من الملف الحالي...');
-    state.lastInvoice = initializeLastInvoice(allInvoices, users);
-    console.log('✅ تم تعبئة lastInvoice:', JSON.stringify(state.lastInvoice, null, 2));
-}
+    const state = loadState();
+    
+    // ✅ ✅ ✅ إذا كان lastInvoice فارغاً، قم بتعبئته من الملف الحالي ✅ ✅ ✅
+    if (Object.keys(state.lastInvoice).length === 0) {
+        console.log('📂 lastInvoice فارغ، جاري تعبئته من الملف الحالي...');
+        state.lastInvoice = initializeLastInvoice(allInvoices, users);
+        console.log('✅ تم تعبئة lastInvoice:', JSON.stringify(state.lastInvoice, null, 2));
+    } else {
+        console.log('📂 lastInvoice موجود بالفعل:', JSON.stringify(state.lastInvoice, null, 2));
+    }
     
     // 5. معالجة كل مستخدم (الفواتير)
     const invoiceSummary = [];
@@ -544,7 +553,10 @@ if (Object.keys(state.lastInvoice).length === 0) {
         if (emailsToSend.length === 0) continue;
         
         const userInvoices = filterInvoicesForUser(allInvoices, user);
-        if (userInvoices.length === 0) continue;
+        if (userInvoices.length === 0) {
+            console.log(`${user.username}: لا توجد فواتير للمستخدم`);
+            continue;
+        }
         
         const newInvoices = filterNewInvoices(userInvoices, user, state);
         if (newInvoices.length === 0) {
