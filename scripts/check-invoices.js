@@ -579,6 +579,16 @@ async function processCredits(users, state) {
 async function main() {
     console.log('🚀 بدء فحص GitHub...');
     
+    // ✅ ✅ ✅ تحميل state.json من المستودع قبل التشغيل ✅ ✅ ✅
+    console.log('📥 جاري تحميل state.json من المستودع...');
+    try {
+        const { execSync } = require('child_process');
+        execSync('git pull origin main', { stdio: 'pipe' });
+        console.log('✅ تم تحديث state.json من المستودع');
+    } catch (error) {
+        console.log('⚠️ فشل تحميل state.json:', error.message);
+    }
+    
     // 1. تحميل المستخدمين
     const users = loadUsers();
     if (users.length === 0) {
@@ -639,6 +649,20 @@ async function main() {
     
     // 6. حفظ الحالة
     saveState(state);
+    
+    // ✅ ✅ ✅ رفع state.json إلى المستودع بعد التحديث ✅ ✅ ✅
+    console.log('📤 جاري رفع state.json إلى المستودع...');
+    try {
+        const { execSync } = require('child_process');
+        execSync('git config user.name "github-actions[bot]"');
+        execSync('git config user.email "github-actions[bot]@users.noreply.github.com"');
+        execSync('git add state.json');
+        execSync('git commit -m "تحديث حالة التتبع - $(date '+%Y-%m-%d %H:%M:%S')" || echo "لا توجد تغييرات"');
+        execSync('git push origin main');
+        console.log('✅ تم رفع state.json إلى المستودع');
+    } catch (error) {
+        console.error('⚠️ فشل رفع state.json:', error.message);
+    }
     
     // 7. ✅ إرسال تقرير الفواتير للأدمن (إذا وجدت فواتير جديدة)
     if (invoiceSummary.length > 0) {
