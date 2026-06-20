@@ -15,12 +15,19 @@ jobs:
     
     steps:
       - name: 📥 سحب الكود
-        uses: actions/checkout@v4        # ← تم التحديث من v3 إلى v4
+        uses: actions/checkout@v4
+        
+      - name: 📂 استرجاع حالة التتبع السابقة
+        uses: actions/download-artifact@v4
+        with:
+          name: state
+          path: .
+        continue-on-error: true
         
       - name: 🔧 إعداد Node.js
-        uses: actions/setup-node@v4      # ← تم التحديث من v3 إلى v4
+        uses: actions/setup-node@v4
         with:
-          node-version: '22'             # ← تم التحديث من 18 إلى 22
+          node-version: '22'
           cache: 'npm'
           
       - name: 📦 تثبيت الاعتماديات
@@ -37,3 +44,9 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
           GITHUB_ACTOR: ${{ github.actor }}
+          
+      - name: 💾 حفظ حالة التتبع (state.json)
+        uses: actions/upload-artifact@v4
+        with:
+          name: state
+          path: state.json
