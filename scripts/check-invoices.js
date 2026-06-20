@@ -521,7 +521,15 @@ async function main() {
     console.log(`📄 تم استخراج ${allInvoices.length} فاتورة`);
     
     // 4. تحميل الحالة السابقة
-    const state = loadState();
+    // 4. تحميل الحالة السابقة
+const state = loadState();
+
+// ✅ ✅ ✅ إذا كان lastInvoice فارغاً، قم بتعبئته من الملف الحالي ✅ ✅ ✅
+if (Object.keys(state.lastInvoice).length === 0) {
+    console.log('📂 lastInvoice فارغ، جاري تعبئته من الملف الحالي...');
+    state.lastInvoice = initializeLastInvoice(allInvoices, users);
+    console.log('✅ تم تعبئة lastInvoice:', JSON.stringify(state.lastInvoice, null, 2));
+}
     
     // 5. معالجة كل مستخدم (الفواتير)
     const invoiceSummary = [];
@@ -727,6 +735,43 @@ function sendAdminCreditReport(creditSummary) {
     }
 }
 
+/**
+ * تعبئة lastInvoice بأحدث فاتورة لكل مستخدم ونوع
+ */
+function initializeLastInvoice(invoices, users) {
+    const initialLastInvoice = {};
+    
+    for (const user of users) {
+        if (user.userType === 'admin') continue;
+        
+        // فلترة الفواتير الخاصة بهذا المستخدم
+        const userInvoices = filterInvoicesForUser(invoices, user);
+        if (userInvoices.length === 0) continue;
+        
+        // تجميع الفواتير حسب النوع (C / P)
+        const byType = {};
+        userInvoices.forEach(inv => {
+            const parsed = parseInvoiceNumber(inv['final-number']);
+            if (!parsed) return;
+            if (!byType[parsed.type]) byType[parsed.type] = [];
+            byType[parsed.type].push(inv);
+        });
+        
+        // لكل نوع، خذ أعلى رقم
+        for (const typeKey in byType) {
+            const list = byType[typeKey];
+            list.sort((a, b) => getSortKey(a['final-number']) - getSortKey(b['final-number']));
+            const lastFullKey = getSortKey(list[list.length - 1]['final-number']);
+            
+            if (!initialLastInvoice[user.username]) {
+                initialLastInvoice[user.username] = {};
+            }
+            initialLastInvoice[user.username][typeKey] = lastFullKey;
+        }
+    }
+    
+    return initialLastInvoice;
+}
 function sendTestAll() {
     console.log('🧪 تشغيل اختبار النظام بالكامل...');
     sendTestEmail();
