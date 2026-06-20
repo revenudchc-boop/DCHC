@@ -43,33 +43,35 @@ function getCreditFile() {
 
 async function extractInvoices(filePath) {
     const content = fs.readFileSync(filePath, 'utf8');
-    const parser = new xml2js.Parser({ explicitArray: false });
-    try {
-        const result = await parser.parseStringPromise(content);
-        let invoices = [];
-        if (result && result.root && result.root.invoice) {
-            invoices = Array.isArray(result.root.invoice) ? result.root.invoice : [result.root.invoice];
-        } else {
-            const matches = content.match(/<invoice[^>]*>/g);
-            if (matches) {
-                invoices = matches.map(tag => {
-                    const attrs = {};
-                    const attrRegex = /(\w+-\w+)="([^"]*)"/g;
-                    let match;
-                    while ((match = attrRegex.exec(tag)) !== null) {
-                        attrs[match[1]] = match[2];
-                    }
-                    return attrs;
-                });
-            }
+    const invoices = [];
+    
+    // البحث عن كل فاتورة باستخدام Regex
+    const invoiceRegex = /<invoice\s+([^>]*)>/g;
+    let match;
+    
+    while ((match = invoiceRegex.exec(content)) !== null) {
+        const attributes = match[1];
+        const inv = {};
+        
+        // استخراج السمات المطلوبة
+        const fields = ['final-number', 'draft-number', 'payee-customer-id', 'contract-customer-id', 
+                       'total-total', 'currency', 'key-word1', 'key-word2', 'created'];
+        
+        for (const field of fields) {
+            const attrRegex = new RegExp(`${field}="([^"]*)"`, 'i');
+            const attrMatch = attributes.match(attrRegex);
+            inv[field] = attrMatch ? attrMatch[1] : '';
         }
-        return invoices;
-    } catch (error) {
-        console.error('❌ خطأ في تحليل XML:', error.message);
-        return [];
+        
+        // إذا كانت الفاتورة تحتوي على final-number على الأقل، أضفها
+        if (inv['final-number']) {
+            invoices.push(inv);
+        }
     }
+    
+    console.log(`📄 تم استخراج ${invoices.length} فاتورة باستخدام Regex`);
+    return invoices;
 }
-
 function loadUsers() {
     if (!fs.existsSync(USERS_FILE)) {
         console.log('⚠️ users.json غير موجود');
