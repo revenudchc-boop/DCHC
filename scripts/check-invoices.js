@@ -543,11 +543,11 @@ async function processCredits(users, state) {
         const userCredits = filterCreditsForUser(allCredits, user);
         if (userCredits.length === 0) continue;
         
-        // ✅ ✅ ✅ المفتاح الصحيح هو username وليس 'credit_' + username
+        // ✅ ✅ ✅ المفتاح الصحيح (نفس مفتاح lastInvoice)
         const key = user.username;
         const lastStored = state.lastCredit[key] || 0;
         
-        console.log(`🔍 [${user.username}] lastStored=${lastStored}`);
+        console.log(`🔍 [${user.username}] lastStored للـ Credit = ${lastStored}`);
         
         userCredits.sort((a, b) => (parseInt(a['draft-number']) || 0) - (parseInt(b['draft-number']) || 0));
         
@@ -568,32 +568,6 @@ async function processCredits(users, state) {
             email: user.email
         });
     }
-    
-    // ✅ ✅ ✅ تأكد من حفظ state.lastCredit بعد التحديث ✅ ✅ ✅
-    console.log('💾 تم تحديث state.lastCredit:', JSON.stringify(state.lastCredit, null, 2));
-    
-    // ✅ إرسال تقرير تيليجرام
-    if (creditSummaryData.length > 0) {
-        const chatId = process.env.TELEGRAM_CHAT_ID;
-        if (chatId) {
-            let message = '<b>🔴 تقرير إشعارات الخصم الجديدة</b>\n';
-            message += '━━━━━━━━━━━━━━━━\n';
-            let totalCredits = 0;
-            creditSummaryData.forEach(s => {
-                message += `👤 <b>${s.username}</b>: ${s.count} إشعار خصم\n`;
-                totalCredits += s.count;
-            });
-            message += '━━━━━━━━━━━━━━━━\n';
-            message += `📊 إجمالي الإشعارات: <b>${totalCredits}</b>\n`;
-            message += `👥 عدد المستخدمين: <b>${creditSummaryData.length}</b>\n`;
-            message += `🕐 ${new Date().toLocaleString('ar-EG')}`;
-            sendTelegramMessage(chatId, message);
-            console.log(`✅ تم إرسال تقرير تيليجرام لإشعارات الخصم (${creditSummaryData.length} مستخدم)`);
-        }
-    }
-    
-    return creditSummaryData;
-}
     
     // ✅ ✅ ✅ إرسال تقرير تيليجرام لإشعارات الخصم ✅ ✅ ✅
     if (creditSummaryData.length > 0) {
@@ -618,7 +592,7 @@ async function processCredits(users, state) {
         }
     }
     
-    return creditSummaryData;  // ← إرجاع البيانات
+    return creditSummaryData;
 }
 
 async function main() {
