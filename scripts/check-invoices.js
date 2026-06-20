@@ -161,17 +161,29 @@ function filterInvoicesForUser(allInvoices, user) {
 
 function loadState() {
     if (!fs.existsSync(STATE_FILE)) {
+        console.log('📂 state.json غير موجود، سيتم إنشاؤه');
         return { lastInvoice: {}, lastCredit: {} };
     }
     try {
-        return JSON.parse(fs.readFileSync(STATE_FILE, 'utf8'));
-    } catch {
+        const content = fs.readFileSync(STATE_FILE, 'utf8');
+        const state = JSON.parse(content);
+        console.log('📂 تم تحميل state.json:', JSON.stringify(state, null, 2));
+        return state;
+    } catch (error) {
+        console.error('❌ خطأ في قراءة state.json:', error.message);
         return { lastInvoice: {}, lastCredit: {} };
     }
 }
 
 function saveState(state) {
-    fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
+    try {
+        fs.writeFileSync(STATE_FILE, JSON.stringify(state, null, 2));
+        console.log('💾 تم حفظ state.json:', JSON.stringify(state, null, 2));
+        return true;
+    } catch (error) {
+        console.error('❌ فشل حفظ state.json:', error.message);
+        return false;
+    }
 }
 
 /**
@@ -198,12 +210,17 @@ function filterNewInvoices(invoices, user, state) {
         const lastStored = lastKey[typeKey] || 0;
         const lastFullKey = getSortKey(list[list.length - 1]['final-number']);
         
+        console.log(`🔍 [${user.username}] نوع ${typeKey}: lastStored=${lastStored}, lastFullKey=${lastFullKey}`);
+        
         const newOfType = list.filter(inv => getSortKey(inv['final-number']) > lastStored);
         
         if (newOfType.length > 0) {
             if (!state.lastInvoice[key]) state.lastInvoice[key] = {};
             state.lastInvoice[key][typeKey] = lastFullKey;
             newInvoices.push(...newOfType);
+            console.log(`✅ [${user.username}] نوع ${typeKey}: ${newOfType.length} فواتير جديدة`);
+        } else {
+            console.log(`ℹ️ [${user.username}] نوع ${typeKey}: لا توجد فواتير جديدة`);
         }
     }
     
@@ -539,7 +556,7 @@ async function processCredits(users, state) {
         const lastCredit = userCredits[userCredits.length - 1];
         state.lastCredit[key] = parseInt(lastCredit['draft-number']) || 0;
         
-        console.log(`${user.username}: ${newCredits.length} إشعار خصم جديد`);
+        console.log(`${user.username}: ${newCredits.length} إشعار خصم جديد (lastStored=${lastStored}, newLast=${state.lastCredit[key]})`);
         
         sendCreditEmail(emailsToSend.join(','), user, newCredits);
         
@@ -579,15 +596,15 @@ async function processCredits(users, state) {
 async function main() {
     console.log('🚀 بدء فحص GitHub...');
     
-   // ✅ ✅ ✅ تحميل state.json من المستودع قبل التشغيل ✅ ✅ ✅
-console.log('📥 جاري تحميل state.json من المستودع...');
-try {
-    const { execSync } = require('child_process');
-    execSync('git pull origin main', { stdio: 'pipe' });
-    console.log('✅ تم تحديث state.json من المستودع');
-} catch (error) {
-    console.log('⚠️ فشل تحميل state.json:', error.message);
-}
+    // ✅ ✅ ✅ تحميل state.json من المستودع قبل التشغيل ✅ ✅ ✅
+    console.log('📥 جاري تحميل state.json من المستودع...');
+    try {
+        const { execSync } = require('child_process');
+        execSync('git pull origin main', { stdio: 'pipe' });
+        console.log('✅ تم تحديث state.json من المستودع');
+    } catch (error) {
+        console.log('⚠️ فشل تحميل state.json:', error.message);
+    }
     
     // 1. تحميل المستخدمين
     const users = loadUsers();
@@ -651,19 +668,21 @@ try {
     saveState(state);
     
     // ✅ ✅ ✅ رفع state.json إلى المستودع بعد التحديث ✅ ✅ ✅
-console.log('📤 جاري رفع state.json إلى المستودع...');
-try {
-    const { execSync } = require('child_process');
-    execSync('git config user.name "github-actions[bot]"');
-    execSync('git config user.email "github-actions[bot]@users.noreply.github.com"');
-    execSync('git add state.json');
-    // ✅ استخدام backticks (`) بدلاً من علامات الاقتباس المفردة
-    execSync(`git commit -m "تحديث حالة التتبع - $(date '+%Y-%m-%d %H:%M:%S')" || echo "لا توجد تغييرات"`, { shell: '/bin/bash' });
-    execSync('git push origin main');
-    console.log('✅ تم رفع state.json إلى المستودع');
-} catch (error) {
-    console.error('⚠️ فشل رفع state.json:', error.message);
-}
+    console.log('📤 جاري رفع state.json إلى المستودع...');
+    try {
+        const { execSync } = require('child_process');
+        const token = process.env.GITHUB_TOKEN;
+        const repoUrl = `https://x-access-token:${token}@github.com/${process.env.GITHUB_REPOSITORY}.git`;
+        
+        execSync('git config user.name "github-actions[bot]"');
+        execSync('git config user.email "github-actions[bot]@users.noreply.github.com"');
+        execSync('git add state.json');
+        execSync(`git commit -m "تحديث حالة التتبع - $(date '+%Y-%m-%d %H:%M:%S')" || echo "لا توجد تغييرات"`, { shell: '/bin/bash' });
+        execSync(`git push ${repoUrl} main`, { shell: '/bin/bash' });
+        console.log('✅ تم رفع state.json إلى المستودع');
+    } catch (error) {
+        console.error('⚠️ فشل رفع state.json:', error.message);
+    }
     
     // 7. ✅ إرسال تقرير الفواتير للأدمن (إذا وجدت فواتير جديدة)
     if (invoiceSummary.length > 0) {
@@ -831,6 +850,7 @@ function sendAdminCreditReport(creditSummary) {
         });
     }
 }
+
 function sendTestAll() {
     console.log('🧪 تشغيل اختبار النظام بالكامل...');
     sendTestEmail();
@@ -855,4 +875,4 @@ main().catch(error => {
 // sendTestTelegram();
 
 // 🔹 الخيار 4: تشغيل جميع الاختبارات (علّق الخيار 1 وافتح هذا)
-//sendTestAll()
+// sendTestAll();
