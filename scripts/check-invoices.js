@@ -490,7 +490,7 @@ async function processCredits(users, state) {
 async function main() {
     console.log('🚀 بدء فحص GitHub...');
     
-    // تحميل state.json من المستودع
+    // ✅ تحميل state.json من المستودع قبل التشغيل
     console.log('📥 جاري تحميل state.json من المستودع...');
     try {
         const { execSync } = require('child_process');
@@ -500,12 +500,14 @@ async function main() {
         console.log('⚠️ فشل تحميل state.json:', error.message);
     }
     
+    // 1. تحميل المستخدمين
     const users = loadUsers();
     if (users.length === 0) {
         console.log('⚠️ لا يوجد مستخدمين نشطين');
         return;
     }
     
+    // 2. قراءة أحدث ملف فواتير
     const latestFile = getLastDataFile();
     if (!latestFile) {
         console.log('❌ لا توجد ملفات بيانات');
@@ -514,12 +516,14 @@ async function main() {
     
     console.log(`📌 أحدث ملف: ${latestFile.name}`);
     
+    // 3. استخراج الفواتير
     const allInvoices = await extractInvoices(latestFile.path);
     console.log(`📄 تم استخراج ${allInvoices.length} فاتورة`);
     
+    // 4. تحميل الحالة السابقة
     const state = loadState();
     
-    // معالجة الفواتير
+    // 5. معالجة كل مستخدم (الفواتير)
     const invoiceSummary = [];
     let sentCount = 0;
     
@@ -554,10 +558,21 @@ async function main() {
         });
     }
     
-    // حفظ الحالة (حتى لو لم توجد فواتير)
-    saveState(state);
+    // 6. ✅ معالجة Credit Data أولاً (قبل حفظ الحالة)
+    const creditSummary = await processCredits(users, state);
     
-    // رفع state.json إلى المستودع
+    // 7. ✅ إرسال تقرير إشعارات الخصم للأدمن
+    if (creditSummary.length > 0) {
+        sendAdminCreditReport(creditSummary);
+    } else {
+        console.log('ℹ️ لا توجد إشعارات خصم جديدة، لم يتم إرسال تقرير الإشعارات');
+    }
+    
+    // 8. ✅ حفظ الحالة بعد تحديث lastCredit
+    saveState(state);
+    console.log('📂 محتوى state.json قبل الرفع:', JSON.stringify(state, null, 2));
+    
+    // 9. ✅ رفع state.json إلى المستودع بعد التحديث
     console.log('📤 جاري رفع state.json إلى المستودع...');
     try {
         const { execSync } = require('child_process');
@@ -574,7 +589,7 @@ async function main() {
         console.error('⚠️ فشل رفع state.json:', error.message);
     }
     
-    // تقرير الفواتير
+    // 10. ✅ إرسال تقرير الفواتير للأدمن (إذا وجدت فواتير جديدة)
     if (invoiceSummary.length > 0) {
         sendAdminInvoiceReport(invoiceSummary, latestFile.name, allInvoices.length);
         sendTelegramAlert(invoiceSummary);
@@ -582,19 +597,8 @@ async function main() {
         console.log('ℹ️ لا توجد فواتير جديدة، لم يتم إرسال تقرير الفواتير');
     }
     
-    // معالجة Credit Data
-    const creditSummary = await processCredits(users, state);
-    
-    // تقرير إشعارات الخصم
-    if (creditSummary.length > 0) {
-        sendAdminCreditReport(creditSummary);
-    } else {
-        console.log('ℹ️ لا توجد إشعارات خصم جديدة، لم يتم إرسال تقرير الإشعارات');
-    }
-    
     console.log(`✅ اكتمل الفحص. تم إرسال ${sentCount} إيميلات للمستخدمين`);
 }
-
 // ============================================
 // دوال الاختبار
 // ============================================
