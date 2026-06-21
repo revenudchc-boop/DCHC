@@ -7836,5 +7836,13 @@
     <credit-item amount-credited="271.1179" quantity="1.0" rate-credited="5.22" credit-by="FULL" tax-credited="0.0" exchange-rate="51.9383" invoice-draft-number="278854" invoice-final-number="P25-14156" invoice-item-gkey="10537030" />
   </credit-items>
 </credit>
+<credit currency="USAD" customer-name="ميدتيرنيان شيبنج كومباني مصر للوكاله البحريه (دولار)" date="2026-06-10T00:00:00" type="OAC" customer-id="MEDITERRANEAN SHIPPING COMPANY(USAD)" customer-role="AGENT" draft-number="100706" final-number="100138" finalized-date="2026-06-10T09:18:52" open-credit="Y" notes="اشعار خصم كميه طبقا للتعاقد" status="FINAL" total-credit="6.718520347E7" total-tax-credit="0.0">
+  <credit-items>
+    <credit-item amount-credited="190618.49" effective-date="2026-06-10T00:00:00" quantity="1.0" rate-credited="190618.49" tariff-description="DischargeTransshipment20FullDry  " tariff-currency="USD" contract-id="MSC CONTRACT" type="REGULAR" tariff-id="DT20FD" tax-credited="0.0" exchange-rate="48.75" />
+    <credit-item amount-credited="289210.56" effective-date="2026-06-10T00:00:00" quantity="1.0" rate-credited="289210.56" tariff-description="DischargeTransshipment20EmptyDry " tariff-currency="USD" contract-id="MSC CONTRACT" type="REGULAR" tariff-id="DT20ED " tax-credited="0.0" exchange-rate="48.75" />
+    <credit-item amount-credited="268263.04" effective-date="2026-06-10T00:00:00" quantity="1.0" rate-credited="268263.04" tariff-description="DischargeTransshipment40FullDry " tariff-currency="USD" contract-id="MSC CONTRACT" type="REGULAR" tariff-id="DT40FD " tax-credited="0.0" exchange-rate="48.75" />
+    <credit-item amount-credited="545465.91" effective-date="2026-06-10T00:00:00" quantity="1.0" rate-credited="545495.91" tariff-description="DischargeTransshipment40EmptyDry " tariff-currency="USD" contract-id="MSC CONTRACT" type="REGULAR" tariff-id="DT40ED " tax-credited="0.0" exchange-rate="48.75" />
+  </credit-items>
+</credit>
 </argo:snx>
 
