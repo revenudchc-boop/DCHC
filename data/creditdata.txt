@@ -7800,6 +7800,11 @@
     <credit-item amount-credited="49237.51" effective-date="2026-06-10T00:00:00" quantity="1.0" rate-credited="49237.51" tariff-description="LoadExport40FullDry" tariff-currency="USD" contract-id="GENERAL TARIFF" type="REGULAR" tariff-id="LE40FD" tax-credited="0.0" exchange-rate="46.8467" />
   </credit-items>
 </credit>
+<credit currency="EGP" customer-name="ميدتيرنيان شيبنج كومباني مصر للوكاله البحريه(جنيه)" date="2026-06-24T00:00:00" type="OAC" customer-id="MEDITERRANEAN SHIPPING COMPANY(EGP)" customer-role="AGENT" draft-number="100721" final-number="100156" finalized-date="2026-06-24T10:23:45" open-credit="Y" notes="سماح 14 يوم تخزين صادر مملوء" status="FINAL" total-credit="59690.42" total-tax-credit="0.0">
+  <credit-items>
+    <credit-item amount-credited="59690.42" effective-date="2026-06-24T00:00:00" quantity="1.0" rate-credited="59690.42" tariff-description="خصم تخزين صادر مملوء" tariff-currency="USD" contract-id="GENERAL TARIFF" type="TIER" tariff-id="STORE20FD " tax-credited="0.0" exchange-rate="1.00" />
+  </credit-items>
+</credit>
 <credit currency="USAD" customer-name="ينج مينج شيبنج مصر للملاحة (دولار)" date="2026-06-17T00:00:00" type="OAC" customer-id="YANG MING SHIPPING EGYPT(USAD)" customer-role="AGENT" draft-number="100712" final-number="100148" finalized-date="2026-06-17T10:46:50" open-credit="N" notes="53" status="FINAL" total-credit="8018.835" total-tax-credit="0.0">
   <credit-items>
     <credit-item amount-credited="8018.835" quantity="1.0" rate-credited="150.0" credit-by="FULL" tax-credited="0.0" exchange-rate="53.4589" invoice-draft-number="277599" invoice-final-number="P25-13724" invoice-item-gkey="10446370" />
@@ -7836,12 +7841,66 @@
     <credit-item amount-credited="271.1179" quantity="1.0" rate-credited="5.22" credit-by="FULL" tax-credited="0.0" exchange-rate="51.9383" invoice-draft-number="278854" invoice-final-number="P25-14156" invoice-item-gkey="10537030" />
   </credit-items>
 </credit>
-<credit currency="USAD" customer-name="ميدتيرنيان شيبنج كومباني مصر للوكاله البحريه (دولار)" date="2026-06-10T00:00:00" type="OAC" customer-id="MEDITERRANEAN SHIPPING COMPANY(USAD)" customer-role="AGENT" draft-number="100706" final-number="100138" finalized-date="2026-06-10T09:18:52" open-credit="Y" notes="اشعار خصم كميه طبقا للتعاقد" status="FINAL" total-credit="6.718520347E7" total-tax-credit="0.0">
+<credit currency="EGP" customer-name="Hapag-Lioyd(Egypt)Shipping (جنيه)" date="2026-06-21T00:00:00" type="OAC" customer-id="HAPAG-LLOYD (EGYPT) SHIPPING (EGP)" customer-role="AGENT" draft-number="100718" final-number="100154" finalized-date="2026-06-22T12:35:59" open-credit="N" notes="45" status="FINAL" total-credit="31303.6218" total-tax-credit="4382.5071">
+  <credit-items>
+    <credit-item amount-credited="10434.5406" quantity="1.0" rate-credited="198.0" credit-by="FULL" tax-credited="1460.8357" exchange-rate="52.6997" invoice-draft-number="272757" invoice-final-number="P25-12481" invoice-item-gkey="10224750">
+      <credit-item-taxes>
+        <tax tax-id="SALES TAX" rate="0.14" date="2015-01-01T00:00:00" amount="1460.8356840000001" />
+      </credit-item-taxes>
+    </credit-item>
+    <credit-item amount-credited="10434.5406" quantity="1.0" rate-credited="198.0" credit-by="FULL" tax-credited="1460.8357" exchange-rate="52.6997" invoice-draft-number="272757" invoice-final-number="P25-12481" invoice-item-gkey="10224753">
+      <credit-item-taxes>
+        <tax tax-id="SALES TAX" rate="0.14" date="2015-01-01T00:00:00" amount="1460.8356840000001" />
+      </credit-item-taxes>
+    </credit-item>
+    <credit-item amount-credited="10434.5406" quantity="1.0" rate-credited="198.0" credit-by="FULL" tax-credited="1460.8357" exchange-rate="52.6997" invoice-draft-number="272757" invoice-final-number="P25-12481" invoice-item-gkey="10224759">
+      <credit-item-taxes>
+        <tax tax-id="SALES TAX" rate="0.14" date="2015-01-01T00:00:00" amount="1460.8356840000001" />
+      </credit-item-taxes>
+    </credit-item>
+  </credit-items>
+</credit>
+<credit currency="EGP" customer-name="Hapag-Lioyd(Egypt)Shipping (جنيه)" date="2026-06-21T00:00:00" type="OAC" customer-id="HAPAG-LLOYD (EGYPT) SHIPPING (EGP)" customer-role="AGENT" draft-number="100719" final-number="100155" finalized-date="2026-06-22T12:36:08" open-credit="N" notes="46" status="FINAL" total-credit="408.65999999999997" total-tax-credit="0.0">
+  <credit-items>
+    <credit-item amount-credited="136.22" quantity="1.0" rate-credited="136.22" credit-by="FULL" tax-credited="0.0" exchange-rate="N/A" invoice-draft-number="272758" invoice-final-number="P25-12482" invoice-item-gkey="10224772" />
+    <credit-item amount-credited="136.22" quantity="1.0" rate-credited="136.22" credit-by="FULL" tax-credited="0.0" exchange-rate="N/A" invoice-draft-number="272758" invoice-final-number="P25-12482" invoice-item-gkey="10224762" />
+    <credit-item amount-credited="136.22" quantity="1.0" rate-credited="136.22" credit-by="FULL" tax-credited="0.0" exchange-rate="N/A" invoice-draft-number="272758" invoice-final-number="P25-12482" invoice-item-gkey="10224784" />
+  </credit-items>
+</credit>
+<credit currency="EGP" customer-name="ميدتيرنيان شيبنج كومباني مصر للوكاله البحريه(جنيه)" date="2026-06-27T00:00:00" type="OAC" customer-id="MEDITERRANEAN SHIPPING COMPANY(EGP)" customer-role="AGENT" draft-number="100722" final-number="100157" finalized-date="2026-06-27T11:39:34" open-credit="N" notes="1005" status="FINAL" total-credit="24601.849199999997" total-tax-credit="0.0">
+  <credit-items>
+    <credit-item amount-credited="1688.3621999999998" quantity="7.0" rate-credited="4.5" credit-by="FULL" tax-credited="0.0" exchange-rate="53.5988" invoice-draft-number="274988" invoice-final-number="P25-13174" invoice-item-gkey="10324040" />
+    <credit-item amount-credited="1688.3621999999998" quantity="7.0" rate-credited="4.5" credit-by="FULL" tax-credited="0.0" exchange-rate="53.5988" invoice-draft-number="274988" invoice-final-number="P25-13174" invoice-item-gkey="10324031" />
+    <credit-item amount-credited="1929.5567999999998" quantity="8.0" rate-credited="4.5" credit-by="FULL" tax-credited="0.0" exchange-rate="53.5988" invoice-draft-number="274988" invoice-final-number="P25-13174" invoice-item-gkey="10324029" />
+    <credit-item amount-credited="1929.5567999999998" quantity="8.0" rate-credited="4.5" credit-by="FULL" tax-credited="0.0" exchange-rate="53.5988" invoice-draft-number="274988" invoice-final-number="P25-13174" invoice-item-gkey="10324027" />
+    <credit-item amount-credited="1688.3621999999998" quantity="7.0" rate-credited="4.5" credit-by="FULL" tax-credited="0.0" exchange-rate="53.5988" invoice-draft-number="274988" invoice-final-number="P25-13174" invoice-item-gkey="10324033" />
+    <credit-item amount-credited="1929.5567999999998" quantity="8.0" rate-credited="4.5" credit-by="FULL" tax-credited="0.0" exchange-rate="53.5988" invoice-draft-number="274988" invoice-final-number="P25-13174" invoice-item-gkey="10324030" />
+    <credit-item amount-credited="1688.3621999999998" quantity="7.0" rate-credited="4.5" credit-by="FULL" tax-credited="0.0" exchange-rate="53.5988" invoice-draft-number="274988" invoice-final-number="P25-13174" invoice-item-gkey="10324038" />
+    <credit-item amount-credited="1688.3621999999998" quantity="7.0" rate-credited="4.5" credit-by="FULL" tax-credited="0.0" exchange-rate="53.5988" invoice-draft-number="274988" invoice-final-number="P25-13174" invoice-item-gkey="10324039" />
+    <credit-item amount-credited="1929.5567999999998" quantity="8.0" rate-credited="4.5" credit-by="FULL" tax-credited="0.0" exchange-rate="53.5988" invoice-draft-number="274988" invoice-final-number="P25-13174" invoice-item-gkey="10324028" />
+    <credit-item amount-credited="1688.3621999999998" quantity="7.0" rate-credited="4.5" credit-by="FULL" tax-credited="0.0" exchange-rate="53.5988" invoice-draft-number="274988" invoice-final-number="P25-13174" invoice-item-gkey="10324035" />
+    <credit-item amount-credited="1688.3621999999998" quantity="7.0" rate-credited="4.5" credit-by="FULL" tax-credited="0.0" exchange-rate="53.5988" invoice-draft-number="274988" invoice-final-number="P25-13174" invoice-item-gkey="10324037" />
+    <credit-item amount-credited="1688.3621999999998" quantity="7.0" rate-credited="4.5" credit-by="FULL" tax-credited="0.0" exchange-rate="53.5988" invoice-draft-number="274988" invoice-final-number="P25-13174" invoice-item-gkey="10324036" />
+    <credit-item amount-credited="1688.3621999999998" quantity="7.0" rate-credited="4.5" credit-by="FULL" tax-credited="0.0" exchange-rate="53.5988" invoice-draft-number="274988" invoice-final-number="P25-13174" invoice-item-gkey="10324034" />
+    <credit-item amount-credited="1688.3621999999998" quantity="7.0" rate-credited="4.5" credit-by="FULL" tax-credited="0.0" exchange-rate="53.5988" invoice-draft-number="274988" invoice-final-number="P25-13174" invoice-item-gkey="10324032" />
+  </credit-items>
+</credit>
+<credit currency="USAD" customer-name="ميدتيرنيان شيبنج كومباني مصر للوكاله البحريه (دولار)" date="2026-06-10T00:00:00" type="OAC" customer-id="MEDITERRANEAN SHIPPING COMPANY(USAD)" customer-role="AGENT" draft-number="100706" final-number="100138" finalized-date="2026-06-10T09:18:52" open-credit="Y" notes="اشعار خصم كميه طبقا للتعاقد" status="FINAL" total-credit="1293588.00" total-tax-credit="0.0">
   <credit-items>
     <credit-item amount-credited="190618.49" effective-date="2026-06-10T00:00:00" quantity="1.0" rate-credited="190618.49" tariff-description="DischargeTransshipment20FullDry  " tariff-currency="USD" contract-id="MSC CONTRACT" type="REGULAR" tariff-id="DT20FD" tax-credited="0.0" exchange-rate="48.75" />
     <credit-item amount-credited="289210.56" effective-date="2026-06-10T00:00:00" quantity="1.0" rate-credited="289210.56" tariff-description="DischargeTransshipment20EmptyDry " tariff-currency="USD" contract-id="MSC CONTRACT" type="REGULAR" tariff-id="DT20ED " tax-credited="0.0" exchange-rate="48.75" />
     <credit-item amount-credited="268263.04" effective-date="2026-06-10T00:00:00" quantity="1.0" rate-credited="268263.04" tariff-description="DischargeTransshipment40FullDry " tariff-currency="USD" contract-id="MSC CONTRACT" type="REGULAR" tariff-id="DT40FD " tax-credited="0.0" exchange-rate="48.75" />
     <credit-item amount-credited="545465.91" effective-date="2026-06-10T00:00:00" quantity="1.0" rate-credited="545495.91" tariff-description="DischargeTransshipment40EmptyDry " tariff-currency="USD" contract-id="MSC CONTRACT" type="REGULAR" tariff-id="DT40ED " tax-credited="0.0" exchange-rate="48.75" />
+  </credit-items>
+</credit>
+<credit currency="USAD" customer-name="ينج مينج شيبنج مصر للملاحة (دولار)" date="2026-06-10T00:00:00" type="OAC" customer-id="YANG MING SHIPPING EGYPT(USAD)" customer-role="AGENT" draft-number="100709" final-number="100141" finalized-date="2026-06-10T10:35:40" open-credit="Y" notes="اشعار خصم كمية طبقا للتعاقد 2026-2025" status="FINAL" total-credit="113627.11" total-tax-credit="0.0">
+  <credit-items>
+    <credit-item amount-credited="113627.11" effective-date="2026-06-10T00:00:00" quantity="1.0" rate-credited="113627.11" tariff-description="DischargeTransshipment20FullDry  " tariff-currency="USD" contract-id="OCEAN NETWORK ALLIENS CONTRACT" type="REGULAR" tariff-id="DT20FD" tax-credited="0.0" exchange-rate="48.5914" />
+  </credit-items>
+</credit>
+<credit currency="USAD" customer-name="القاضى وشركاه للملاحه والتجاره   كادمار(دولار)" date="2026-06-10T00:00:00" type="OAC" customer-id="KADMAR SHIPPING EGYPT(USAD)" customer-role="SHIPPER" draft-number="100708" final-number="100140" finalized-date="2026-06-10T10:35:26" open-credit="Y" notes="اشعار خصم كمية طبقا للتعاقد 2026-2025" status="FINAL" total-credit="3556.46" total-tax-credit="0.0">
+  <credit-items>
+    <credit-item amount-credited="3556.46" effective-date="2026-06-10T00:00:00" quantity="1.0" rate-credited="3556.46" tariff-description="DischargeTransshipment20FullDry  " tariff-currency="USD" contract-id="GENERAL TARIFF" type="REGULAR" tariff-id="DT20FD" tax-credited="0.0" exchange-rate="48.5914" />
   </credit-items>
 </credit>
 </argo:snx>
