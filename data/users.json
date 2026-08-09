@@ -352,5 +352,19 @@
     "status": "active",
     "createdAt": "2023-01-01T00:00:00.000Z",
     "lastLogin": null
+  },
+    {
+    "id": "oocl",
+    "username": "oocl",
+    "email": "Karim.ibrahim@oocl.com",
+	"additionalEmails": [""],
+    "taxNumber": "7482131470",
+    "contractCustomerId": "OOCL",
+	"customerIds": ["OOCL", "OOCL (EGYPT SHIPPING AGENCY)(EGP)", "OOCL (EGYPT SHIPPING AGENCY) (USAD)"],
+    "userType": "accountant",
+    "password": "oocl123",
+    "status": "active",
+    "createdAt": "2023-01-01T00:00:00.000Z",
+    "lastLogin": null
   }
 ]
