@@ -367,11 +367,11 @@
     "createdAt": "2023-01-01T00:00:00.000Z",
     "lastLogin": null
   },
-	{
+    {
     "id": "csl",
     "username": "ILPE Accounting",
-    "email": "",
-	"additionalEmails": ["Acc@ilpegypt.com", "M.Mahmoud@ilpegypt.com", "liner@ilpegypt.com", "K.Ibrahim@ilpegypt.com"],
+    "email": "Acc@ilpegypt.com",
+	"additionalEmails": ["M.Mahmoud@ilpegypt.com", "liner@ilpegypt.com", "K.Ibrahim@ilpegypt.com" ,"mb.mohamed@ilpegypt.com"],
     "taxNumber": "202492435",
     "contractCustomerId": "CSL",
 	"customerIds": ["CSL", "INTERNATIONAL LOGISTICS PARTNERS EGYPT(EGP)", "INTERNATIONAL LOGISTICS PARTNERS EGYPT(USAD)"],
