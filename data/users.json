@@ -380,5 +380,19 @@
     "status": "active",
     "createdAt": "2023-01-01T00:00:00.000Z",
     "lastLogin": null
+  },
+	{
+    "id": "Maersk",
+    "username": "maersk",
+    "email": "Mohamed.el.gamil@maersk.com",
+	"additionalEmails": ["finapeg@maersk.com"],
+    "taxNumber": "371847702",
+    "contractCustomerId": "MSK",
+	"customerIds": ["MSK", "MAERSK EGYPT SHIPPING AGENCY(EGP)", "MAERSK EGYPT SHIPPING AGENCY(USAD)"],
+    "userType": "accountant",
+    "password": "maersk123",
+    "status": "active",
+    "createdAt": "2023-01-01T00:00:00.000Z",
+    "lastLogin": null
   }
 ]
