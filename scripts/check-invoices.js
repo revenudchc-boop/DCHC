@@ -378,7 +378,7 @@ function sendCreditEmail(toEmail, user, credits) {
             </table>
             ${more}
             <div style="text-align:center;margin:30px 0;">
-                <a href="https://revenudchc-boop.github.io/DCHC/" style="background:#c62828;color:white;text-decoration:none;padding:12px 30px;border-radius:50px;">🔗 فتح نظام الفواتير</a>
+                <a href="https://revenudchc-boop.github.io/DCHC-Inv/" style="background:#c62828;color:white;text-decoration:none;padding:12px 30px;border-radius:50px;">🔗 فتح نظام الفواتير</a>
             </div>
             <hr><p style="color:#999;font-size:0.8em;text-align:center;">رسالة تلقائية من نظام الفواتير</p>
         </div>
