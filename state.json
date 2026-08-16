@@ -62,6 +62,9 @@
     },
     "maersk": {
       "P": 26001474
+    },
+    "panmarine": {
+      "P": 26001433
     }
   },
   "lastCredit": {
@@ -74,6 +77,7 @@
     "cosco": 100664,
     "dhl": 100695,
     "kadmar": 100708,
-    "maersk": 100626
+    "maersk": 100626,
+    "panmarine": 100136
   }
 }
