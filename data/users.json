@@ -394,5 +394,19 @@
     "status": "active",
     "createdAt": "2023-01-01T00:00:00.000Z",
     "lastLogin": null
+  },
+	{
+    "id": "panmarine",
+    "username": "panmarine",
+    "email": "Ahmed.Nabil@medkon-egypt.com",
+	"additionalEmails": ["mohamed.aboelfotoh@medkon-egypt.com", "mohamed.aboelfotoh@pan-marine.net"],
+    "taxNumber": "476859786",
+    "contractCustomerId": "SIV",
+	"customerIds": ["MDK", "PAN MARINE SHIPPING SERVICES (EGP)", "PAN MARINE SHIPPING SERVICES(USAD)"],
+    "userType": "accountant",
+    "password": "panmarine123",
+    "status": "active",
+    "createdAt": "2023-01-01T00:00:00.000Z",
+    "lastLogin": null
   }
 ]
