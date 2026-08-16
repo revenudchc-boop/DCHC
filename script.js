@@ -19,23 +19,6 @@ const COMPANY_INFO = {
     baseUrl: 'https://revenudchc-boop.github.io/DCHC/'
 };
 
-// ============================================
-// إعدادات GitHub للاكتشاف التلقائي
-// ============================================
-const GITHUB_CONFIG = {
-    owner: 'revenudchc-boop',
-    repo: 'DCHC',
-    branch: 'main',
-    folder: 'data',
-    rawBaseUrl: 'https://raw.githubusercontent.com/revenudchc-boop/DCHC/main/data/',
-    apiUrl: 'https://api.github.com/repos/revenudchc-boop/DCHC/contents/data',
-    usersFileName: 'users.json',     // ✅ أضف هذا السطر
-    usersFileUrl: 'https://raw.githubusercontent.com/revenudchc-boop/DCHC/main/data/users.json',  // ✅ أضف هذا السطر
-    filesList: [],
-    loadedInvoices: [],
-    isLoaded: false
-};
-
 // أنواع الفواتير
 const INVOICE_TYPES = {
     CASH: 'cash',
@@ -76,12 +59,6 @@ let viewedInvoices = new Set();
 const NEWS_VISIBLE_KEY = 'newsBarVisible';
 let isQuickPayment = false;
 let isSearching = false;  // منع تغيير وضع العرض أثناء البحث
-// ============================================
-// ذاكرة تخزين مؤقت للملفات المحملة
-// ============================================
-let loadedFilesCache = new Map(); // تخزين بيانات كل ملف تم تحميله
-let allLoadedInvoices = []; // تخزين جميع الفواتير من جميع الملفات
-let lastSearchDateRange = { from: null, to: null }; // تتبع نطاق التاريخ المطلوب
 
 // ============================================
 // إعدادات التحديث التلقائي (Auto Refresh)
@@ -101,12 +78,11 @@ let driveConfig = {
     folderId: '1FlBXLupfXCICs6xt7xxEE02wr_cjAapC',
     fileName: 'datatxt.txt',
     fileId: '1xZSobMThbWKcZ53OmZEWlbn6mzz5Nsnr',
-    dataFiles: [],  // ✅ جديد: مصفوفة للملفات المتعددة
     usersFileName: 'users.json',
     usersFileId: '1-ktLLXz1Febs44lB-aqfuNmTRs1GNB0w',
     logoFileId: '1DugYxs9a21e6J0ynTu6pE0yHXM2wRXSP',
-    creditFileName: 'creditdata.txt',
-    creditFileId: '1WU9R9Yby0_QoJeulIgYRuCQk9XV-N_e1'
+    creditFileName: 'creditdata.txt',                // ← تم التغيير
+    creditFileId: '1WU9R9Yby0_QoJeulIgYRuCQk9XV-N_e1' // ← تم الإضافة
 };
 
 // متغيرات التقارير
@@ -1372,152 +1348,56 @@ async function findCreditFileIdAuto() {
     } catch { return false; }
 }
 
-// ============================================
-// الإعداد التلقائي للنظام (معدل لـ GitHub)
-// ============================================
 async function autoConfigureDrive() {
-    console.log('🔄 بدء الإعداد التلقائي للنظام...');
-    showProgress('جاري إعداد النظام...', 20);
-    
-    // ✅ تحميل إعدادات المستخدمين من Drive (إذا كانت موجودة)
-    // نضعها في try/catch حتى لا توقف النظام إذا فشلت
-    try {
-        const usersFound = await findUsersFileIdAuto();
-        if (usersFound) {
-            await loadUsersFromDrive();
-            console.log('✅ تم تحميل المستخدمين من Drive');
-        }
-    } catch(e) {
-        console.warn('⚠️ فشل تحميل المستخدمين من Drive:', e.message);
-    }
-    
-    // ✅ لم نعد بحاجة لاكتشاف ملفات البيانات من Drive
-    // لأننا سنستخدم GitHub بدلاً من ذلك
-    console.log('✅ تم إعداد النظام (سيتم استخدام GitHub لملفات البيانات)');
-    
-    showProgress('تم إعداد النظام', 100);
+    console.log('بدء الإعداد التلقائي لـ Drive...');
+    showProgress('جاري إعداد Google Drive...', 20);
+    const dataFound = await findDataFileIdAuto();
+    const usersFound = await findUsersFileIdAuto();
+    const creditFound = await findCreditFileIdAuto();   // إضافة هذا السطر
+    if (dataFound || usersFound || creditFound) saveDriveSettingsToStorage();
+    showProgress(dataFound || usersFound || creditFound ? 'تم إعداد Drive' : 'استخدم الإعدادات الافتراضية', 100);
     setTimeout(hideProgress, 1500);
-}
-
-// ✅ دالة جديدة: اكتشاف تلقائي لجميع ملفات البيانات
-// ============================================
-// اكتشاف ملفات datatxt_Q من GitHub وترتيبها (الأحدث أولاً)
-// ============================================
-async function discoverDataFiles() {
-    console.log('🔍 بدء البحث عن ملفات datatxt_Q في مجلد data...');
-    
-    try {
-        // 1. الاتصال بـ GitHub API لجلب محتويات المجلد
-        const response = await fetch(GITHUB_CONFIG.apiUrl);
-        
-        // 2. التحقق من نجاح الاتصال
-        if (!response.ok) {
-            console.error(`❌ فشل الاتصال: ${response.status}`);
-            return false;
-        }
-        
-        // 3. قراءة قائمة الملفات
-        const files = await response.json();
-        
-        // 4. تصفية الملفات: فقط الملفات التي تبدأ بـ datatxt_Q وتنتهي بـ .txt
-        const dataFiles = files.filter(file => {
-            return file.type === 'file' && 
-                   file.name.startsWith('datatxt_Q') && 
-                   file.name.endsWith('.txt');
-        });
-        
-        if (dataFiles.length === 0) {
-            console.warn('⚠️ لم يتم العثور على أي ملفات تبدأ بـ datatxt_Q');
-            return false;
-        }
-        
-        // 5. استخراج الرقم من اسم الملف (مثلاً: Q003 -> 3)
-        const filesWithNumbers = dataFiles.map(file => {
-            // استخراج الرقم باستخدام Regex
-            const match = file.name.match(/datatxt_Q(\d+)\.txt/);
-            const number = match ? parseInt(match[1]) : 0;
-            
-            return {
-                name: file.name,
-                url: GITHUB_CONFIG.rawBaseUrl + file.name,
-                number: number,
-                size: file.size,
-                downloadUrl: file.download_url
-            };
-        });
-        
-        // 6. الترتيب من الأحدث (أكبر رقم) إلى الأقدم (أصغر رقم)
-        filesWithNumbers.sort((a, b) => b.number - a.number);
-        
-        // 7. تخزين القائمة
-        GITHUB_CONFIG.filesList = filesWithNumbers;
-        
-        // 8. عرض النتائج في Console
-        console.log(`✅ تم اكتشاف ${GITHUB_CONFIG.filesList.length} ملف:`);
-        GITHUB_CONFIG.filesList.forEach((file, index) => {
-            console.log(`   ${index + 1}. ${file.name} (رقم ${file.number})`);
-        });
-        
-        return true;
-        
-    } catch (error) {
-        console.error('❌ خطأ في الاكتشاف:', error);
-        return false;
-    }
-}
-
-// ✅ دالة جديدة: قراءة نطاق التاريخ من ملف
-async function discoverFileDateRange(fileIndex) {
-    const file = driveConfig.dataFiles[fileIndex];
-    if (!file || !file.id) return;
-    
-    try {
-        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${driveConfig.apiKey}`);
-        if (!res.ok) return;
-        
-        const content = await res.text();
-        
-        // استخراج أول تاريخ وآخر تاريخ
-        const dates = [];
-        const regex = /finalized-date="([^"]*)"/g;
-        let match;
-        while ((match = regex.exec(content)) !== null) {
-            dates.push(match[1].slice(0, 10));
-        }
-        
-        if (dates.length > 0) {
-            dates.sort();
-            file.from = dates[0];
-            file.to = dates[dates.length - 1];
-            console.log(`📅 ${file.name}: ${file.from} → ${file.to}`);
-            saveDriveSettingsToStorage();
-        }
-    } catch (e) {
-        console.warn(`⚠️ فشل قراءة نطاق التاريخ لـ ${file.name}`);
-    }
 }
 
 // ============================================
 // دوال المستخدمين
 // ============================================
-
-function loadUsers() {
+async function loadUsersFromDrive() {
+    if (!driveConfig.apiKey || !driveConfig.folderId || !driveConfig.usersFileId) return false;
     try {
-        // ✅ قراءة المستخدمين من متغير البيئة (GitHub Secret)
-        const usersJson = process.env.USERS_JSON;
-        if (!usersJson) {
-            console.log('⚠️ USERS_JSON غير موجود في البيئة');
-            return [];
-        }
-        const users = JSON.parse(usersJson);
-        console.log(`✅ تم تحميل ${users.length} مستخدم من GitHub Secret`);
-        return users.filter(u => u.status === 'active');
+        showProgress('جاري تحميل المستخدمين...', 30);
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${driveConfig.usersFileId}?alt=media&key=${driveConfig.apiKey}`);
+        if (!res.ok) throw new Error('فشل التحميل');
+        let content = await res.text();
+        try { JSON.parse(content); } catch { content = repairJSON(content); }
+        users = JSON.parse(content);
+        if (!Array.isArray(users)) throw new Error('ملف غير صالح');
+        localStorage.setItem('backupUsers', JSON.stringify(users));
+        return true;
     } catch (error) {
-        console.error('❌ خطأ في قراءة المستخدمين:', error.message);
-        return [];
-    }
+        console.error(error);
+        showNotification('فشل تحميل المستخدمين', 'error');
+        return false;
+    } finally { setTimeout(hideProgress, 1500); }
 }
 
+async function saveUsersToDrive() {
+    if (!driveConfig.apiKey || !driveConfig.folderId || !driveConfig.usersFileId) return false;
+    try {
+        showProgress('جاري حفظ المستخدمين...', 30);
+        const metadata = { name: driveConfig.usersFileName, mimeType: 'application/json' };
+        const form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+        form.append('file', new Blob([JSON.stringify(users, null, 2)], { type: 'application/json' }));
+        const res = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveConfig.usersFileId}?uploadType=multipart&key=${driveConfig.apiKey}`, { method: 'PATCH', body: form });
+        if (!res.ok) throw new Error('فشل الحفظ');
+        showNotification('✅ تم حفظ المستخدمين', 'success');
+        return true;
+    } catch (error) {
+        showNotification(`❌ خطأ: ${error.message}`, 'error');
+        return false;
+    } finally { setTimeout(hideProgress, 1500); }
+}
 
 // دالة مساعدة لفك تشفير Base64 (للاستخدام في حالة الطوارئ فقط)
 function decodeBase64(encoded) {
@@ -1542,88 +1422,48 @@ function loadUsersFromBackup() {
     return false;
 }
 
-// ============================================
-// تحميل المستخدمين (من GitHub أولاً، ثم النسخة الاحتياطية)
-// ============================================
-// ============================================
-// تحميل المستخدمين (من متغير عام أو تخزين محلي)
-// ============================================
-async function loadUsers(forceRefresh = false) {
-    console.log('👥 تحميل المستخدمين...');
-    
-    try {
-        // محاولة التحميل من التخزين المحلي أولاً
-        if (!forceRefresh) {
-            const cached = localStorage.getItem('usersData');
-            if (cached) {
-                try {
-                    const parsed = JSON.parse(cached);
-                    if (Array.isArray(parsed) && parsed.length > 0) {
-                        users = parsed;
-                        console.log(`✅ تم تحميل ${users.length} مستخدم من التخزين المحلي`);
-                        return true;
-                    }
-                } catch(e) {}
-            }
-        }
-        
-        // محاولة التحميل من ملف JSON (في بيئة التطوير)
-        try {
-            const response = await fetch('config/users.json');
-            if (response.ok) {
-                const data = await response.json();
-                if (Array.isArray(data) && data.length > 0) {
-                    users = data;
-                    localStorage.setItem('usersData', JSON.stringify(users));
-                    console.log(`✅ تم تحميل ${users.length} مستخدم من config/users.json`);
-                    return true;
-                }
-            }
-        } catch (e) {
-            console.log('ℹ️ تعذر تحميل users.json محلياً');
-        }
-        
-        // في بيئة GitHub Actions، سيتم تمرير المستخدمين عبر المتغير العام
-        if (typeof window !== 'undefined' && window.USERS_JSON) {
-            const parsed = JSON.parse(window.USERS_JSON);
-            if (Array.isArray(parsed) && parsed.length > 0) {
-                users = parsed;
-                localStorage.setItem('usersData', JSON.stringify(users));
-                console.log(`✅ تم تحميل ${users.length} مستخدم من window.USERS_JSON`);
-                return true;
-            }
-        }
-        
-        // إذا لم تنجح أي طريقة، استخدم النسخة الاحتياطية
-        if (loadUsersFromBackup()) {
-            console.warn('⚠️ تم تحميل المستخدمين من النسخة الاحتياطية المحلية');
-            return true;
-        }
-        
-        console.error('❌ فشل تحميل المستخدمين من جميع المصادر');
-        return false;
-        
-    } catch (error) {
-        console.error('❌ خطأ في تحميل المستخدمين:', error.message);
-        return false;
-    }
-}
+// (ملغاة) لم نعد نستخدم مستخدمين افتراضيين متعددين
+// function loadDefaultUsers() { ... }  // تم حذفها نهائياً
 
-// دالة مساعدة لتحميل المستخدمين من النسخة الاحتياطية
-function loadUsersFromBackup() {
-    const backup = localStorage.getItem('backupUsers');
-    if (backup) {
-        try {
-            users = JSON.parse(backup);
-            if (Array.isArray(users) && users.length > 0) {
-                console.log(`📦 تم تحميل ${users.length} مستخدم من النسخة الاحتياطية`);
-                return true;
-            }
-        } catch(e) {
-            console.error('❌ فشل تحليل النسخة الاحتياطية:', e);
-        }
+// تحميل المستخدمين (الاعتماد الأساسي على Drive)
+async function loadUsers(forceRefresh = false) {
+    // محاولة التحميل من Drive أولاً
+    let loaded = false;
+    if (forceRefresh) {
+        loaded = await loadUsersFromDrive();
+    } else {
+        loaded = await loadUsersFromDrive();
     }
-    return false;
+    
+    if (loaded) {
+        // نجح التحميل من Drive
+        if (forceRefresh) showNotification('تم تحديث المستخدمين', 'success');
+        return;
+    }
+    
+    // فشل التحميل من Drive → نحاول من النسخة الاحتياطية المحلية
+    if (loadUsersFromBackup()) {
+        console.warn('⚠️ تم تحميل المستخدمين من النسخة الاحتياطية المحلية');
+        showNotification('تم تحميل المستخدمين من النسخة الاحتياطية', 'warning');
+        return;
+    }
+    
+    // في حالة عدم وجود أي بيانات (لا Drive ولا نسخة احتياطية)، نضيف مديراً احتياطياً واحداً فقط
+    console.error('❌ فشل تحميل المستخدمين من Drive والنسخة الاحتياطية. سيتم إنشاء مدير احتياطي.');
+    users = [{
+        id: 'user_admin_emergency',
+        username: 'admin',
+        email: 'admin@emergency.local',
+        taxNumber: decodeBase64('QURNSU4wMDE='),      // ADMIN001
+        contractCustomerId: decodeBase64('QURNSU4wMDE='),
+        customerIds: [],
+        userType: 'admin',
+        password: decodeBase64('YWRtaW4xMjM='),       
+        status: 'active',
+        createdAt: new Date().toISOString(),
+        lastLogin: null
+    }];
+    showNotification('تم إنشاء مدير احتياطي بسبب فشل تحميل المستخدمين', 'warning');
 }
 
 // تحديث المستخدمين يدوياً من Drive (للمدير فقط)
@@ -1786,22 +1626,9 @@ window.deleteUser = async function(userId) {
     showNotification('تم الحذف', 'success');
 };
 
-// ============================================
-// حفظ المستخدمين (محلياً مؤقتاً)
-// ============================================
 window.saveUsersManually = async function() {
-    if (!currentUser || currentUser.userType !== 'admin') {
-        showNotification('غير مصرح', 'error');
-        return;
-    }
-    
-    // حفظ نسخة احتياطية محلياً
-    localStorage.setItem('backupUsers', JSON.stringify(users));
-    
-    showNotification('✅ تم حفظ المستخدمين محلياً (نسخة احتياطية)', 'success');
-    
-    // محاولة الحفظ إلى GitHub (اختياري)
-    await saveUsersToGitHub();
+    if (!currentUser || currentUser.userType !== 'admin') return showNotification('غير مصرح', 'error');
+    await saveUsersToDrive();
 };
 
 // ============================================
@@ -1815,12 +1642,6 @@ function checkSession() {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('mainApp').style.display = 'block';
             updateUserInterface();
-			
-			            // ✅ ✅ ✅ تحميل حالة المعاينة من السحابة ✅ ✅ ✅
-            loadViewedFromDrive().then(() => {
-                console.log('✅ تم تحميل حالة المعاينة، عددها:', viewedInvoices.size);
-            });
-
             
             // ✅ تحميل شريط الأخبار (ظاهر تلقائياً)
             if (currentUser) {
@@ -2406,12 +2227,18 @@ function parseInvoiceNode(invoice) {
         for (let j = 0; j < charges.length; j++) {
             const charge = charges[j];
             
-            // ✅ استخدام quantity-billed كعدد أيام التخزين
-            const from = charge.getAttribute('event-performed-from') || '';
-            const to = charge.getAttribute('event-performed-to') || '';
-            const qtyBilled = parseFloat(charge.getAttribute('quantity-billed') || '1');
-            let storageDays = Math.round(qtyBilled);
-            if (storageDays < 1) storageDays = 1;
+            let storageDays = 1;
+            const from = charge.getAttribute('event-performed-from');
+            const to = charge.getAttribute('event-performed-to');
+            
+            if (from && to) {
+                const d1 = new Date(from), d2 = new Date(to);
+                if (!isNaN(d1) && !isNaN(d2)) {
+                    const diffTime = Math.abs(d2 - d1);
+                    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                    storageDays = diffDays + 1;
+                }
+            }
             
             // قراءة الكمية من XML
             const quantityBilled = parseFloat(charge.getAttribute('quantity-billed') || 1);
@@ -2590,35 +2417,20 @@ function parseCreditNode(creditElement) {
 // دوال البحث المتقدم - معدلة لاستخدام finalized-date
 // ============================================
 window.applyAdvancedSearch = async function() {
-    isSearching = true;
+	    isSearching = true;  // 👈 أضف هذا السطر هنا
     console.log('🔍 [بحث] بدء البحث');
+    console.log('📊 عدد الفواتير الكلي:', invoicesData.length);
     
-    if (!invoicesData.length) { 
-        filteredInvoices = []; 
-        renderData(); 
-        isSearching = false;
-        return; 
-    }
+    if (!invoicesData.length) { filteredInvoices = []; renderData(); return; }
     
-const [final, draft, cust, vessel, bl, cont, viewedStatus, from, to, invType, contractCustomerId] = [
-    'searchFinalNumber', 'searchDraftNumber', 'searchCustomer', 'searchVessel', 
-    'searchBlNumber', 'searchContainer', 'searchStatus', 'searchDateFrom', 
-    'searchDateTo', 'searchInvoiceType', 'searchContractCustomerId'
-].map(id => document.getElementById(id)?.value?.toLowerCase().trim() || '');
-	
-	// ✅ ✅ ✅ أضف هذا السطر للتأكد من قيمة viewedStatus ✅ ✅ ✅
-    console.log('📌 قيمة viewedStatus في البحث:', viewedStatus);
-    console.log('📌 عدد علامات المعاينة في الذاكرة:', viewedInvoices.size);
+    const [final, draft, cust, vessel, bl, cont, status, from, to, invType, contractCustomerId, viewedStatus] = [
+        'searchFinalNumber', 'searchDraftNumber', 'searchCustomer', 'searchVessel', 
+        'searchBlNumber', 'searchContainer', 'searchStatus', 'searchDateFrom', 
+        'searchDateTo', 'searchInvoiceType', 'searchContractCustomerId', 'searchViewedStatus'
+    ].map(id => document.getElementById(id)?.value.toLowerCase().trim() || '');
 
     let tempInvoices = [...invoicesData];
-    
-    // ✅ التحقق: إذا كان هناك تاريخ بحث، تأكد من تحميل البيانات اللازمة
-    if (from || to) {
-        await ensureDataForDateRange(from, to);
-        tempInvoices = [...invoicesData]; // إعادة تحميل بعد التحديث
-    }
 
-    // تطبيق باقي الفلاتر...
     if (currentUser?.isGuest) {
         const { taxNumber, blNumber } = currentUser;
         tempInvoices = tempInvoices.filter(inv => {
@@ -2642,6 +2454,8 @@ const [final, draft, cust, vessel, bl, cont, viewedStatus, from, to, invType, co
         }
         allowedIds = [...new Set(allowedIds.map(id => id.toLowerCase()))];
         
+        console.log('✅ allowedIds للمستخدم:', allowedIds);
+        
         if (allowedIds.length === 0) {
             tempInvoices = [];
         } else {
@@ -2653,14 +2467,21 @@ const [final, draft, cust, vessel, bl, cont, viewedStatus, from, to, invType, co
         }
     }
 
-    // تطبيق فلتر حالة المعاينة
+    console.log('📊 عدد الفواتير بعد تصفية المستخدم (tempInvoices):', tempInvoices.length);
+    
+    // ✅ تأكد من تحميل العلامات قبل البحث
     if (viewedStatus && viewedInvoices.size === 0 && currentUser) {
+        console.log('🔄 viewedInvoices فارغة، جاري التحميل من Drive...');
         await loadViewedFromDrive();
     }
     
     const searched = tempInvoices.filter(inv => {
+        // ✅ تصفية حسب صلاحيات المستخدم (طبقة أمان إضافية)
         const belongsToUser = checkIfInvoiceBelongsToUser(inv);
-        if (!belongsToUser) return false;
+        if (!belongsToUser) {
+            console.log('❌ فاتورة لا تخص المستخدم:', inv['final-number']);
+            return false;
+        }
         
         if (final && !(inv['final-number'] || '').toLowerCase().includes(final)) return false;
         if (draft && !(inv['draft-number'] || '').toLowerCase().includes(draft)) return false;
@@ -2676,21 +2497,18 @@ const [final, draft, cust, vessel, bl, cont, viewedStatus, from, to, invType, co
             if (!found) return false;
         }
         if (contractCustomerId && !(inv['contract-customer-id'] || '').toLowerCase().includes(contractCustomerId)) return false;
-        
-        // فلتر حالة المعاينة
-        if (viewedStatus) {
-            const viewKey = getInvoiceKey(inv);
-            const isViewed = viewedInvoices.has(viewKey);
-            if (viewedStatus === 'viewed' && !isViewed) return false;
-            if (viewedStatus === 'not_viewed' && isViewed) return false;
-        }
-        
+        // فلتر حالة المعاينة (بدلاً من فلتر FINAL/DRAFT)
+		if (status) {
+			const viewKey = getInvoiceKey(inv);
+			const isViewed = viewedInvoices.has(viewKey);
+			if (status === 'viewed' && !isViewed) return false;
+			if (status === 'not_viewed' && isViewed) return false;
+		}
         if (invType) {
             const num = inv['final-number'] || '';
             if (invType === 'cash' && !(num.startsWith('C') || num.startsWith('c'))) return false;
             if (invType === 'postponed' && !(num.startsWith('P') || num.startsWith('p'))) return false;
         }
-        
         if (from || to) {
             const invDateStr = inv['finalized-date'] || inv['created'] || '';
             const invDate = new Date(invDateStr);
@@ -2707,163 +2525,23 @@ const [final, draft, cust, vessel, bl, cont, viewedStatus, from, to, invType, co
             }
         }
         
+        
         return true;
     });
 
+    console.log('📊 عدد الفواتير بعد البحث (searched):', searched.length);
+    
     filteredInvoices = searched;
     currentPage = 1;
     clearSelectedInvoices();
     renderData();
     
+    console.log('📊 عدد الفواتير المعروضة (filteredInvoices):', filteredInvoices.length);
     showNotification(`تم العثور على ${formatNumberWithCommas(filteredInvoices.length)} فاتورة`, filteredInvoices.length ? 'success' : 'info');
+	    // 👇 أضف هذا السطر في النهاية
     setTimeout(() => { isSearching = false; }, 500);
+
 };
-
-// ============================================
-// دوال تحميل البيانات حسب نطاق التاريخ
-// ============================================
-
-// التأكد من تحميل البيانات اللازمة لنطاق التاريخ المطلوب
-// ============================================
-// التأكد من تحميل البيانات للنطاق الزمني المطلوب
-// (معدلة بالكامل لـ GitHub)
-// ============================================
-async function ensureDataForDateRange(fromDate, toDate) {
-    console.log('📅 البحث حسب التاريخ:', fromDate || 'البداية', '→', toDate || 'النهاية');
-    
-    // ✅ مع GitHub، جميع الملفات يتم تحميلها مسبقاً في loadAllInvoices()
-    // لذلك لا نحتاج إلى تحميل أي ملفات إضافية
-    
-    if (!invoicesData || invoicesData.length === 0) {
-        console.warn('⚠️ لا توجد بيانات للبحث، جاري التحميل من GitHub...');
-        
-        // محاولة تحميل البيانات من GitHub
-        if (typeof loadAllInvoices === 'function') {
-            await loadAllInvoices();
-        } else {
-            console.error('❌ دالة loadAllInvoices غير موجودة');
-            return false;
-        }
-    }
-    
-    console.log(`✅ البيانات متاحة: ${invoicesData.length} فاتورة`);
-    return true;
-}
-
-// التحقق من تداخل نطاقي تواريخ
-function isDateRangeOverlap(searchFrom, searchTo, fileFrom, fileTo) {
-    // إذا لم يكن هناك تاريخ بحث محدد، نحمّل كل شيء
-    if (!searchFrom && !searchTo) return true;
-    
-    const searchStart = searchFrom ? new Date(searchFrom) : new Date('1900-01-01');
-    const searchEnd = searchTo ? new Date(searchTo) : new Date('2100-12-31');
-    const fileStart = fileFrom ? new Date(fileFrom) : new Date('1900-01-01');
-    const fileEnd = fileTo ? new Date(fileTo) : new Date('2100-12-31');
-    
-    // التحقق من التداخل
-    return (searchStart <= fileEnd && searchEnd >= fileStart);
-}
-
-// تحميل قائمة الملفات من Drive فقط
-async function loadFilesListFromDrive() {
-    if (!driveConfig.apiKey || !driveConfig.folderId) return false;
-    
-    try {
-        const query = encodeURIComponent(`'${driveConfig.folderId}' in parents and (name contains 'datatxt' or name contains 'invoices') and trashed=false`);
-        const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${query}&key=${driveConfig.apiKey}&fields=files(id,name,createdTime,modifiedTime)`);
-        
-        if (!res.ok) return false;
-        const data = await res.json();
-        
-        const files = data.files || [];
-        
-        // ترتيب حسب التاريخ
-        files.sort((a, b) => {
-            const dateA = new Date(a.modifiedTime || a.createdTime);
-            const dateB = new Date(b.modifiedTime || b.createdTime);
-            return dateA - dateB;
-        });
-        
-        driveConfig.dataFiles = files.map(f => ({
-            name: f.name,
-            id: f.id,
-            modifiedTime: f.modifiedTime,
-            from: null,
-            to: null,
-            loaded: false
-        }));
-        
-        saveDriveSettingsToStorage();
-        console.log(`✅ تم تحديث قائمة الملفات: ${driveConfig.dataFiles.length} ملف`);
-        return true;
-        
-    } catch (error) {
-        console.error('فشل تحميل قائمة الملفات:', error);
-        return false;
-    }
-}
-
-// تحديث يدوي لتحميل كل الملفات (للمدير)
-async function loadAllDataFiles() {
-    if (!currentUser || currentUser.userType !== 'admin') {
-        showNotification('غير مصرح', 'error');
-        return;
-    }
-    
-    showProgress('جاري تحميل جميع ملفات البيانات...', 10);
-    
-    try {
-        await loadFilesListFromDrive();
-        
-        allLoadedInvoices = [];
-        loadedFilesCache.clear();
-        
-        for (let i = 0; i < driveConfig.dataFiles.length; i++) {
-            const file = driveConfig.dataFiles[i];
-            showProgress(`تحميل ${file.name}... (${i+1}/${driveConfig.dataFiles.length})`, Math.round((i / driveConfig.dataFiles.length) * 80));
-            
-            const fileInvoices = await loadSingleDataFile(file.id, file.name);
-            if (fileInvoices && fileInvoices.length > 0) {
-                allLoadedInvoices = allLoadedInvoices.concat(fileInvoices);
-                loadedFilesCache.set(file.id, {
-                    name: file.name,
-                    invoices: fileInvoices,
-                    dateRange: extractDateRange(fileInvoices)
-                });
-                
-                // تحديث نطاق التاريخ في الملف
-                const range = extractDateRange(fileInvoices);
-                file.from = range.from;
-                file.to = range.to;
-            }
-        }
-        
-        // إزالة المكررات
-        const uniqueInvoices = [];
-        const seenKeys = new Set();
-        allLoadedInvoices.forEach(inv => {
-            const key = getInvoiceKey(inv);
-            if (!seenKeys.has(key)) {
-                seenKeys.add(key);
-                uniqueInvoices.push(inv);
-            }
-        });
-        
-        invoicesData = uniqueInvoices;
-        saveDriveSettingsToStorage();
-        
-        showProgress('تم التحميل', 100);
-        showNotification(`✅ تم تحميل ${invoicesData.length} فاتورة من ${driveConfig.dataFiles.length} ملف`, 'success');
-        
-        // تحديث العرض
-        currentUser?.isGuest ? filterInvoicesByGuest(currentUser.taxNumber, currentUser.blNumber) : filterInvoicesByUser();
-        
-    } catch (error) {
-        showNotification(`❌ فشل التحميل: ${error.message}`, 'error');
-    } finally {
-        setTimeout(hideProgress, 1500);
-    }
-}
 
 window.resetAdvancedSearch = function() {
 	    isSearching = true;  // 👈 أضف هذا
@@ -6066,195 +5744,27 @@ function filterCreditByUser(creditArray) {
 }
 
 
-// ============================================
-// تحميل الفواتير (الواجهة الرئيسية)
-// ============================================
 async function loadInvoicesFromDrive() {
-    console.log('🔄 بدء تحميل البيانات...');
-    return await loadAllInvoices();
-}
+    if (!driveConfig.apiKey || !driveConfig.folderId) return false;
+    let fileId = driveConfig.fileId;
+    if (!fileId && driveConfig.fileName) {
+        try {
+            const res = await fetch(`https://www.googleapis.com/drive/v3/files?q=${encodeURIComponent(`'${driveConfig.folderId}' in parents and name='${driveConfig.fileName}'`)}&key=${driveConfig.apiKey}&fields=files(id,name)`);
+            if (!res.ok) throw new Error('فشل البحث');
+            const data = await res.json();
+            if (!data.files?.length) return false;
+            fileId = data.files[0].id;
+            driveConfig.fileId = fileId;
+            if (currentUser?.userType === 'admin') saveDriveSettingsToStorage();
+        } catch { return false; }
+    } else if (!fileId) return false;
 
-// دالة مساعدة لتحميل ملف واحد
-// ============================================
-// تحميل ملف واحد وتحليل محتواه
-// ============================================
-async function loadSingleDataFile(fileInfo) {
-    const fileName = fileInfo.name;
-    console.log(`📥 جاري تحميل: ${fileName}`);
-    
     try {
-        // تحميل الملف من GitHub Raw
-        const response = await fetch(fileInfo.url);
-        
-        if (!response.ok) {
-            console.error(`❌ فشل تحميل ${fileName}: ${response.status}`);
-            return [];
-        }
-        
-        // قراءة محتوى الملف
-        const content = await response.text();
-        
-        // تحليل XML واستخراج الفواتير
-        const parser = new DOMParser();
-        const xmlDoc = parser.parseFromString(content, 'text/xml');
-        
-        // التحقق من وجود أخطاء في XML
-        const parseError = xmlDoc.querySelector('parsererror');
-        let invoices = [];
-        
-        if (parseError) {
-            // إذا فشل التحليل، نحاول استخراج الفواتير باستخدام Regex
-            console.log(`⚠️ ${fileName}: محاولة استخراج الفواتير بطريقة بديلة...`);
-            const matches = content.match(/<invoice[\s\S]*?<\/invoice>/g);
-            
-            if (matches && matches.length > 0) {
-                const wrapped = parser.parseFromString(`<root>${matches.join('')}</root>`, 'text/xml');
-                const nodes = wrapped.querySelectorAll('invoice');
-                
-                for (let i = 0; i < nodes.length; i++) {
-                    const inv = parseInvoiceNode(nodes[i]);
-                    if (inv) invoices.push(inv);
-                }
-            }
-        } else {
-            // التحليل العادي
-            const nodes = xmlDoc.getElementsByTagName('invoice');
-            for (let i = 0; i < nodes.length; i++) {
-                const inv = parseInvoiceNode(nodes[i]);
-                if (inv) invoices.push(inv);
-            }
-        }
-        
-        console.log(`✅ ${fileName}: تم استخراج ${invoices.length} فاتورة`);
-        return invoices;
-        
-    } catch (error) {
-        console.error(`❌ خطأ في تحميل ${fileName}:`, error);
-        return [];
-    }
-}
-
-// ============================================
-// تحميل جميع الملفات (من الأحدث إلى الأقدم)
-// ============================================
-async function loadAllInvoices() {
-    console.log('🚀 بدء تحميل جميع الفواتير...');
-    
-    // الخطوة 1: اكتشاف الملفات
-    showProgress('جاري اكتشاف ملفات البيانات...', 10);
-    const discovered = await discoverDataFiles();
-    
-    if (!discovered || GITHUB_CONFIG.filesList.length === 0) {
-        showNotification('❌ لم يتم العثور على ملفات بيانات', 'error');
-        return false;
-    }
-    
-    // الخطوة 2: تحميل الملفات (من الأحدث إلى الأقدم)
-    let allInvoices = [];
-    const totalFiles = GITHUB_CONFIG.filesList.length;
-    
-    for (let i = 0; i < totalFiles; i++) {
-        const file = GITHUB_CONFIG.filesList[i];
-        const progressPercent = 10 + Math.round((i / totalFiles) * 80);
-        
-        showProgress(`جاري تحميل ${file.name} (${i+1}/${totalFiles})...`, progressPercent);
-        
-        const fileInvoices = await loadSingleDataFile(file);
-        
-        if (fileInvoices.length > 0) {
-            allInvoices = allInvoices.concat(fileInvoices);
-            console.log(`   📊 ${file.name}: ${fileInvoices.length} فاتورة (المجموع: ${allInvoices.length})`);
-        }
-    }
-    
-    // الخطوة 3: إزالة المكررات (في حالة وجود نفس الفاتورة في أكثر من ملف)
-    showProgress('جاري إزالة المكررات...', 95);
-    const uniqueInvoices = [];
-    const seenKeys = new Set();
-    
-    for (const inv of allInvoices) {
-        const key = `${inv['final-number']}|${inv['draft-number']}`;
-        if (!seenKeys.has(key)) {
-            seenKeys.add(key);
-            uniqueInvoices.push(inv);
-        }
-    }
-    
-    const duplicateCount = allInvoices.length - uniqueInvoices.length;
-    if (duplicateCount > 0) {
-        console.log(`🗑️ تم إزالة ${duplicateCount} فاتورة مكررة`);
-    }
-    
-    // الخطوة 4: تخزين البيانات النهائية
-    invoicesData = uniqueInvoices;
-    GITHUB_CONFIG.loadedInvoices = uniqueInvoices;
-    GITHUB_CONFIG.isLoaded = true;
-    
-    showProgress('تم التحميل بنجاح!', 100);
-    setTimeout(hideProgress, 1500);
-    
-    console.log(`🎉 اكتمل التحميل:`);
-    console.log(`   📁 عدد الملفات: ${totalFiles}`);
-    console.log(`   📄 إجمالي الفواتير: ${allInvoices.length}`);
-    console.log(`   ✨ فواتير فريدة: ${invoicesData.length}`);
-	
-	    // ✅ ✅ ✅ أضف هذه الأسطر الجديدة (تحميل علامات المعاينة) ✅ ✅ ✅
-    console.log('🔄 جاري تحميل علامات المعاينة من السحابة...');
-    try {
-        await loadViewedFromDrive();
-        console.log('✅ تم تحميل علامات المعاينة، عددها:', viewedInvoices.size);
-    } catch(err) {
-        console.warn('⚠️ فشل تحميل علامات المعاينة:', err);
-    }
-    
-    // ✅ ✅ ✅ أضف هذه الأسطر الجديدة ✅ ✅ ✅
-    console.log('🔄 جاري تحديث العرض...');
-    
-    if (currentUser) {
-        if (currentUser.isGuest) {
-            filterInvoicesByGuest(currentUser.taxNumber, currentUser.blNumber);
-        } else {
-            filterInvoicesByUser();
-        }
-        renderData();
-        updateSummary();
-        console.log('✅ تم عرض الفواتير والإجماليات');
-    } else {
-        console.log('⚠️ لا يوجد مستخدم حالياً، سيتم العرض بعد تسجيل الدخول');
-    }
-    
-    return true;
-}
-
-// استخراج نطاق التواريخ من الملف
-function extractDateRange(invoices) {
-    let minDate = null;
-    let maxDate = null;
-    
-    invoices.forEach(inv => {
-        const invDate = (inv['finalized-date'] || inv['created'] || '').slice(0, 10);
-        if (invDate) {
-            if (!minDate || invDate < minDate) minDate = invDate;
-            if (!maxDate || invDate > maxDate) maxDate = invDate;
-        }
-    });
-    
-    return { from: minDate, to: maxDate };
-}
-
-// ✅ تحميل ملف بيانات إضافي حسب الحاجة
-async function loadAdditionalDataFile(fileName) {
-    if (!driveConfig.dataFiles || driveConfig.dataFiles.length === 0) return false;
-    
-    const file = driveConfig.dataFiles.find(f => f.name === fileName);
-    if (!file || !file.id) return false;
-    
-    try {
-        showProgress(`جاري تحميل ${file.name}...`, 30);
-        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${file.id}?alt=media&key=${driveConfig.apiKey}`);
-        if (!res.ok) return false;
-        
+        showProgress('جاري تحميل البيانات...', 30);
+        const res = await fetch(`https://www.googleapis.com/drive/v3/files/${fileId}?alt=media&key=${driveConfig.apiKey}`);
+        if (!res.ok) throw new Error('فشل التحميل');
         const content = await res.text();
+        showProgress('جاري تحليل البيانات...', 60);
         const parser = new DOMParser();
         const xmlDoc = parser.parseFromString(content, "text/xml");
         const parseError = xmlDoc.querySelector('parsererror');
@@ -6262,7 +5772,7 @@ async function loadAdditionalDataFile(fileName) {
 
         if (parseError) {
             const matches = content.match(/<invoice[\s\S]*?<\/invoice>/g);
-            if (!matches?.length) return false;
+            if (!matches?.length) throw new Error('لا توجد فواتير');
             const wrapped = parser.parseFromString(`<root>${matches.join('')}</root>`, 'text/xml');
             const nodes = wrapped.querySelectorAll('invoice');
             for (let i = 0; i < nodes.length; i++) { const inv = parseInvoiceNode(nodes[i]); if (inv) newInvoices.push(inv); }
@@ -6271,27 +5781,50 @@ async function loadAdditionalDataFile(fileName) {
             for (let i = 0; i < nodes.length; i++) { const inv = parseInvoiceNode(nodes[i]); if (inv) newInvoices.push(inv); }
         }
 
-        // ✅ دمج مع البيانات الحالية وإزالة المكررات
-        const allInvoices = [...invoicesData, ...newInvoices];
-        const uniqueInvoices = [];
-        const seenKeys = new Set();
-        allInvoices.forEach(inv => {
-            const key = getInvoiceKey(inv);
-            if (!seenKeys.has(key)) {
-                seenKeys.add(key);
-                uniqueInvoices.push(inv);
-            }
-        });
-        
-        invoicesData = uniqueInvoices;
+        if (!newInvoices.length) throw new Error('لا توجد فواتير');
+        // ✅ إزالة الفواتير المكررة
+			const uniqueInvoicesRemove = [];
+			const seenKeysRemove = new Set();
+
+			newInvoices.forEach(inv => {
+				const key = getInvoiceKey(inv);
+				if (!seenKeysRemove.has(key)) {
+					seenKeysRemove.add(key);
+					uniqueInvoicesRemove.push(inv);
+				}
+			});
+
+			const duplicateCountRemove = newInvoices.length - uniqueInvoicesRemove.length;
+				if (duplicateCountRemove > 0 && currentUser?.userType === 'admin') {
+					showNotification(`⚠️ تم إزالة ${duplicateCountRemove} فاتورة مكررة`, 'warning');
+				}
+
+			invoicesData = uniqueInvoicesRemove;
         showProgress('تم التحميل', 100);
+        
+        // ✅ تطبيق تصفية المستخدم أولاً
+        currentUser?.isGuest ? filterInvoicesByGuest(currentUser.taxNumber, currentUser.blNumber) : filterInvoicesByUser();
+        
+        // ✅ بعد تحميل الفواتير، قم بتحميل العلامات (checkbox)
+        console.log('✅ تم تحميل الفواتير، جاري تحميل العلامات...');
+        
+        // انتظار اكتمال تحميل العلامات ثم تحديث الجدول
+        await loadViewedFromDrive();
+        
+        // تحديث واجهة المستخدم مرة أخيرة
+        renderData();
+        
+		// بعد تحميل العلامات وتحديث الجدول
+		setTimeout(() => {
+			checkUnviewedInvoicesAndShowReport();
+		}, 500);
+        document.getElementById('fileStatus').innerHTML = `<i class="fas fa-check-circle"></i> ✅ تم تحميل ${formatNumberWithCommas(invoicesData.length)} فاتورة من Drive`;
+        updateDataSource();
         return true;
-    } catch (e) {
-        console.error('فشل تحميل الملف الإضافي:', e);
+    } catch (error) {
+        showNotification(`❌ خطأ: ${error.message}`, 'error');
         return false;
-    } finally {
-        setTimeout(hideProgress, 1500);
-    }
+    } finally { setTimeout(hideProgress, 1500); }
 }
 
 window.updateFromDrive = async function() {
@@ -10084,43 +9617,3 @@ async function loadCreditDataFromDriveSilent() {
         return false;
     }
 }
-
-// ============================================
-// تحديث يدوي من GitHub (للمدير فقط)
-// ============================================
-window.updateFromGitHub = async function() {
-    if (!currentUser || currentUser.userType !== 'admin') {
-        showNotification('غير مصرح - هذه الخاصية للمدير فقط', 'error');
-        return;
-    }
-    
-    showNotification('🔄 جاري تحديث البيانات من GitHub...', 'info');
-    
-    // إعادة تعيين الذاكرة المؤقتة
-    GITHUB_CONFIG.filesList = [];
-    GITHUB_CONFIG.loadedInvoices = [];
-    GITHUB_CONFIG.isLoaded = false;
-    
-    const success = await loadAllInvoices();
-    
-    if (success) {
-        // تحديث العرض حسب نوع المستخدم
-        if (currentUser?.isGuest) {
-            filterInvoicesByGuest(currentUser.taxNumber, currentUser.blNumber);
-        } else {
-            filterInvoicesByUser();
-        }
-        showNotification(`✅ تم التحديث: ${invoicesData.length} فاتورة`, 'success');
-    } else {
-        showNotification('❌ فشل تحديث البيانات', 'error');
-    }
-};
-
-// ============================================
-// تحميل المستخدمين من GitHub
-// ============================================
-
-
-// ============================================
-// حفظ المستخدمين إلى GitHub (ملاحظة: GitHub API يتطلب token)
-// ============================================
