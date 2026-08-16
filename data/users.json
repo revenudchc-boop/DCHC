@@ -408,5 +408,19 @@
     "status": "active",
     "createdAt": "2023-01-01T00:00:00.000Z",
     "lastLogin": null
+  },
+	{
+    "id": "EMK",
+    "username": "emk",
+    "email": "",
+	"additionalEmails": [""],
+    "taxNumber": "698963008",
+    "contractCustomerId": "EMK",
+	"customerIds": ["EMK", "HIGH SEAS SHIPPING(جنيه)", "HIGH SEAS SHIPPING(USAD)"],
+    "userType": "accountant",
+    "password": "emk123",
+    "status": "active",
+    "createdAt": "2023-01-01T00:00:00.000Z",
+    "lastLogin": null
   }
 ]
