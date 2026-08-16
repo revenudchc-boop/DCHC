@@ -1375,25 +1375,15 @@ async function findCreditFileIdAuto() {
 // ============================================
 // الإعداد التلقائي للنظام (معدل لـ GitHub)
 // ============================================
+// ============================================
+// الإعداد التلقائي للنظام
+// ============================================
 async function autoConfigureDrive() {
     console.log('🔄 بدء الإعداد التلقائي للنظام...');
     showProgress('جاري إعداد النظام...', 20);
     
-    // ✅ تحميل إعدادات المستخدمين من Drive (إذا كانت موجودة)
-    // نضعها في try/catch حتى لا توقف النظام إذا فشلت
-    try {
-        const usersFound = await findUsersFileIdAuto();
-        if (usersFound) {
-            await loadUsersFromDrive();
-            console.log('✅ تم تحميل المستخدمين من Drive');
-        }
-    } catch(e) {
-        console.warn('⚠️ فشل تحميل المستخدمين من Drive:', e.message);
-    }
-    
-    // ✅ لم نعد بحاجة لاكتشاف ملفات البيانات من Drive
-    // لأننا سنستخدم GitHub بدلاً من ذلك
-    console.log('✅ تم إعداد النظام (سيتم استخدام GitHub لملفات البيانات)');
+    // ✅ تم إعداد النظام
+    console.log('✅ تم إعداد النظام');
     
     showProgress('تم إعداد النظام', 100);
     setTimeout(hideProgress, 1500);
@@ -1501,50 +1491,6 @@ async function discoverFileDateRange(fileIndex) {
 // دوال المستخدمين
 // ============================================
 
-function loadUsers() {
-    try {
-        // ✅ قراءة المستخدمين من متغير البيئة (GitHub Secret)
-        const usersJson = process.env.USERS_JSON;
-        if (!usersJson) {
-            console.log('⚠️ USERS_JSON غير موجود في البيئة');
-            return [];
-        }
-        const users = JSON.parse(usersJson);
-        console.log(`✅ تم تحميل ${users.length} مستخدم من GitHub Secret`);
-        return users.filter(u => u.status === 'active');
-    } catch (error) {
-        console.error('❌ خطأ في قراءة المستخدمين:', error.message);
-        return [];
-    }
-}
-
-
-// دالة مساعدة لفك تشفير Base64 (للاستخدام في حالة الطوارئ فقط)
-function decodeBase64(encoded) {
-    try {
-        return atob(encoded);
-    } catch(e) {
-        return encoded;
-    }
-}
-
-// تحميل النسخة الاحتياطية من localStorage
-function loadUsersFromBackup() {
-    const backup = localStorage.getItem('backupUsers');
-    if (backup) {
-        try { 
-            users = JSON.parse(backup); 
-            return true; 
-        } catch { 
-            return false; 
-        }
-    }
-    return false;
-}
-
-// ============================================
-// تحميل المستخدمين (من GitHub أولاً، ثم النسخة الاحتياطية)
-// ============================================
 // ============================================
 // تحميل المستخدمين (من متغير عام أو تخزين محلي)
 // ============================================
@@ -1624,6 +1570,92 @@ function loadUsersFromBackup() {
         }
     }
     return false;
+}
+
+async function saveUsersToDrive() {
+    if (!driveConfig.apiKey || !driveConfig.folderId || !driveConfig.usersFileId) return false;
+    try {
+        showProgress('جاري حفظ المستخدمين...', 30);
+        const metadata = { name: driveConfig.usersFileName, mimeType: 'application/json' };
+        const form = new FormData();
+        form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
+        form.append('file', new Blob([JSON.stringify(users, null, 2)], { type: 'application/json' }));
+        const res = await fetch(`https://www.googleapis.com/upload/drive/v3/files/${driveConfig.usersFileId}?uploadType=multipart&key=${driveConfig.apiKey}`, { method: 'PATCH', body: form });
+        if (!res.ok) throw new Error('فشل الحفظ');
+        showNotification('✅ تم حفظ المستخدمين', 'success');
+        return true;
+    } catch (error) {
+        showNotification(`❌ خطأ: ${error.message}`, 'error');
+        return false;
+    } finally { setTimeout(hideProgress, 1500); }
+}
+
+// دالة مساعدة لفك تشفير Base64 (للاستخدام في حالة الطوارئ فقط)
+function decodeBase64(encoded) {
+    try {
+        return atob(encoded);
+    } catch(e) {
+        return encoded;
+    }
+}
+
+// تحميل النسخة الاحتياطية من localStorage
+function loadUsersFromBackup() {
+    const backup = localStorage.getItem('backupUsers');
+    if (backup) {
+        try { 
+            users = JSON.parse(backup); 
+            return true; 
+        } catch { 
+            return false; 
+        }
+    }
+    return false;
+}
+
+// ============================================
+// تحميل المستخدمين (من GitHub أولاً، ثم النسخة الاحتياطية)
+// ============================================
+async function loadUsers(forceRefresh = false) {
+    console.log('👥 تحميل المستخدمين...');
+    
+    // محاولة التحميل من GitHub أولاً
+    let loaded = false;
+    
+    if (forceRefresh) {
+        loaded = await loadUsersFromGitHub();
+    } else {
+        loaded = await loadUsersFromGitHub();
+    }
+    
+    if (loaded) {
+        if (forceRefresh) showNotification('تم تحديث المستخدمين', 'success');
+        return;
+    }
+    
+    // فشل التحميل من GitHub → نحاول من النسخة الاحتياطية المحلية
+    if (loadUsersFromBackup()) {
+        console.warn('⚠️ تم تحميل المستخدمين من النسخة الاحتياطية المحلية');
+        showNotification('تم تحميل المستخدمين من النسخة الاحتياطية', 'warning');
+        return;
+    }
+    
+    // في حالة عدم وجود أي بيانات، نضيف مديراً احتياطياً
+    console.error('❌ فشل تحميل المستخدمين. سيتم إنشاء مدير احتياطي.');
+    users = [{
+        id: 'user_admin_emergency',
+        username: 'admin',
+        email: 'admin@emergency.local',
+        taxNumber: 'ADMIN001',
+        contractCustomerId: 'ADMIN001',
+        customerIds: [],
+        userType: 'admin',
+        password: 'admin123',
+        status: 'active',
+        createdAt: new Date().toISOString(),
+        lastLogin: null
+    }];
+    showNotification('تم إنشاء مدير احتياطي', 'warning');
 }
 
 // تحديث المستخدمين يدوياً من Drive (للمدير فقط)
@@ -1815,14 +1847,13 @@ function checkSession() {
             document.getElementById('loginScreen').style.display = 'none';
             document.getElementById('mainApp').style.display = 'block';
             updateUserInterface();
-			
-			            // ✅ ✅ ✅ تحميل حالة المعاينة من السحابة ✅ ✅ ✅
+            
+            // ✅ تحميل حالة المعاينة
             loadViewedFromDrive().then(() => {
                 console.log('✅ تم تحميل حالة المعاينة، عددها:', viewedInvoices.size);
             });
 
-            
-            // ✅ تحميل شريط الأخبار (ظاهر تلقائياً)
+            // ✅ تحميل شريط الأخبار
             if (currentUser) {
                 setTimeout(() => {
                     if (typeof initNewsBar === 'function') {
@@ -1834,14 +1865,12 @@ function checkSession() {
             addDatabaseControls();
 
             // ✅ تحميل البيانات فوراً
-            console.log('🟢 بدء تحميل البيانات من Drive...');
+            console.log('🟢 بدء تحميل البيانات...');
             loadInvoicesFromDrive().then(async () => {
                 console.log('✅ تم التحميل الأولي بنجاح');
-                // ✅ تحميل السدادات لتحديث حالة الفواتير
                 console.log('🔄 جاري تحميل السدادات...');
                 await loadPaymentsFromCloud(currentUser.username);
                 console.log('📋 السدادات بعد التحميل:', paymentsData.length);
-                // إعادة عرض البيانات لتحديث الأيقونات
                 if (currentUser?.isGuest) {
                     filterInvoicesByGuest(currentUser.taxNumber, currentUser.blNumber);
                 } else {
@@ -1854,15 +1883,6 @@ function checkSession() {
             // ✅ بدء التحديث التلقائي
             if (typeof applyRefreshSetting === 'function') {
                 applyRefreshSetting();
-            }
-
-            // ✅ تحديث المستخدمين كل 5 دقائق للمدير فقط
-            if (currentUser.userType === 'admin') {
-                setInterval(async () => {
-                    if (currentUser?.userType === 'admin' && typeof loadUsersFromDrive === 'function') {
-                        await loadUsersFromDrive();
-                    }
-                }, 5 * 60 * 1000);
             }
         } catch(e) {
             console.error('خطأ في استعادة الجلسة:', e);
@@ -1887,9 +1907,12 @@ window.handleLogin = async function() {
     const username = document.getElementById('loginUsername').value.trim();
     const password = document.getElementById('loginPassword').value;
     if (!username || !password) return showLoginMessage('الرجاء إدخال البيانات', 'error');
+    
+    // ✅ تحميل المستخدمين من Secret
     await loadUsers(true);
     const user = users.find(u => (u.username === username || u.email === username) && u.status === 'active' && u.password === password);
     if (!user) return showLoginMessage('بيانات غير صحيحة', 'error');
+    
     user.lastLogin = new Date().toISOString();
     currentUser = { ...user };
     sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
@@ -1898,11 +1921,8 @@ window.handleLogin = async function() {
     updateUserInterface();
     addDatabaseControls();
 
-    // ✅ الخطوة 1: تحميل البيانات فوراً (بدون انتظار)
     showNotification('جاري تحميل البيانات...', 'info');
-    await loadInvoicesFromDrive();  // ننتظر التحميل (اختياري)
-    
-    // ✅ الخطوة 2: بدء المؤقت (إذا كان مفعلاً)
+    await loadInvoicesFromDrive();
     applyRefreshSetting();
 };
 
@@ -10124,3 +10144,16 @@ window.updateFromGitHub = async function() {
 // ============================================
 // حفظ المستخدمين إلى GitHub (ملاحظة: GitHub API يتطلب token)
 // ============================================
+async function saveUsersToGitHub() {
+    console.log('💾 جاري حفظ المستخدمين إلى GitHub...');
+    
+    // ⚠️ ملاحظة: حفظ الملفات إلى GitHub يتطلب Personal Access Token
+    // هذه الميزة تحتاج إلى إعداد إضافي. سنعود إليها لاحقاً.
+    
+    showNotification('حفظ المستخدمين إلى GitHub يتطلب إعدادات إضافية. سيتم الحفظ محلياً مؤقتاً.', 'warning');
+    
+    // حفظ نسخة احتياطية محلياً
+    localStorage.setItem('backupUsers', JSON.stringify(users));
+    
+    return false;
+}
