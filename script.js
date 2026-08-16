@@ -1556,21 +1556,7 @@ async function loadUsers(forceRefresh = false) {
 }
 
 // دالة مساعدة لتحميل المستخدمين من النسخة الاحتياطية
-function loadUsersFromBackup() {
-    const backup = localStorage.getItem('backupUsers');
-    if (backup) {
-        try {
-            users = JSON.parse(backup);
-            if (Array.isArray(users) && users.length > 0) {
-                console.log(`📦 تم تحميل ${users.length} مستخدم من النسخة الاحتياطية`);
-                return true;
-            }
-        } catch(e) {
-            console.error('❌ فشل تحليل النسخة الاحتياطية:', e);
-        }
-    }
-    return false;
-}
+
 
 async function saveUsersToDrive() {
     if (!driveConfig.apiKey || !driveConfig.folderId || !driveConfig.usersFileId) return false;
