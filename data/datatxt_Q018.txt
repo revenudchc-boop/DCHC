@@ -29487,6 +29487,36 @@
     <parameter metafield-id="bexuObId" reportable-field="ObId" value="T8WS26252" />
   </parameters>
 </invoice>
+<invoice draft-number="289789" final-number="P26-1496" finalized-date="2026-08-17T00:00:00" status="FINAL" is-merged="N" invoice-type-id="VSL TRANSIT CONTAINER HANDLING" currency="USAD" payee-customer-id="FAIRTRANS MARINE, TRADING AND FORWARDING AGENT(USAD)" payee-customer-role="AGENT" contract-customer-id="OWV" contract-customer-role="LINEOP" total-charges="5300.8935" total-discounts="0.0" total-taxes="0.0" total-total="5300.8935" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="5300.8935" total-un-rounded="5300.8935" key-word1="EGY FUTURE" key-word2="1O23352" key-word3="OWV" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="1" flex-string-04="EGY FUTURE" flex-string-05="eslamyousri" flex-string-06="50.4847" flex-string-07="105.0" flex-string-08="105.0" flex-string-09="0.0" flex-string-10="105.0" flex-date-02="2026-08-12T00:00:00" flex-date-03="2026-08-17T14:39:59" flex-long-03="1" created="2026-08-17T11:56:33" creator="nada" changed="2026-08-17T14:35:54" changer="eslamyousri">
+  <charges>
+    <charge event-type-id="UNIT_DISCH" entity-id="TCKU2777351" tariff-id="DT20FD" description="DischargeTransshipment20FullDry  " event-performed-from="2026-08-12T11:55:15" extract-class="INV" rate-billed="105.0" quantity-billed="1.0" amount="5300.8935" is-flat-rate="Y" flat-rate-amount="105.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="50.4847" extract-gkey="24462169" created="2026-08-17T11:56:39" creator="nada">
+      <taxes />
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuIbId" reportable-field="IbId" value="1O23352" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="OWV" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-08-12T10:00:00 +0200" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="EGY FUTURE" />
+    <parameter metafield-id="bexuIbId" reportable-field="كود الرحله" value="1O23352" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="الخط الملاحي" value="OWV" />
+  </parameters>
+</invoice>
+<invoice draft-number="289790" final-number="P26-1497" finalized-date="2026-08-17T00:00:00" status="FINAL" is-merged="N" invoice-type-id="VSL TRANSIT AMOUNT COLLECTED TO OTHERS(DPA)" currency="USAD" payee-customer-id="FAIRTRANS MARINE, TRADING AND FORWARDING AGENT(USAD)" payee-customer-role="AGENT" contract-customer-id="OWV" contract-customer-role="LINEOP" total-charges="165.085" total-discounts="0.0" total-taxes="0.0" total-total="165.085" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="165.085" total-un-rounded="165.085" key-word1="EGY FUTURE" key-word2="1O23352" key-word3="OWV" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="2" flex-string-04="EGY FUTURE" flex-string-05="eslamyousri" flex-string-06="50.4847" flex-string-07="3.27" flex-string-08="3.27" flex-string-09="0.0" flex-string-10="3.27" flex-date-02="2026-08-12T00:00:00" flex-date-03="2026-08-17T14:39:59" flex-long-03="2" created="2026-08-17T11:58:31" creator="nada" changed="2026-08-17T14:35:54" changer="eslamyousri">
+  <charges>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="TCKU2777351" tariff-id="DPAAMTRAN20F26" description="dpaammounttranstit20Full2026 " event-performed-from="2026-08-12T11:57:50" extract-class="INV" rate-billed="3.27" quantity-billed="1.0" amount="165.085" is-flat-rate="Y" flat-rate-amount="3.27" quantity="1.0" quantity-unit="ITEMS" exchange-rate="50.4847" extract-gkey="24462170" created="2026-08-17T11:58:38" creator="nada">
+      <taxes />
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-08-12T10:00:00 +0200" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="EGY FUTURE" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="OWV" />
+    <parameter metafield-id="bexuIbId" reportable-field="IbId" value="1O23352" />
+    <parameter metafield-id="bexuIbId" reportable-field="كود الرحله" value="1O23352" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="الخط الملاحي" value="OWV" />
+  </parameters>
+</invoice>
 <invoice draft-number="289792" final-number="P26-1490" finalized-date="2026-08-17T00:00:00" status="FINAL" is-merged="N" invoice-type-id="VSL EXPORT EMPTY HANDLING" currency="EGP" payee-customer-id="EGYPTIAN GLOBAL LOGISTICS(EGP)" payee-customer-role="AGENT" contract-customer-id="ALP" contract-customer-role="LINEOP" total-charges="1070146.5852" total-discounts="0.0" total-taxes="149820.5219" total-total="1219967.1071" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="1219967.1071" total-un-rounded="1219967.1071000001" key-word1="TANJONG PAGAR 1" key-word2="T8WS26252" key-word3="ALP" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="5" flex-string-04="TANJONG PAGAR 1" flex-string-05="eslamyousri" flex-string-06="50.3551" flex-string-10="21252.0" flex-date-02="2026-08-15T00:00:00" flex-date-03="2026-08-17T14:15:17" flex-long-03="5" created="2026-08-17T12:00:28" creator="nohanber" changed="2026-08-17T14:11:11" changer="eslamyousri">
   <charges>
     <charge event-type-id="UNIT_LOAD" entity-id="VOLU4951044" tariff-id="LE40ED " description="LoadExport40EmptyDry " event-performed-from="2026-08-15T20:13:54" extract-class="INV" rate-billed="132.0" quantity-billed="1.0" amount="6646.8732" is-flat-rate="Y" flat-rate-amount="132.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="50.3551" extract-gkey="24474423" created="2026-08-17T12:00:51" creator="nohanber">
@@ -32617,6 +32647,51 @@
     <parameter metafield-id="bexuObId" reportable-field="كود الرحله" value="T8WS26252" />
   </parameters>
 </invoice>
+<invoice draft-number="289798" final-number="P26-1495" finalized-date="2026-08-17T00:00:00" status="FINAL" is-merged="N" invoice-type-id="VSL TR HATCH AND GEARBOX INVOICE" currency="USAD" payee-customer-id="MAHONY SHIPPING AND MARINE SERVICES(USAD)" payee-customer-role="AGENT" contract-customer-id="UFS" contract-customer-role="LINEOP" total-charges="98445.165" total-discounts="0.0" total-taxes="0.0" total-total="98445.165" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="98445.165" total-un-rounded="98445.165" key-word1="EGY FUTURE" key-word2="1O23352" key-word3="UFS" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="7" flex-string-04="EGY FUTURE" flex-string-05="eslamyousri" flex-string-06="50.4847" flex-string-07="1950.0" flex-string-08="1950.0" flex-string-09="0.0" flex-string-10="1950.0" flex-date-02="2026-08-12T10:00:00" flex-date-03="2026-08-17T14:38:29" flex-long-03="7" created="2026-08-17T12:11:29" creator="nada" changed="2026-08-17T14:34:24" changer="eslamyousri">
+  <charges>
+    <charge event-type-id="GEARBOX20" entity-id="1O23352" tariff-id="GB20 " description="gearbox20 " event-performed-from="2026-08-13T08:18:15" extract-class="MARINE" rate-billed="100.0" quantity-billed="2.0" amount="10096.94" is-flat-rate="N" flat-rate-amount="0.0" quantity="2.0" quantity-unit="UNITS" exchange-rate="50.4847" extract-gkey="41094" created="2026-08-17T12:11:31" creator="nada">
+      <taxes />
+    </charge>
+    <charge event-type-id="HATCHCOVER" entity-id="1O23352" tariff-id="H.CN " description="h.cnormal " event-performed-from="2026-08-13T08:18:05" extract-class="MARINE" rate-billed="175.0" quantity-billed="10.0" amount="88348.225" is-flat-rate="N" flat-rate-amount="0.0" quantity="10.0" quantity-unit="UNITS" exchange-rate="50.4847" extract-gkey="41093" created="2026-08-17T12:11:31" creator="nada">
+      <taxes />
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexmVvId" reportable-field="كود الرحله" value="1O23352" />
+    <parameter metafield-id="bexmVslOperatorId" reportable-field="VesselOperatorId" value="UFS" />
+    <parameter metafield-id="bexmVvId" reportable-field="VesselVisitId" value="1O23352" />
+    <parameter metafield-id="bexmVvATA" reportable-field="VesselVisitATA" value="2026-08-12T10:00:00 +0200" />
+    <parameter metafield-id="bexmVslName" reportable-field="VesselName" value="EGY FUTURE" />
+  </parameters>
+</invoice>
+<invoice draft-number="289800" final-number="P26-1494" finalized-date="2026-08-17T00:00:00" status="FINAL" is-merged="N" invoice-type-id="VSL TRANSIT STORAGE &amp; POWER  INVOICE" currency="USAD" payee-customer-id="YANG MING SHIPPING EGYPT(USAD)" payee-customer-role="AGENT" contract-customer-id="YML" contract-customer-role="LINEOP" total-charges="92387.001" total-discounts="0.0" total-taxes="0.0" total-total="92387.001" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="92387.001" total-un-rounded="92387.001" key-word1="EGY FUTURE" key-word2="1O23352" key-word3="YML" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="35" flex-string-04="EGY FUTURE" flex-string-05="eslamyousri" flex-string-06="50.4847" flex-string-07="1830.0" flex-string-08="1830.0" flex-string-09="0.0" flex-string-10="1830.0" flex-date-02="2026-08-12T00:00:00" flex-date-03="2026-08-17T14:37:36" flex-long-03="35" created="2026-08-17T12:13:43" creator="hebahkamal" changed="2026-08-17T14:33:31" changer="eslamyousri">
+  <charges>
+    <charge event-type-id="REEFER" entity-id="OTPU6488716" tariff-id="POWT40FR " description="PowerTransshipment40FullReffer " paid-thru-day="2026-08-12T16:02:08" event-performed-from="2026-08-05T00:00:00" event-performed-to="2026-08-12T00:00:00" extract-class="INV" rate-billed="30.0" quantity-billed="8.0" amount="12116.328" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="8.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="50.4847" extract-gkey="24428924" changer="hebahkamal" changed="2026-08-17T12:14:43" created="2026-08-17T12:14:36" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="REEFER" entity-id="YMLU7434867" tariff-id="POWT20FR " description="PowerTransshipment20FullReffer " paid-thru-day="2026-08-12T16:17:13" event-performed-from="2026-07-29T00:00:00" event-performed-to="2026-08-12T00:00:00" extract-class="INV" rate-billed="30.0" quantity-billed="15.0" amount="22718.114999999998" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="15.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="50.4847" extract-gkey="24373872" changer="hebahkamal" changed="2026-08-17T12:14:43" created="2026-08-17T12:14:31" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="REEFER" entity-id="YMLU7435009" tariff-id="POWT20FR " description="PowerTransshipment20FullReffer " paid-thru-day="2026-08-12T16:22:37" event-performed-from="2026-07-29T00:00:00" event-performed-to="2026-08-12T00:00:00" extract-class="INV" rate-billed="30.0" quantity-billed="15.0" amount="22718.114999999998" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="15.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="50.4847" extract-gkey="24373491" changer="hebahkamal" changed="2026-08-17T12:14:43" created="2026-08-17T12:14:28" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="REEFER" entity-id="SZLU2065277" tariff-id="POWT20FR " description="PowerTransshipment20FullReffer " paid-thru-day="2026-08-12T22:20:00" event-performed-from="2026-07-29T00:00:00" event-performed-to="2026-08-12T00:00:00" extract-class="INV" rate-billed="30.0" quantity-billed="15.0" amount="22718.114999999998" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="15.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="50.4847" extract-gkey="24372164" changer="hebahkamal" changed="2026-08-17T12:14:43" created="2026-08-17T12:14:22" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="REEFER" entity-id="YMLU5465236" tariff-id="POWT40FR " description="PowerTransshipment40FullReffer " paid-thru-day="2026-08-12T16:19:01" event-performed-from="2026-08-05T00:00:00" event-performed-to="2026-08-12T00:00:00" extract-class="INV" rate-billed="30.0" quantity-billed="8.0" amount="12116.328" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="8.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="50.4847" extract-gkey="24428923" changer="hebahkamal" changed="2026-08-17T12:14:43" created="2026-08-17T12:14:15" creator="hebahkamal">
+      <taxes />
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuObCarrierName" reportable-field="ObCarrierName" value="EGY FUTURE" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="YML" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ الشحن" value="2026-08-13T00:00:00 +0200" />
+    <parameter metafield-id="bexuObId" reportable-field="ObId" value="1O23352" />
+    <parameter metafield-id="bexuObId" reportable-field="كود الرحله" value="1O23352" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="الخط الملاحي" value="YML" />
+    <parameter metafield-id="bexuObCarrierATA" reportable-field="ObCarrierATA" value="2026-08-12T10:00:00 +0200" />
+  </parameters>
+</invoice>
 <invoice draft-number="289801" final-number="P26-1484" finalized-date="2026-08-17T14:00:46" status="FINAL" is-merged="N" invoice-type-id="VSL TRANSIT CONTAINER HANDLING" currency="USAD" payee-customer-id="OCEAN NETWORK EXPRESS(EGYPT) FOR SHIPPING AGENCIES (USAD)" payee-customer-role="AGENT" contract-customer-id="ONE" contract-customer-role="LINEOP" total-charges="29079.1872" total-discounts="0.0" total-taxes="0.0" total-total="29079.1872" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="29079.1872" total-un-rounded="29079.1872" key-word1="EGY FUTURE" key-word2="1O23352" key-word3="ONE" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="65" flex-string-04="EGY FUTURE" flex-string-05="eslamyousri" flex-string-06="50.4847" flex-string-07="576.0" flex-string-08="576.0" flex-string-09="0.0" flex-string-10="576.0" flex-date-02="2026-08-12T00:00:00" flex-date-03="2026-08-17T14:04:53" flex-long-03="65" created="2026-08-17T12:15:22" creator="zinabsamir" changed="2026-08-17T14:00:48" changer="eslamyousri">
   <charges>
     <charge event-type-id="UNIT_DISCH" entity-id="ONEU5567400" tariff-id="DT40FD " description="DischargeTransshipment40FullDry " event-performed-from="2026-08-12T10:56:03" extract-class="INV" rate-billed="100.0" quantity-billed="1.0" amount="5048.47" is-flat-rate="Y" flat-rate-amount="100.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="50.4847" extract-gkey="24461893" created="2026-08-17T12:15:46" creator="zinabsamir">
@@ -34157,6 +34232,81 @@
     <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-08-05T09:00:00 +0200" />
     <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
     <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+  </parameters>
+</invoice>
+<invoice draft-number="289840" final-number="C26-4406" finalized-date="2026-08-17T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="ALWARDAH FOR TRNSPORT" payee-customer-role="AGENT" contract-customer-id="499049195" contract-customer-role="SHIPPER" total-charges="205263.438" total-discounts="0.0" total-taxes="28736.8813" total-total="234000.3193" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="234000.3193" total-un-rounded="234000.3193" key-word1="EGY FUTURE" key-word2="AMC2525341" key-word3="CMA" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*17/8*" flex-string-04="EGY FUTURE" flex-string-05="mmosaad" flex-string-06="50.322" flex-string-10="4079.0" flex-date-02="2026-06-09T00:00:00" flex-date-03="2026-08-17T14:49:52" created="2026-08-17T14:45:03" creator="nada" changed="2026-08-17T14:45:47" changer="mmosaad">
+  <charges>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="FSCU7131660" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-09T23:26:02" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1258.05" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="50.322" extract-gkey="23963907" created="2026-08-17T14:45:19" creator="nada">
+      <taxes>
+        <tax amount="176.127" created="2026-08-17T14:45:19" creator="nada">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="FSCU7131660" tariff-id="STORI40FHIMO 8 " description="تخزين خطر بدون سماح مازاد عن 20 يوم 40 قدم " paid-thru-day="2026-08-17T00:00:00" event-performed-from="2026-06-29T00:00:00" event-performed-to="2026-08-17T00:00:00" extract-class="INV" rate-billed="31.5" quantity-billed="50.0" amount="79257.15000000001" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="50.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="50.322" extract-gkey="23963896" changer="nada" changed="2026-08-17T14:45:19" created="2026-08-17T14:45:19" creator="nada">
+      <taxes>
+        <tax amount="11096.001000000002" created="2026-08-17T14:45:19" creator="nada">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="FSCU7131660" tariff-id="STORI40FHIMO 8 " description="تخزين خطر بدون سماح 40 قدم " paid-thru-day="2026-08-17T00:00:00" event-performed-from="2026-06-09T00:00:00" event-performed-to="2026-06-28T00:00:00" extract-class="INV" rate-billed="21.0" quantity-billed="20.0" amount="21135.24" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="20.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="50.322" extract-gkey="23963896" changer="nada" changed="2026-08-17T14:45:19" created="2026-08-17T14:45:19" creator="nada">
+      <taxes>
+        <tax amount="2958.9336000000003" created="2026-08-17T14:45:19" creator="nada">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="CMAU5944190" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-06-09T23:25:23" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1258.05" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="50.322" extract-gkey="23963891" created="2026-08-17T14:45:19" creator="nada">
+      <taxes>
+        <tax amount="176.127" created="2026-08-17T14:45:19" creator="nada">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="CMAU5944190" tariff-id="STORI40FHIMO 8 " description="تخزين خطر بدون سماح مازاد عن 20 يوم 40 قدم " paid-thru-day="2026-08-17T00:00:00" event-performed-from="2026-06-29T00:00:00" event-performed-to="2026-08-17T00:00:00" extract-class="INV" rate-billed="31.5" quantity-billed="50.0" amount="79257.15000000001" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="50.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="50.322" extract-gkey="23963878" changer="nada" changed="2026-08-17T14:45:19" created="2026-08-17T14:45:19" creator="nada">
+      <taxes>
+        <tax amount="11096.001000000002" created="2026-08-17T14:45:19" creator="nada">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="CMAU5944190" tariff-id="STORI40FHIMO 8 " description="تخزين خطر بدون سماح 40 قدم " paid-thru-day="2026-08-17T00:00:00" event-performed-from="2026-06-09T00:00:00" event-performed-to="2026-06-28T00:00:00" extract-class="INV" rate-billed="21.0" quantity-billed="20.0" amount="21135.24" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="20.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="50.322" extract-gkey="23963878" changer="nada" changed="2026-08-17T14:45:19" created="2026-08-17T14:45:19" creator="nada">
+      <taxes>
+        <tax amount="2958.9336000000003" created="2026-08-17T14:45:19" creator="nada">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="RENT_3_TON" entity-id="CMAU5944190" tariff-id="RENT3TON_IMO" description="كشف ومعاينه ونش 3 طن خطر" event-performed-from="2026-06-24T10:17:18" extract-class="INV" rate-billed="19.5" quantity-billed="1.0" amount="981.279" is-flat-rate="N" flat-rate-amount="0.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="50.322" extract-gkey="24109532" created="2026-08-17T14:45:18" creator="nada">
+      <taxes>
+        <tax amount="137.37906" created="2026-08-17T14:45:18" creator="nada">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="RENT_3_TON" entity-id="FSCU7131660" tariff-id="RENT3TON_IMO" description="كشف ومعاينه ونش 3 طن خطر" event-performed-from="2026-06-24T10:17:18" extract-class="INV" rate-billed="19.5" quantity-billed="1.0" amount="981.279" is-flat-rate="N" flat-rate-amount="0.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="50.322" extract-gkey="24109531" created="2026-08-17T14:45:18" creator="nada">
+      <taxes>
+        <tax amount="137.37906" created="2026-08-17T14:45:18" creator="nada">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="CMA" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="AMC2525341" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="AMC2525341" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="EGY FUTURE" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="EGY FUTURE" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-06-09T23:15:00 +0200" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="346" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-08-17T00:00:00 +0200" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[AMC2525341]" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
   </parameters>
 </invoice>
 </argo:snx>
