@@ -1,0 +1,19 @@
+name: اختبار جلب المستخدمين
+
+on:
+  workflow_dispatch:  # يتيح لك التشغيل يدوياً من علامة التبويب Actions
+
+jobs:
+  test-fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: استنساخ المستودع
+        uses: actions/checkout@v4
+
+      - name: إعداد Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: تشغيل سكربت جلب المستخدمين
+        run: node scripts/fetch-users.js
