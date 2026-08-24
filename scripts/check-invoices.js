@@ -81,19 +81,21 @@ async function extractInvoices(filePath) {
 // ============================================
 async function fetchUsersFromScript() {
     console.log('🚀 جاري جلب المستخدمين من Google Apps Script...');
+    const url = 'https://script.google.com/macros/s/AKfycbxNNFfi5IEWDZ4kgSEHmM_gbIJxjOx15r71BZ0dSliXLrW_itIpwvNwsGi_MiWevbmdZQ/exec?key=DCHC_SECURE_2024';
+    console.log(`📡 الرابط: ${url}`);
     try {
-        const response = await fetch(USERS_SCRIPT_URL);
+        const response = await fetch(url);
+        console.log(`📊 حالة الاستجابة: ${response.status} ${response.statusText}`);
         if (!response.ok) {
+            const text = await response.text();
+            console.error(`❌ نص الخطأ: ${text}`);
             throw new Error(`HTTP ${response.status}`);
         }
         const data = await response.json();
-        if (!Array.isArray(data)) {
-            throw new Error('البيانات ليست مصفوفة');
-        }
-        console.log(`✅ تم جلب ${data.length} مستخدم من Apps Script.`);
+        console.log(`✅ تم جلب ${data.length} مستخدم.`);
         return data;
     } catch (error) {
-        console.error('❌ فشل جلب المستخدمين من Apps Script:', error.message);
+        console.error('❌ فشل الجلب:', error.message);
         return null;
     }
 }
