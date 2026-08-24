@@ -12,7 +12,7 @@
     "id": "user_accountant",
     "username": "accountant",
     "email": "",
-    "additionalEmails": undefined,
+    "additionalEmails": [],
     "taxNumber": "ACC001",
     "contractCustomerId": "ACC001",
     "customerIds": []
@@ -57,7 +57,7 @@
     "id": "Alpha",
     "username": "alp",
     "email": "",
-    "additionalEmails": undefined,
+    "additionalEmails": [],
     "taxNumber": "202487598",
     "contractCustomerId": "alp",
     "customerIds": []
@@ -66,7 +66,7 @@
     "id": "w ships",
     "username": "wshi",
     "email": "",
-    "additionalEmails": undefined,
+    "additionalEmails": [],
     "taxNumber": "202487598",
     "contractCustomerId": "wshi",
     "customerIds": []
@@ -75,7 +75,7 @@
     "id": "YASSER",
     "username": "yasser",
     "email": "",
-    "additionalEmails": undefined,
+    "additionalEmails": [],
     "taxNumber": "ADMIN001",
     "contractCustomerId": "ADMIN001",
     "customerIds": []
@@ -84,7 +84,7 @@
     "id": "volta",
     "username": "vol",
     "email": "",
-    "additionalEmails": undefined,
+    "additionalEmails": [],
     "taxNumber": "202487598",
     "contractCustomerId": "vol",
     "customerIds": []
@@ -93,7 +93,7 @@
     "id": "zim",
     "username": "zim",
     "email": "Accounts-shipping@egymar.com.eg",
-    "additionalEmails": undefined,
+    "additionalEmails": [],
     "taxNumber": "455213275",
     "contractCustomerId": "ZIM",
     "customerIds": ["ZIM", "EGYMAR SHIPPING & LOGISTICS SERVICES S.A.E(EGP)", "EGYMAR SHIPPING & LOGISTICS SERVICES S.A.E(USAD)"]
@@ -102,7 +102,7 @@
     "id": "c star",
     "username": "csd",
     "email": "admin.coordinator@meastline.com",
-    "additionalEmails": undefined,
+    "additionalEmails": [],
     "taxNumber": "560161093",
     "contractCustomerId": "csd",
     "customerIds": []
@@ -111,7 +111,7 @@
     "id": "yang ming",
     "username": "yml",
     "email": "ymdam@yml.com.eg",
-    "additionalEmails": undefined,
+    "additionalEmails": [],
     "taxNumber": "335065120",
     "contractCustomerId": "YML",
     "customerIds": ["YML", "YANG MING SHIPPING EGYPT(EGP)", "YANG MING SHIPPING EGYPT(USAD)"]
@@ -120,7 +120,7 @@
     "id": "wec_line",
     "username": "wec",
     "email": "",
-    "additionalEmails": undefined,
+    "additionalEmails": [],
     "taxNumber": "202487288",
     "contractCustomerId": "wec",
     "customerIds": []
@@ -138,7 +138,7 @@
     "id": "acl",
     "username": "acl",
     "email": "",
-    "additionalEmails": undefined,
+    "additionalEmails": [],
     "taxNumber": "202487598",
     "contractCustomerId": "acl",
     "customerIds": []
@@ -147,7 +147,7 @@
     "id": "bwl",
     "username": "bwl",
     "email": "mfinance@bgshipping.com",
-    "additionalEmails": undefined,
+    "additionalEmails": [],
     "taxNumber": "202484173",
     "contractCustomerId": "bwl",
     "customerIds": []
@@ -156,7 +156,7 @@
     "id": "loutas",
     "username": "lot",
     "email": "accounts.egypt@lotus-shipping.com",
-    "additionalEmails": undefined,
+    "additionalEmails": [],
     "taxNumber": "702173487",
     "contractCustomerId": "lot",
     "customerIds": []
@@ -165,7 +165,7 @@
     "id": "EGL",
     "username": "egl",
     "email": "acc-nvocc@eglegypt.com",
-    "additionalEmails": undefined,
+    "additionalEmails": [],
     "taxNumber": "202487598",
     "contractCustomerId": "ALP",
     "customerIds": ["ALP", "VOL", "WSHI", "EGYPTIAN GLOBAL LOGISTICS(EGP)", "EGYPTIAN GLOBAL LOGISTICS(USAD)", "EGYPTIAN GLOBAL  LOGISTICS FOR TRADE(تحت التسوية)"]
@@ -174,7 +174,7 @@
     "id": "cosco_cos",
     "username": "cosco",
     "email": "Hytham.Shalaby@coscon.com",
-    "additionalEmails": undefined,
+    "additionalEmails": [],
     "taxNumber": "325815798",
     "contractCustomerId": "COS",
     "customerIds": ["COS", "COE", "COSCO SHIPPING LINES (EGYPT)(USAD)", "COSCO SHIPPING LINES (EGYPT) (EGP)"]
@@ -183,7 +183,7 @@
     "id": "dhl",
     "username": "dhl",
     "email": "",
-    "additionalEmails": undefined,
+    "additionalEmails": [],
     "taxNumber": "",
     "contractCustomerId": "",
     "customerIds": ["DHL GLOBAL FORWARDING"]
@@ -192,7 +192,7 @@
     "id": "latt",
     "username": "latt",
     "email": "",
-    "additionalEmails": undefined,
+    "additionalEmails": [],
     "taxNumber": "204829305",
     "contractCustomerId": "",
     "customerIds": ["TUR", "HKL", "KMT", "LATT TRADING & SHIPPING(EGP)", "LATT TRADING & SHIPPING(USAD)"]
@@ -282,7 +282,7 @@
     "id": "MAXI",
     "username": "maxi",
     "email": "mohamed.a.felfel@wilhelmsen.com",
-    "additionalEmails": undefined,
+    "additionalEmails": [],
     "taxNumber": "204830109",
     "contractCustomerId": "MAXI",
     "customerIds": ["MAXI", "WILHELMSEN PORT SERVICES(EGP)", "WILHELMSEN PORT SERVICES(USAD)"]
