@@ -6,7 +6,8 @@
     "additionalEmails": ["", ""],
     "taxNumber": "ADMIN001",
     "contractCustomerId": "ADMIN001",
-    "customerIds": []
+    "customerIds": [],
+    "status": "active"
   },
   {
     "id": "user_accountant",
@@ -15,7 +16,8 @@
     "additionalEmails": [],
     "taxNumber": "ACC001",
     "contractCustomerId": "ACC001",
-    "customerIds": []
+    "customerIds": [],
+    "status": "active"
   },
   {
     "id": "msc",
@@ -24,7 +26,8 @@
     "additionalEmails": ["islam.nagib@msc.com", "alaa.samir@msc.com", "ghadeer.marzouk@msc.com", "dalia.asad@msc.com", "sobhy.mostafa@msc.com"],
     "taxNumber": "202487288",
     "contractCustomerId": "MSC",
-    "customerIds": ["MSC", "WEC", "MEDITERRANEAN SHIPPING COMPANY(USAD)", "MEDITERRANEAN SHIPPING COMPANY(EGP)", "MEDITERRANEAN SHIPPING COMPANY(تحت التسوية )"]
+    "customerIds": ["MSC", "WEC", "MEDITERRANEAN SHIPPING COMPANY(USAD)", "MEDITERRANEAN SHIPPING COMPANY(EGP)", "MEDITERRANEAN SHIPPING COMPANY(تحت التسوية )"],
+    "status": "active"
   },
   {
     "id": "one",
@@ -33,7 +36,8 @@
     "additionalEmails": ["eg.fa.liner@one-line.com", "Eg.ops.liner@one-line.com", "mohamed.sultan@one-line.com"],
     "taxNumber": "374380139",
     "contractCustomerId": "ONE",
-    "customerIds": ["ONE", "OCEAN NETWORK EXPRESS(EGYPT) FOR SHIPPING AGENCIES (EGP)", "OCEAN NETWORK EXPRESS(EGYPT) FOR SHIPPING AGENCIES (USAD)", "OCEAN NETWORK EXPRESS(EGYPT) FOR SHIPPING AGENCIES-تحت التسويه"]
+    "customerIds": ["ONE", "OCEAN NETWORK EXPRESS(EGYPT) FOR SHIPPING AGENCIES (EGP)", "OCEAN NETWORK EXPRESS(EGYPT) FOR SHIPPING AGENCIES (USAD)", "OCEAN NETWORK EXPRESS(EGYPT) FOR SHIPPING AGENCIES-تحت التسويه"],
+    "status": "active"
   },
   {
     "id": "cma-cgm",
@@ -42,7 +46,8 @@
     "additionalEmails": ["cro.ap@cma-cgm.com", "gsb.egapinvoicing@cma-cgm.com", "gsb.egcc@cma-cgm.com"],
     "taxNumber": "376659300",
     "contractCustomerId": "CMA",
-    "customerIds": ["CMA", "CMA CGM  EGYPT-AGENCIES(EGP)", "CMA CGM  EGYPT-AGENCIES(USAD)"]
+    "customerIds": ["CMA", "CMA CGM  EGYPT-AGENCIES(EGP)", "CMA CGM  EGYPT-AGENCIES(USAD)"],
+    "status": "active"
   },
   {
     "id": "NOATUM",
@@ -51,7 +56,8 @@
     "additionalEmails": ["agency.egypt@noatummaritime.com"],
     "taxNumber": "202606384",
     "contractCustomerId": "GFS",
-    "customerIds": ["GFS", "NOATUM MARITIME SERVICES EGYPT(EGP)", "NOATUM MARITIME SERVICES EGYPT(USAD)", "ahmed.swidan@noatummaritime.com", "haytham.ezz@noatummaritime.com"]
+    "customerIds": ["GFS", "NOATUM MARITIME SERVICES EGYPT(EGP)", "NOATUM MARITIME SERVICES EGYPT(USAD)", "ahmed.swidan@noatummaritime.com", "haytham.ezz@noatummaritime.com"],
+    "status": "active"
   },
   {
     "id": "Alpha",
@@ -60,7 +66,8 @@
     "additionalEmails": [],
     "taxNumber": "202487598",
     "contractCustomerId": "alp",
-    "customerIds": []
+    "customerIds": [],
+    "status": "active"
   },
   {
     "id": "w ships",
@@ -69,7 +76,8 @@
     "additionalEmails": [],
     "taxNumber": "202487598",
     "contractCustomerId": "wshi",
-    "customerIds": []
+    "customerIds": [],
+    "status": "active"
   },
   {
     "id": "YASSER",
@@ -78,7 +86,8 @@
     "additionalEmails": [],
     "taxNumber": "ADMIN001",
     "contractCustomerId": "ADMIN001",
-    "customerIds": []
+    "customerIds": [],
+    "status": "active"
   },
   {
     "id": "volta",
@@ -87,7 +96,8 @@
     "additionalEmails": [],
     "taxNumber": "202487598",
     "contractCustomerId": "vol",
-    "customerIds": []
+    "customerIds": [],
+    "status": "active"
   },
   {
     "id": "zim",
@@ -96,7 +106,8 @@
     "additionalEmails": [],
     "taxNumber": "455213275",
     "contractCustomerId": "ZIM",
-    "customerIds": ["ZIM", "EGYMAR SHIPPING & LOGISTICS SERVICES S.A.E(EGP)", "EGYMAR SHIPPING & LOGISTICS SERVICES S.A.E(USAD)"]
+    "customerIds": ["ZIM", "EGYMAR SHIPPING & LOGISTICS SERVICES S.A.E(EGP)", "EGYMAR SHIPPING & LOGISTICS SERVICES S.A.E(USAD)"],
+    "status": "active"
   },
   {
     "id": "c star",
@@ -105,7 +116,8 @@
     "additionalEmails": [],
     "taxNumber": "560161093",
     "contractCustomerId": "csd",
-    "customerIds": []
+    "customerIds": [],
+    "status": "active"
   },
   {
     "id": "yang ming",
@@ -114,7 +126,8 @@
     "additionalEmails": [],
     "taxNumber": "335065120",
     "contractCustomerId": "YML",
-    "customerIds": ["YML", "YANG MING SHIPPING EGYPT(EGP)", "YANG MING SHIPPING EGYPT(USAD)"]
+    "customerIds": ["YML", "YANG MING SHIPPING EGYPT(EGP)", "YANG MING SHIPPING EGYPT(USAD)"],
+    "status": "active"
   },
   {
     "id": "wec_line",
@@ -123,7 +136,8 @@
     "additionalEmails": [],
     "taxNumber": "202487288",
     "contractCustomerId": "wec",
-    "customerIds": []
+    "customerIds": [],
+    "status": "active"
   },
   {
     "id": "user_admin",
@@ -132,7 +146,8 @@
     "additionalEmails": ["", ""],
     "taxNumber": "ADMIN001",
     "contractCustomerId": "ADMIN001",
-    "customerIds": []
+    "customerIds": [],
+    "status": "active"
   },
   {
     "id": "acl",
@@ -141,7 +156,8 @@
     "additionalEmails": [],
     "taxNumber": "202487598",
     "contractCustomerId": "acl",
-    "customerIds": []
+    "customerIds": [],
+    "status": "active"
   },
   {
     "id": "bwl",
@@ -150,7 +166,8 @@
     "additionalEmails": [],
     "taxNumber": "202484173",
     "contractCustomerId": "bwl",
-    "customerIds": []
+    "customerIds": [],
+    "status": "active"
   },
   {
     "id": "loutas",
@@ -159,7 +176,8 @@
     "additionalEmails": [],
     "taxNumber": "702173487",
     "contractCustomerId": "lot",
-    "customerIds": []
+    "customerIds": [],
+    "status": "active"
   },
   {
     "id": "EGL",
@@ -168,7 +186,8 @@
     "additionalEmails": [],
     "taxNumber": "202487598",
     "contractCustomerId": "ALP",
-    "customerIds": ["ALP", "VOL", "WSHI", "EGYPTIAN GLOBAL LOGISTICS(EGP)", "EGYPTIAN GLOBAL LOGISTICS(USAD)", "EGYPTIAN GLOBAL  LOGISTICS FOR TRADE(تحت التسوية)"]
+    "customerIds": ["ALP", "VOL", "WSHI", "EGYPTIAN GLOBAL LOGISTICS(EGP)", "EGYPTIAN GLOBAL LOGISTICS(USAD)", "EGYPTIAN GLOBAL  LOGISTICS FOR TRADE(تحت التسوية)"],
+    "status": "active"
   },
   {
     "id": "cosco_cos",
@@ -177,7 +196,8 @@
     "additionalEmails": [],
     "taxNumber": "325815798",
     "contractCustomerId": "COS",
-    "customerIds": ["COS", "COE", "COSCO SHIPPING LINES (EGYPT)(USAD)", "COSCO SHIPPING LINES (EGYPT) (EGP)"]
+    "customerIds": ["COS", "COE", "COSCO SHIPPING LINES (EGYPT)(USAD)", "COSCO SHIPPING LINES (EGYPT) (EGP)"],
+    "status": "active"
   },
   {
     "id": "dhl",
@@ -186,7 +206,8 @@
     "additionalEmails": [],
     "taxNumber": "",
     "contractCustomerId": "",
-    "customerIds": ["DHL GLOBAL FORWARDING"]
+    "customerIds": ["DHL GLOBAL FORWARDING"],
+    "status": "active"
   },
   {
     "id": "latt",
@@ -195,7 +216,8 @@
     "additionalEmails": [],
     "taxNumber": "204829305",
     "contractCustomerId": "",
-    "customerIds": ["TUR", "HKL", "KMT", "LATT TRADING & SHIPPING(EGP)", "LATT TRADING & SHIPPING(USAD)"]
+    "customerIds": ["TUR", "HKL", "KMT", "LATT TRADING & SHIPPING(EGP)", "LATT TRADING & SHIPPING(USAD)"],
+    "status": "active"
   },
   {
     "id": "Badawi",
@@ -204,7 +226,8 @@
     "additionalEmails": ["Sherif.Magdy@bsaeg.com"],
     "taxNumber": "412706407",
     "contractCustomerId": "SFT",
-    "customerIds": ["SFT", "SLG", "BADAWI SHIPPING AGENCY COMPANY(جنية)", "BADAWI SHIPPING AGENCY COMPANY(USD)", "BADAWI SHIPPING AGENCY (تحت التسويه)"]
+    "customerIds": ["SFT", "SLG", "BADAWI SHIPPING AGENCY COMPANY(جنية)", "BADAWI SHIPPING AGENCY COMPANY(USD)", "BADAWI SHIPPING AGENCY (تحت التسويه)"],
+    "status": "active"
   },
   {
     "id": "sea glory",
@@ -213,7 +236,8 @@
     "additionalEmails": [""],
     "taxNumber": "766832147",
     "contractCustomerId": "CUL",
-    "customerIds": ["CUL", "UGL", "SEAGLORY SHIPPING AGENCY EGYPT(EGP)", "SEAGLORY SHIPPING AGENCY EGYPT(USAD)"]
+    "customerIds": ["CUL", "UGL", "SEAGLORY SHIPPING AGENCY EGYPT(EGP)", "SEAGLORY SHIPPING AGENCY EGYPT(USAD)"],
+    "status": "active"
   },
   {
     "id": "kadmar",
@@ -222,7 +246,8 @@
     "additionalEmails": [""],
     "taxNumber": "552346063",
     "contractCustomerId": "HMM",
-    "customerIds": ["HMM", "KADMAR SHIPPING EGYPT(EGP)", "KADMAR SHIPPING EGYPT(USAD)"]
+    "customerIds": ["HMM", "KADMAR SHIPPING EGYPT(EGP)", "KADMAR SHIPPING EGYPT(USAD)"],
+    "status": "active"
   },
   {
     "id": "sidra",
@@ -231,7 +256,8 @@
     "additionalEmails": [""],
     "taxNumber": "719175755",
     "contractCustomerId": "ALN",
-    "customerIds": ["OSL", "OVP", "SID", "SIDRA LINE EGYPT(EGP)", "SIDRA LINE EGYPT(USAD)", "SIDRA LINE EGYPT (تحت التسويه)"]
+    "customerIds": ["OSL", "OVP", "SID", "SIDRA LINE EGYPT(EGP)", "SIDRA LINE EGYPT(USAD)", "SIDRA LINE EGYPT (تحت التسويه)"],
+    "status": "active"
   },
   {
     "id": "oocl",
@@ -240,7 +266,8 @@
     "additionalEmails": [""],
     "taxNumber": "7482131470",
     "contractCustomerId": "oocl",
-    "customerIds": ["OOCL", "OOCL (EGYPT SHIPPING AGENCY)(EGP)", "OOCL (EGYPT SHIPPING AGENCY) (USAD)"]
+    "customerIds": ["OOCL", "OOCL (EGYPT SHIPPING AGENCY)(EGP)", "OOCL (EGYPT SHIPPING AGENCY) (USAD)"],
+    "status": "active"
   },
   {
     "id": "csl",
@@ -249,7 +276,8 @@
     "additionalEmails": ["M.Mahmoud@ilpegypt.com", "liner@ilpegypt.com", "K.Ibrahim@ilpegypt.com", "mb.mohamed@ilpegypt.com"],
     "taxNumber": "202492435",
     "contractCustomerId": "CSL",
-    "customerIds": ["CSL", "INTERNATIONAL LOGISTICS PARTNERS EGYPT(EGP)", "INTERNATIONAL LOGISTICS PARTNERS EGYPT(USAD)"]
+    "customerIds": ["CSL", "INTERNATIONAL LOGISTICS PARTNERS EGYPT(EGP)", "INTERNATIONAL LOGISTICS PARTNERS EGYPT(USAD)"],
+    "status": "active"
   },
   {
     "id": "Maersk",
@@ -258,7 +286,8 @@
     "additionalEmails": ["finapeg@maersk.com"],
     "taxNumber": "371847702",
     "contractCustomerId": "MSK",
-    "customerIds": ["MSK", "MAERSK EGYPT SHIPPING AGENCY(EGP)", "MAERSK EGYPT SHIPPING AGENCY(USAD)"]
+    "customerIds": ["MSK", "MAERSK EGYPT SHIPPING AGENCY(EGP)", "MAERSK EGYPT SHIPPING AGENCY(USAD)"],
+    "status": "active"
   },
   {
     "id": "panmarine",
@@ -267,7 +296,8 @@
     "additionalEmails": ["mohamed.aboelfotoh@medkon-egypt.com", "mohamed.aboelfotoh@pan-marine.net"],
     "taxNumber": "",
     "contractCustomerId": "SIV",
-    "customerIds": ["MDK", "PAN MARINE SHIPPING SERVICES (EGP)", "PAN MARINE SHIPPING SERVICES(USAD)"]
+    "customerIds": ["MDK", "PAN MARINE SHIPPING SERVICES (EGP)", "PAN MARINE SHIPPING SERVICES(USAD)"],
+    "status": "active"
   },
   {
     "id": "EMK",
@@ -276,7 +306,8 @@
     "additionalEmails": [""],
     "taxNumber": "698963008",
     "contractCustomerId": "EMK",
-    "customerIds": ["EMK", "HIGH SEAS SHIPPING(جنيه)", "HIGH SEAS SHIPPING(USAD)"]
+    "customerIds": ["EMK", "HIGH SEAS SHIPPING(جنيه)", "HIGH SEAS SHIPPING(USAD)"],
+    "status": "active"
   },
   {
     "id": "MAXI",
@@ -285,6 +316,7 @@
     "additionalEmails": [],
     "taxNumber": "204830109",
     "contractCustomerId": "MAXI",
-    "customerIds": ["MAXI", "WILHELMSEN PORT SERVICES(EGP)", "WILHELMSEN PORT SERVICES(USAD)"]
+    "customerIds": ["MAXI", "WILHELMSEN PORT SERVICES(EGP)", "WILHELMSEN PORT SERVICES(USAD)"],
+    "status": "active"
   }
 ]
