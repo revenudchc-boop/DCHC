@@ -271,28 +271,23 @@ function sendEmail(toEmail, user, invoices) {
     const maxShow = Math.min(count, 10);
     for (let i = 0; i < maxShow; i++) {
         const inv = invoices[i];
-        // استخراج العملة والإجمالي
-        const currency = inv['currency'] || 'EGP';
         let total = parseFloat(inv['total-total']) || 0;
-        let displayCurrency = currency;
+        let currency = inv['currency'] || 'EGP';
         
-        // إذا كانت العملة USAD، نقوم بتحويلها إلى EGP باستخدام سعر الصرف
+        // إذا كانت العملة USAD، نقسم على سعر الصرف ونبقي العملة USAD
         if (currency === 'USAD') {
-            const exchangeRate = parseFloat(inv['flex-string-06']) || 48.0215; // القيمة الافتراضية
+            const exchangeRate = parseFloat(inv['flex-string-06']) || 48.0215;
             if (exchangeRate > 0) {
                 total = total / exchangeRate;
-                displayCurrency = 'EGP';
             }
+            // العملة تبقى USAD
         }
-        
-        // تنسيق المبلغ (إلى منزلتين عشريتين)
-        const formattedTotal = total.toFixed(2);
         
         invoiceList += `<tr>
             <td style="padding:8px;border-bottom:1px solid #ddd;">${inv['final-number'] || '-'}</td>
             <td style="padding:8px;border-bottom:1px solid #ddd;">${inv['key-word1'] || '-'}</td>
             <td style="padding:8px;border-bottom:1px solid #ddd;">${inv['key-word2'] || '-'}</td>
-            <td style="padding:8px;border-bottom:1px solid #ddd;">${formattedTotal} ${displayCurrency}</td>
+            <td style="padding:8px;border-bottom:1px solid #ddd;">${total.toFixed(2)} ${currency}</td>
         </tr>`;
     }
     
@@ -316,7 +311,7 @@ function sendEmail(toEmail, user, invoices) {
             </div>
             <hr><p style="color:#999;font-size:0.8em;text-align:center;">رسالة تلقائية من نظام الفواتير - شركة دمياط لتداول الحاويات</p>
         </div>
-    </html>`;
+    </div>`;
     
     const transporter = getEmailTransporter();
     if (transporter) {
@@ -436,26 +431,23 @@ function sendCreditEmail(toEmail, user, credits) {
     const maxShow = Math.min(count, 10);
     for (let i = 0; i < maxShow; i++) {
         const cr = credits[i];
-        // استخراج العملة
-        const currency = cr['currency'] || 'EGP';
         let totalCredit = parseFloat(cr['total-credit']) || 0;
         let totalTax = parseFloat(cr['total-tax-credit']) || 0;
         let total = totalCredit + totalTax;
-        let displayCurrency = currency;
+        let currency = cr['currency'] || 'EGP';
         
-        // إذا كانت العملة USAD، نقوم بتحويلها إلى EGP باستخدام سعر الصرف
+        // إذا كانت العملة USAD، نقسم على سعر الصرف ونبقي العملة USAD
         if (currency === 'USAD') {
-            // محاولة الحصول على سعر الصرف من exchange-rate أو flex-string-06
             let exchangeRate = parseFloat(cr['exchange-rate']) || 0;
             if (exchangeRate <= 0) {
-                exchangeRate = parseFloat(cr['flex-string-06']) || 48.0215; // القيمة الافتراضية
+                exchangeRate = parseFloat(cr['flex-string-06']) || 48.0215;
             }
             if (exchangeRate > 0) {
                 totalCredit = totalCredit / exchangeRate;
                 totalTax = totalTax / exchangeRate;
                 total = total / exchangeRate;
-                displayCurrency = 'EGP';
             }
+            // العملة تبقى USAD
         }
         
         creditList += `<tr>
@@ -463,7 +455,7 @@ function sendCreditEmail(toEmail, user, credits) {
             <td style="padding:8px;border-bottom:1px solid #ddd;">${cr['date'] ? cr['date'].split('T')[0] : '-'}</td>
             <td style="padding:8px;border-bottom:1px solid #ddd;">${totalCredit.toFixed(2)}</td>
             <td style="padding:8px;border-bottom:1px solid #ddd;">${totalTax.toFixed(2)}</td>
-            <td style="padding:8px;border-bottom:1px solid #ddd;"><strong>${total.toFixed(2)} ${displayCurrency}</strong></td>
+            <td style="padding:8px;border-bottom:1px solid #ddd;"><strong>${total.toFixed(2)} ${currency}</strong></td>
         </tr>`;
     }
     
