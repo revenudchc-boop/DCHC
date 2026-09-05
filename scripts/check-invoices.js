@@ -47,7 +47,7 @@ function getCreditFile() {
     return { name: 'creditdata.txt', path: creditPath };
 }
 
-async function extractInvoices(filePath) {
+function extractInvoices(filePath) {
     const content = fs.readFileSync(filePath, 'utf8');
     const invoices = [];
     
@@ -58,8 +58,9 @@ async function extractInvoices(filePath) {
         const attributes = match[1];
         const inv = {};
         
+        // ✅ أضف flex-string-06 إلى القائمة
         const fields = ['final-number', 'draft-number', 'payee-customer-id', 'contract-customer-id', 
-                       'total-total', 'currency', 'key-word1', 'key-word2', 'created'];
+                       'total-total', 'currency', 'key-word1', 'key-word2', 'created', 'flex-string-06'];
         
         for (const field of fields) {
             const attrRegex = new RegExp(`${field}="([^"]*)"`, 'i');
@@ -274,24 +275,61 @@ function sendEmail(toEmail, user, invoices) {
         let total = parseFloat(inv['total-total']) || 0;
         let currency = inv['currency'] || 'EGP';
         
-        // إذا كانت العملة USAD، نقسم على سعر الصرف ونبقي العملة USAD
+        // ✅ إذا كانت العملة USAD، نقسم على سعر الصرف ونبقي العملة USAD
         if (currency === 'USAD') {
+            // استخدم flex-string-06 إذا كان موجوداً، وإلا استخدم القيمة الافتراضية
             const exchangeRate = parseFloat(inv['flex-string-06']) || 48.0215;
             if (exchangeRate > 0) {
                 total = total / exchangeRate;
             }
             // العملة تبقى USAD
+        } else {
+            // ✅ إذا كانت العملة EGP، نضيف طابع الشهيد 5 جنيه للفواتير النقدية
+            const finalNumber = inv['final-number'] || '';
+            const isPostponed = finalNumber.startsWith('P') || finalNumber.startsWith('p');
+            if (!isPostponed) {
+                total += 5; // طابع الشهيد
+            }
         }
+        
+        // ✅ تنسيق الأرقام بفواصل الألف
+        const formattedTotal = total.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
         
         invoiceList += `<tr>
             <td style="padding:8px;border-bottom:1px solid #ddd;">${inv['final-number'] || '-'}</td>
             <td style="padding:8px;border-bottom:1px solid #ddd;">${inv['key-word1'] || '-'}</td>
             <td style="padding:8px;border-bottom:1px solid #ddd;">${inv['key-word2'] || '-'}</td>
-            <td style="padding:8px;border-bottom:1px solid #ddd;">${total.toFixed(2)} ${currency}</td>
+            <td style="padding:8px;border-bottom:1px solid #ddd;font-weight:bold;">${formattedTotal} ${currency}</td>
         </tr>`;
     }
     
     const more = count > 10 ? `<p style="color:#666;">... و ${count - 10} فاتورة أخرى</p>` : '';
+    
+    // ✅ حساب الإجمالي الكلي لجميع الفواتير
+    let grandTotal = 0;
+    let grandCurrency = 'EGP';
+    invoices.forEach(inv => {
+        let total = parseFloat(inv['total-total']) || 0;
+        let currency = inv['currency'] || 'EGP';
+        
+        if (currency === 'USAD') {
+            const exchangeRate = parseFloat(inv['flex-string-06']) || 48.0215;
+            if (exchangeRate > 0) {
+                total = total / exchangeRate;
+            }
+            grandCurrency = 'USAD';
+        } else {
+            const finalNumber = inv['final-number'] || '';
+            const isPostponed = finalNumber.startsWith('P') || finalNumber.startsWith('p');
+            if (!isPostponed) {
+                total += 5;
+            }
+            grandCurrency = 'EGP';
+        }
+        grandTotal += total;
+    });
+    
+    const formattedGrandTotal = grandTotal.toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
     
     const htmlBody = `<div dir="rtl" style="font-family:Tahoma;max-width:600px;margin:0 auto;background:#f5f5f5;padding:20px;">
         <div style="background:#1e3c72;color:white;padding:20px;text-align:center;border-radius:10px 10px 0 0;">
@@ -302,12 +340,20 @@ function sendEmail(toEmail, user, invoices) {
             <p>مرحباً <strong>${username}</strong>،</p>
             <p style="color:#10b981;text-align:center;font-size:1.2em;">تم إضافة <strong>${count}</strong> فاتورة جديدة</p>
             <table style="width:100%;border-collapse:collapse;margin:20px 0;">
-                <thead><tr style="background:#4361ee;color:white;"><th>رقم الفاتورة</th><th>السفينة</th><th>البوليصة</th><th>الإجمالي</th></tr></thead>
+                <thead><tr style="background:#4361ee;color:white;">
+                    <th style="padding:10px;">رقم الفاتورة</th>
+                    <th style="padding:10px;">السفينة</th>
+                    <th style="padding:10px;">البوليصة</th>
+                    <th style="padding:10px;">الإجمالي</th>
+                </tr></thead>
                 <tbody>${invoiceList}</tbody>
             </table>
             ${more}
+            <div style="background:#e8f4f8;padding:15px;border-radius:8px;text-align:center;margin-top:15px;">
+                <strong style="font-size:1.1em;">الإجمالي الكلي: ${formattedGrandTotal} ${grandCurrency}</strong>
+            </div>
             <div style="text-align:center;margin:30px 0;">
-                <a href="https://revenudchc-boop.github.io/DCHC-Inv/" style="background:#4361ee;color:white;text-decoration:none;padding:12px 30px;border-radius:50px;">🔗 فتح نظام الفواتير</a>
+                <a href="https://revenudchc-boop.github.io/DCHC-Inv/" style="background:#4361ee;color:white;text-decoration:none;padding:12px 30px;border-radius:50px;display:inline-block;">🔗 فتح نظام الفواتير</a>
             </div>
             <hr><p style="color:#999;font-size:0.8em;text-align:center;">رسالة تلقائية من نظام الفواتير - شركة دمياط لتداول الحاويات</p>
         </div>
@@ -335,7 +381,6 @@ function sendEmail(toEmail, user, invoices) {
         }
     }
 }
-
 function sendTelegramMessage(chatId, message) {
     const botToken = process.env.TELEGRAM_BOT_TOKEN;
     if (!botToken) {
@@ -390,6 +435,7 @@ async function extractCredits(filePath) {
             if (matches) {
                 credits = matches.map(tag => {
                     const attrs = {};
+                    // ✅ أضف exchange-rate إلى السمات المستخرجة
                     const attrRegex = /(\w+-\w+)="([^"]*)"/g;
                     let match;
                     while ((match = attrRegex.exec(tag)) !== null) {
