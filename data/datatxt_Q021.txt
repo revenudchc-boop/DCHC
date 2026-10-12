@@ -1,21 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <argo:snx xmlns:argo="http://www.navis.com/argo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.navis.com/argo snx.xsd">
-<invoice draft-number="297358" final-number="P26-3384" finalized-date="2026-09-30T00:00:00" status="FINAL" is-merged="N" invoice-type-id="VSL TRANSIT STORAGE EMPTY INVOICE(LOADED_FULL)" currency="USAD" payee-customer-id="COSCO SHIPPING LINES (EGYPT)(USAD)" payee-customer-role="AGENT" contract-customer-id="COS" contract-customer-role="LINEOP" total-charges="2441.6208" total-discounts="0.0" total-taxes="0.0" total-total="2441.6208" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="2441.6208" total-un-rounded="2441.6208" key-word1="NORDLUCHS" key-word2="7JBQ222W" key-word3="COS" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="49" flex-string-04="NORDLUCHS" flex-string-05="aelhalwagy" flex-string-06="50.8671" flex-string-07="48.0" flex-string-08="48.0" flex-string-09="0.0" flex-string-10="48.0" flex-date-01="2026-10-05T15:25:09" flex-date-02="2026-09-30T00:00:00" flex-date-03="2026-10-05T14:13:12" flex-long-03="49" created="2026-10-05T13:19:22" creator="zinabsamir" changed="2026-10-05T14:13:12" changer="aelhalwagy">
-  <charges>
-    <charge event-type-id="STORAGE" entity-id="CCLU7835451" tariff-id="STORT40ED " description="StorageTransshipment40EmptyDrymore15 " paid-thru-day="2026-09-26T21:02:12" event-performed-from="2026-09-19T00:00:00" event-performed-to="2026-09-26T00:00:00" extract-class="INV" rate-billed="6.0" quantity-billed="8.0" amount="2441.6208" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="8.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="50.8671" extract-gkey="24652905" changer="zinabsamir" changed="2026-10-05T13:19:48" created="2026-10-05T13:19:47" creator="zinabsamir">
-      <taxes />
-    </charge>
-  </charges>
-  <parameters>
-    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ الشحن" value="2026-09-30T00:00:00 +0200" />
-    <parameter metafield-id="bexuLineOperatorId" reportable-field="الخط الملاحى" value="COS" />
-    <parameter metafield-id="bexuFlexString32" reportable-field="كود الرحله" value="7JBQ222W" />
-    <parameter metafield-id="bexuObCarrierATA" reportable-field="ObCarrierATA" value="2026-09-30T00:00:00 +0200" />
-    <parameter metafield-id="bexuFlexString36" reportable-field="FlexString36" value="NORDLUCHS" />
-    <parameter metafield-id="bexuFlexString32" reportable-field="FlexString32" value="7JBQ222W" />
-    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="COS" />
-  </parameters>
-</invoice>
 <invoice draft-number="297359" final-number="C26-9015" finalized-date="2026-10-05T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="ALMASRY FOR TRANSPORT" payee-customer-role="AGENT" contract-customer-id="530923599" contract-customer-role="SHIPPER" total-charges="2042.1843" total-discounts="0.0" total-taxes="285.9058" total-total="2328.0901" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="2328.0901" total-un-rounded="2328.0901" key-word1="PAN GG" key-word2="271666601" key-word3="MSK" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*9/10*" flex-string-04="PAN GG" flex-string-05="MMOSAAD" flex-string-06="52.3637" flex-string-10="39.0" flex-date-01="2026-10-05T15:27:18" flex-date-02="2026-09-30T00:00:00" flex-date-03="2026-10-05T13:36:12" created="2026-10-05T13:22:44" creator="mnabawy" changed="2026-10-05T13:36:12" changer="MMOSAAD">
   <charges>
     <charge event-type-id="OTHERS_SERVICES" entity-id="CAAU7728234" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-09-30T13:36:53" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1309.0925" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="52.3637" extract-gkey="24845953" created="2026-10-05T13:23:04" creator="mnabawy">
@@ -158341,6 +158325,22 @@
     <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
   </parameters>
 </invoice>
+<invoice draft-number="298372" final-number="P26-3622" finalized-date="2026-10-12T00:00:00" status="FINAL" is-merged="N" invoice-type-id="VSL TRANSIT STORAGE &amp; POWER  INVOICE" currency="USAD" payee-customer-id="EGYMAR SHIPPING &amp; LOGISTICS SERVICES S.A.E(USAD)" payee-customer-role="AGENT" contract-customer-id="ZIM" contract-customer-role="LINEOP" total-charges="6270.852" total-discounts="0.0" total-taxes="0.0" total-total="6270.852" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="6270.852" total-un-rounded="6270.852" key-word1="CARMEL I" key-word2="GTLE37W" key-word3="ZIM" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="25" flex-string-04="CARMEL I" flex-string-05="aelhalwagy" flex-string-06="52.2571" flex-string-07="120.0" flex-string-08="120.0" flex-string-09="0.0" flex-string-10="120.0" flex-date-02="2026-10-04T00:00:00" flex-date-03="2026-10-12T14:14:53" flex-long-03="25" created="2026-10-12T14:05:09" creator="nada" changed="2026-10-12T14:10:12" changer="aelhalwagy">
+  <charges>
+    <charge event-type-id="REEFER" entity-id="ZMOU8828358" tariff-id="POWT40FR " description="PowerTransshipment40FullReffer " paid-thru-day="2026-10-05T00:00:00" event-performed-from="2026-10-02T00:00:00" event-performed-to="2026-10-05T00:00:00" extract-class="INV" rate-billed="30.0" quantity-billed="4.0" amount="6270.852" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="4.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="52.2571" extract-gkey="24869723" changer="nada" changed="2026-10-12T14:05:36" created="2026-10-12T14:05:36" creator="nada">
+      <taxes />
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuObId" reportable-field="كود الرحله" value="GTLE37W" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="الخط الملاحي" value="ZIM" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ الشحن" value="2026-10-05T00:00:00 +0200" />
+    <parameter metafield-id="bexuObId" reportable-field="ObId" value="GTLE37W" />
+    <parameter metafield-id="bexuObCarrierName" reportable-field="ObCarrierName" value="CARMEL I" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="ZIM" />
+    <parameter metafield-id="bexuObCarrierATA" reportable-field="ObCarrierATA" value="2026-10-04T14:10:00 +0200" />
+  </parameters>
+</invoice>
 <invoice draft-number="296398" final-number="P26-3177" finalized-date="2026-09-30T00:00:00" status="FINAL" is-merged="N" invoice-type-id="VSL EXPORT LASH" currency="USAD" payee-customer-id="HAPAG-LLOYD (EGYPT) SHIPPING (USAD)" payee-customer-role="AGENT" contract-customer-id="HLC" contract-customer-role="LINEOP" total-charges="763.0065" total-discounts="0.0" total-taxes="0.0" total-total="763.0065" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="763.0065" total-un-rounded="763.0065" key-word1="PAN GG" key-word2="1VAI271" key-word3="HLC" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="89" flex-string-04="PAN GG" flex-string-05="eslamyousri" flex-string-06="50.8671" flex-string-07="15.0" flex-string-08="15.0" flex-string-09="0.0" flex-string-10="15.0" flex-date-02="2026-09-25T00:00:00" flex-date-03="2026-10-02T10:00:00" flex-long-03="89" created="2026-09-29T12:33:48" creator="MMOWAFI" changed="2026-09-30T12:01:10" changer="eslamyousri">
   <charges>
     <charge event-type-id="UNIT_LASH" entity-id="HLBU3720499" tariff-id="LASHE20FD " description="LashExport20FullDry " event-performed-from="2026-09-26T02:36:04" extract-class="INV" rate-billed="15.0" quantity-billed="1.0" amount="763.0065" is-flat-rate="Y" flat-rate-amount="15.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="50.8671" extract-gkey="24805579" created="2026-09-29T12:34:02" creator="MMOWAFI">
@@ -271204,6 +271204,22 @@
     <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ الشحن" value="2026-09-30T00:00:00 +0200" />
     <parameter metafield-id="bexuLineOperatorId" reportable-field="الخط الملاحى" value="COS" />
     <parameter metafield-id="bexuFlexString32" reportable-field="كود الرحله" value="7JBQ222W" />
+  </parameters>
+</invoice>
+<invoice draft-number="297358" final-number="P26-3384" finalized-date="2026-09-30T00:00:00" status="FINAL" is-merged="N" invoice-type-id="VSL TRANSIT STORAGE EMPTY INVOICE(LOADED_FULL)" currency="USAD" payee-customer-id="COSCO SHIPPING LINES (EGYPT)(USAD)" payee-customer-role="AGENT" contract-customer-id="COS" contract-customer-role="LINEOP" total-charges="2441.6208" total-discounts="0.0" total-taxes="0.0" total-total="2441.6208" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="2441.6208" total-un-rounded="2441.6208" key-word1="NORDLUCHS" key-word2="7JBQ222W" key-word3="COS" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="49" flex-string-04="NORDLUCHS" flex-string-05="aelhalwagy" flex-string-06="50.8671" flex-string-07="48.0" flex-string-08="48.0" flex-string-09="0.0" flex-string-10="48.0" flex-date-01="2026-10-05T15:25:09" flex-date-02="2026-09-30T00:00:00" flex-date-03="2026-10-05T14:13:12" flex-long-03="49" created="2026-10-05T13:19:22" creator="zinabsamir" changed="2026-10-05T14:13:12" changer="aelhalwagy">
+  <charges>
+    <charge event-type-id="STORAGE" entity-id="CCLU7835451" tariff-id="STORT40ED " description="StorageTransshipment40EmptyDrymore15 " paid-thru-day="2026-09-26T21:02:12" event-performed-from="2026-09-19T00:00:00" event-performed-to="2026-09-26T00:00:00" extract-class="INV" rate-billed="6.0" quantity-billed="8.0" amount="2441.6208" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="8.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="50.8671" extract-gkey="24652905" changer="zinabsamir" changed="2026-10-05T13:19:48" created="2026-10-05T13:19:47" creator="zinabsamir">
+      <taxes />
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ الشحن" value="2026-09-30T00:00:00 +0200" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="الخط الملاحى" value="COS" />
+    <parameter metafield-id="bexuFlexString32" reportable-field="كود الرحله" value="7JBQ222W" />
+    <parameter metafield-id="bexuObCarrierATA" reportable-field="ObCarrierATA" value="2026-09-30T00:00:00 +0200" />
+    <parameter metafield-id="bexuFlexString36" reportable-field="FlexString36" value="NORDLUCHS" />
+    <parameter metafield-id="bexuFlexString32" reportable-field="FlexString32" value="7JBQ222W" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="COS" />
   </parameters>
 </invoice>
 </argo:snx>
