@@ -47542,5 +47542,39 @@
     <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="ZIM" />
   </parameters>
 </invoice>
+<invoice draft-number="299405" final-number="C26-10245" finalized-date="2026-10-17T00:00:00" status="FINAL" is-merged="N" invoice-type-id="LCL_IMPORT_INVOICE(CONTAINER CUSTOMER)" currency="EGP" payee-customer-id="CASH CUSTOMER" payee-customer-role="SHIPPER" contract-customer-id="205132928" contract-customer-role="SHIPPER" total-charges="5299.6086" total-discounts="0.0" total-taxes="741.9452" total-total="6041.5538" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="6041.5538" total-un-rounded="6041.5538" key-word1="YM WONDROUS" key-word2="M226240352+" key-word3="YML" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-04="YM WONDROUS" flex-string-05="yasser" flex-string-06="53.5314" flex-string-10="99.0" flex-date-02="2026-10-14T13:00:00" flex-date-03="2026-10-17T14:18:18" created="2026-10-17T14:10:37" creator="ezzat" changed="2026-10-17T14:13:34" changer="yasser">
+  <charges>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="YMMU6788052" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-10-14T23:13:38" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1338.285" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5314" extract-gkey="24981139" created="2026-10-17T14:10:52" creator="ezzat">
+      <taxes>
+        <tax amount="187.35990000000004" created="2026-10-17T14:10:52" creator="ezzat">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="YMMU6788052" tariff-id="STORI40FDLCL" description="تخزين وارد مملوء 40 قدم مازاد عن 3 يومLCL" paid-thru-day="2026-10-17T00:00:00" event-performed-from="2026-10-17T00:00:00" event-performed-to="2026-10-17T00:00:00" extract-class="INV" rate-billed="14.0" quantity-billed="1.0" amount="749.4395999999999" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="1.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="53.5314" extract-gkey="24981126" changer="ezzat" changed="2026-10-17T14:10:52" created="2026-10-17T14:10:52" creator="ezzat">
+      <taxes>
+        <tax amount="104.921544" created="2026-10-17T14:10:52" creator="ezzat">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="LCL_STRIP_IN_YARD" entity-id="YMMU6788052" tariff-id="STIPINLCLI40FD" description="StripInlclyardimport40fulldry " event-performed-from="2026-10-17T11:49:42" extract-class="INV" rate-billed="60.0" quantity-billed="1.0" amount="3211.884" is-flat-rate="Y" flat-rate-amount="60.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5314" extract-gkey="25006100" created="2026-10-17T14:10:52" creator="ezzat">
+      <taxes>
+        <tax amount="449.66376" created="2026-10-17T14:10:52" creator="ezzat">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ الصرف" value="2026-10-17T00:00:00 +0200" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="M226240352+" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوليصه مجمعه" />
+    <parameter metafield-id="bexuEqId" reportable-field="رقم الحاويه" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="M226240352+" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="YML" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="YM WONDROUS" />
+  </parameters>
+</invoice>
 </argo:snx>
 
