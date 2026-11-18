@@ -1,0 +1,49 @@
+name: مراقبة بيانات DCHC (Firestore)
+
+on:
+  workflow_dispatch:
+  # بعد اختبار النظام والتأكد منه، يمكنك فك التعليق بالأسفل وإيقاف القديم:
+  # push:
+  #   paths:
+  #     - 'data/datatxt_Q*.txt'
+  #     - 'data/creditdata.txt'
+  #   branches:
+  #     - main
+
+permissions:
+  contents: write
+
+jobs:
+  check-users-and-notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: 📥 سحب الكود
+        uses: actions/checkout@v4
+
+      - name: 🔧 إعداد Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
+      - name: 📦 تثبيت الاعتماديات
+        run: npm install && npm install firebase-admin --no-save
+
+      - name: 👥 اختبار جلب المستخدمين من Firestore
+        run: node scripts/fetch-users-firebase.js
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: 🔍 تشغيل سكريبت الفحص (Firestore)
+        run: node scripts/check-invoices-firebase.js
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+          EMAIL_USER: ${{ secrets.EMAIL_USER }}
+          EMAIL_PASS: ${{ secrets.EMAIL_PASS }}
+          EMAIL_RECIPIENT: ${{ secrets.EMAIL_RECIPIENT }}
+          TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+          TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_ACTOR: ${{ github.actor }}
