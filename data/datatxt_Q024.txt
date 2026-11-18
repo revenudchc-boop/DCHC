@@ -139240,5 +139240,111 @@
     <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-11-16T06:15:00 +0200" />
   </parameters>
 </invoice>
+<invoice draft-number="304743" final-number="C26-13734" finalized-date="2026-11-18T00:00:00" status="FINAL" is-merged="N" invoice-type-id="فاتورة تحصيل نقدى صادر" currency="EGP" payee-customer-id="AMOUN2" payee-customer-role="AGENT" contract-customer-id="677640099" contract-customer-role="SHIPPER" total-charges="6671.7704" total-discounts="0.0" total-taxes="934.0479" total-total="7605.8183" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="7605.8183" total-un-rounded="7605.818300000001" key-word2="EBKG19474561" key-word3="MSC" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-04="MSC CANDICE" flex-string-05="mmosaad" flex-string-06="53.8046" flex-string-10="124.0" flex-date-02="2026-11-10T22:00:00" flex-date-03="2026-11-18T11:21:53" created="2026-11-18T11:18:50" creator="zinabsamir" changed="2026-11-18T11:21:52" changer="mmosaad">
+  <charges>
+    <charge event-type-id="STUFF" entity-id="MSDU6689941" tariff-id="STUFFRE40ED " description="نقل 40فارغ للتعبئه(اجنبي)ونقل للمملوء" event-performed-from="2026-11-18T10:46:26" extract-class="INV" rate-billed="120.0" quantity-billed="1.0" amount="6456.552" is-flat-rate="N" flat-rate-amount="0.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.8046" extract-gkey="25268179" created="2026-11-18T11:19:06" creator="zinabsamir">
+      <taxes>
+        <tax amount="903.91728" created="2026-11-18T11:19:06" creator="zinabsamir">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="CLEAN" entity-id="MSDU6689941" tariff-id="CLEANE40REEX" description="نظافه حاوايات 40 قدم" event-performed-from="2026-11-18T10:46:33" extract-class="INV" rate-billed="4.0" quantity-billed="1.0" amount="215.2184" is-flat-rate="Y" flat-rate-amount="4.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.8046" extract-gkey="25268181" created="2026-11-18T11:19:06" creator="zinabsamir">
+      <taxes>
+        <tax amount="30.130576000000005" created="2026-11-18T11:19:06" creator="zinabsamir">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuFlexString03" reportable-field="order number" />
+    <parameter metafield-id="bexuBookingNbr" reportable-field="رقم الحجز" value="EBKG19474561" />
+    <parameter metafield-id="bexuBookingNbr" reportable-field="BookingNbr" value="EBKG19474561" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ تفريغ المشمول" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="MSC" />
+    <parameter metafield-id="bexuEqId" reportable-field="ارقام الحاويات" />
+  </parameters>
+</invoice>
+<invoice draft-number="304748" final-number="C26-13735" finalized-date="2026-11-18T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="CASH CUSTOMER" payee-customer-role="SHIPPER" contract-customer-id="205022790" contract-customer-role="SHIPPER" total-charges="18293.564" total-discounts="0.0" total-taxes="2561.099" total-total="20854.663" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="20854.663" total-un-rounded="20854.663" key-word1="ZIM CHINA" key-word2="ZIMUBCN0169729" key-word3="ZIM" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*18/11*" flex-string-04="ZIM CHINA" flex-string-05="mmosaad" flex-string-06="53.8046" flex-string-10="340.0" flex-date-02="2026-10-25T00:00:00" flex-date-03="2026-11-18T11:27:44" created="2026-11-18T11:24:23" creator="hebahkamal" changed="2026-11-18T11:27:43" changer="mmosaad">
+  <charges>
+    <charge event-type-id="STORAGE" entity-id="ZCSU4016659" tariff-id="STORI40FD " description="تخزين مازاد عن 5 أيام 40 قدم" paid-thru-day="2026-11-18T00:00:00" event-performed-from="2026-10-30T00:00:00" event-performed-to="2026-11-13T00:00:00" extract-class="INV" rate-billed="14.0" quantity-billed="15.0" amount="11298.966" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="15.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="53.8046" extract-gkey="25066571" changer="hebahkamal" changed="2026-11-18T11:24:38" created="2026-11-18T11:24:38" creator="hebahkamal">
+      <taxes>
+        <tax amount="1581.85524" created="2026-11-18T11:24:38" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="ZCSU4016659" tariff-id="STORI40FD " description="تخزين مازاد عن 20 يوم 40 قدم" paid-thru-day="2026-11-18T00:00:00" event-performed-from="2026-11-14T00:00:00" event-performed-to="2026-11-18T00:00:00" extract-class="INV" rate-billed="21.0" quantity-billed="5.0" amount="5649.483" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="5.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="53.8046" extract-gkey="25066571" changer="hebahkamal" changed="2026-11-18T11:24:38" created="2026-11-18T11:24:38" creator="hebahkamal">
+      <taxes>
+        <tax amount="790.92762" created="2026-11-18T11:24:38" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="ZCSU4016659" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-10-26T01:15:22" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1345.115" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.8046" extract-gkey="25066574" created="2026-11-18T11:24:38" creator="hebahkamal">
+      <taxes>
+        <tax amount="188.3161" created="2026-11-18T11:24:38" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[zimubcn0169729]" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-11-18T00:00:00 +0200" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="54W" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-10-25T22:00:00 +0200" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="ZIM CHINA" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="ZIM CHINA" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="ZIMUBCN0169729" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="ZIMUBCN0169729" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="ZIM" />
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+  </parameters>
+</invoice>
+<invoice draft-number="304749" final-number="C26-13736" finalized-date="2026-11-18T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="CASH CUSTOMER" payee-customer-role="SHIPPER" contract-customer-id="205022790" contract-customer-role="SHIPPER" total-charges="27332.7368" total-discounts="0.0" total-taxes="3826.5832" total-total="31159.32" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="31159.32" total-un-rounded="31159.32" key-word1="ZIM PACIFIC" key-word2="ZIMUBCN10215328" key-word3="ZIM" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*18/11*" flex-string-04="ZIM PACIFIC" flex-string-05="mmosaad" flex-string-06="53.8046" flex-string-10="508.0" flex-date-02="2026-10-17T00:00:00" flex-date-03="2026-11-18T11:28:32" created="2026-11-18T11:25:43" creator="hebahkamal" changed="2026-11-18T11:28:32" changer="mmosaad">
+  <charges>
+    <charge event-type-id="STORAGE" entity-id="ZCSU4009618" tariff-id="STORI40FD " description="تخزين مازاد عن 5 أيام 40 قدم" paid-thru-day="2026-11-18T00:00:00" event-performed-from="2026-10-22T00:00:00" event-performed-to="2026-11-05T00:00:00" extract-class="INV" rate-billed="14.0" quantity-billed="15.0" amount="11298.966" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="15.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="53.8046" extract-gkey="25003207" changer="hebahkamal" changed="2026-11-18T11:26:05" created="2026-11-18T11:26:05" creator="hebahkamal">
+      <taxes>
+        <tax amount="1581.85524" created="2026-11-18T11:26:05" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="ZCSU4009618" tariff-id="STORI40FD " description="تخزين مازاد عن 20 يوم 40 قدم" paid-thru-day="2026-11-18T00:00:00" event-performed-from="2026-11-06T00:00:00" event-performed-to="2026-11-18T00:00:00" extract-class="INV" rate-billed="21.0" quantity-billed="13.0" amount="14688.6558" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="13.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="53.8046" extract-gkey="25003207" changer="hebahkamal" changed="2026-11-18T11:26:05" created="2026-11-18T11:26:05" creator="hebahkamal">
+      <taxes>
+        <tax amount="2056.4118120000003" created="2026-11-18T11:26:05" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="ZCSU4009618" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-10-17T04:53:15" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1345.115" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.8046" extract-gkey="25003212" created="2026-11-18T11:26:05" creator="hebahkamal">
+      <taxes>
+        <tax amount="188.3161" created="2026-11-18T11:26:05" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="ZIM PACIFIC" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="362W" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="ZIMUBCN10215328" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="ZIM PACIFIC" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="ZIM" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="ZIMUBCN10215328" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[zimubcn10215328]" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-10-17T04:00:00 +0200" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-11-18T00:00:00 +0200" />
+  </parameters>
+</invoice>
 </argo:snx>
 
