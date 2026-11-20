@@ -1,16 +1,17 @@
-const admin = require('firebase-admin');
+const { initializeApp, getApps, cert } = require('firebase-admin/app');
+const { getFirestore } = require('firebase-admin/firestore');
 
 function getFirestoreDb() {
   if (!process.env.FIREBASE_SERVICE_ACCOUNT) {
     throw new Error('متغير FIREBASE_SERVICE_ACCOUNT غير موجود في GitHub Secrets');
   }
-  if (!admin.apps.length) {
+  if (getApps().length === 0) {
     const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
-    admin.initializeApp({
-      credential: admin.credential.cert(serviceAccount)
+    initializeApp({
+      credential: cert(serviceAccount)
     });
   }
-  return admin.firestore();
+  return getFirestore();
 }
 
 async function fetchUsers() {
