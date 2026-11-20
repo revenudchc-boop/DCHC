@@ -2,13 +2,12 @@ name: مراقبة بيانات DCHC (Firestore)
 
 on:
   workflow_dispatch:
-  # بعد اختبار النظام والتأكد منه، يمكنك فك التعليق بالأسفل وإيقاف القديم:
-  # push:
-  #   paths:
-  #     - 'data/datatxt_Q*.txt'
-  #     - 'data/creditdata.txt'
-  #   branches:
-  #     - main
+  push:
+    paths:
+      - 'data/datatxt_Q*.txt'
+      - 'data/creditdata.txt'
+    branches:
+      - main
 
 permissions:
   contents: write
