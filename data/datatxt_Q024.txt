@@ -1,301 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <argo:snx xmlns:argo="http://www.navis.com/argo" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.navis.com/argo snx.xsd">
-<invoice draft-number="304755" final-number="P26-5081" finalized-date="2026-11-18T00:00:00" status="FINAL" is-merged="N" invoice-type-id="VSL IMPORT HANDLING EGP" currency="EGP" payee-customer-id="OCEAN NETWORK EXPRESS(EGYPT) FOR SHIPPING AGENCIES (EGP)" payee-customer-role="AGENT" contract-customer-id="ONE" contract-customer-role="LINEOP" total-charges="280739.1609" total-discounts="0.0" total-taxes="39303.4825" total-total="320042.6434" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="320042.6434" total-un-rounded="320042.6434" key-word1="JOHANNES MAERSK" key-word2="3G9A634S" key-word3="ONE" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="89" flex-string-04="JOHANNES MAERSK" flex-string-05="aelhalwagy" flex-string-06="53.5047" flex-string-10="5247.0" flex-date-02="2026-11-12T00:00:00" flex-date-03="2026-11-20T10:00:00" flex-long-03="89" created="2026-11-18T11:32:44" creator="hebahkamal" changed="2026-11-18T12:49:35" changer="aelhalwagy">
-  <charges>
-    <charge event-type-id="UNIT_DISCH" entity-id="CAIU9147123" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T13:45:05" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25215900" created="2026-11-18T11:32:51" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="TLLU6136916" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T17:34:32" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25218574" created="2026-11-18T11:32:51" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="KKFU7836460" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T13:21:16" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25215515" created="2026-11-18T11:32:51" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="DRYU6060313" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T16:03:10" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25217320" created="2026-11-18T11:32:51" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="TGBU4266904" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T13:12:08" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25215359" created="2026-11-18T11:32:51" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="ONEU4961614" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T13:34:35" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25215742" created="2026-11-18T11:32:51" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="TRHU5860874" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T13:09:20" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25215331" created="2026-11-18T11:32:51" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="ONEU5798395" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T16:00:34" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25217285" created="2026-11-18T11:32:51" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="TCLU4965000" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T16:38:38" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25217814" created="2026-11-18T11:32:51" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="ONEU4763199" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T16:53:13" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25218051" created="2026-11-18T11:32:51" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="ONEU5399800" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T17:33:23" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25218551" created="2026-11-18T11:32:51" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="BMOU1545080" tariff-id="DI20FD" description="DischargeImport20FullDry" event-performed-from="2026-11-12T16:42:12" extract-class="INV" rate-billed="99.0" quantity-billed="1.0" amount="5296.9653" is-flat-rate="Y" flat-rate-amount="99.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25217885" created="2026-11-18T11:32:51" creator="hebahkamal">
-      <taxes>
-        <tax amount="741.575142" created="2026-11-18T11:32:51" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="FDCU0595275" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T16:16:04" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25217495" created="2026-11-18T11:32:51" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="ONEU7375670" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T16:51:31" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25218019" created="2026-11-18T11:32:51" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="ONEU7389360" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T17:18:52" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25218362" created="2026-11-18T11:32:51" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="TLLU5596687" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T12:49:51" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25215075" created="2026-11-18T11:32:51" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="TIIU7478911" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T14:08:53" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25216317" created="2026-11-18T11:32:50" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:50" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="ONEU5933828" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T16:54:12" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25218078" created="2026-11-18T11:32:50" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:50" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="ONEU1413793" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T13:30:10" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25215673" created="2026-11-18T11:32:50" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:50" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="TEMU8823844" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T17:07:19" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25218222" created="2026-11-18T11:32:50" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:50" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="TCKU6475431" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T17:28:41" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25218481" created="2026-11-18T11:32:50" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:50" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="KKFU7975613" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T17:30:45" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25218515" created="2026-11-18T11:32:51" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="TRHU6482491" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T13:12:35" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25215368" created="2026-11-18T11:32:51" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="CAJU6305379" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T16:12:59" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25217458" created="2026-11-18T11:32:51" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="TCLU4547817" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T17:48:11" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25218705" created="2026-11-18T11:32:51" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="TLLU5506981" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T14:07:32" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25216289" created="2026-11-18T11:32:52" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:52" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-    <charge event-type-id="UNIT_DISCH" entity-id="ONEU1739500" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T16:18:36" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25217531" created="2026-11-18T11:32:52" creator="hebahkamal">
-      <taxes>
-        <tax amount="1483.150284" created="2026-11-18T11:32:52" creator="hebahkamal">
-          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
-        </tax>
-      </taxes>
-    </charge>
-  </charges>
-  <parameters>
-    <parameter metafield-id="bexuIbId" reportable-field="كود الرحله" value="3G9A634S" />
-    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" />
-    <parameter metafield-id="bexuLineOperatorId" reportable-field="الخط الملاحي" value="ONE" />
-    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="JOHANNES MAERSK" />
-    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="ONE" />
-    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-11-12T09:00:00 +0200" />
-    <parameter metafield-id="bexuIbId" reportable-field="IbId" value="3G9A634S" />
-  </parameters>
-</invoice>
-<invoice draft-number="304756" final-number="P26-5082" finalized-date="2026-11-18T00:00:00" status="FINAL" is-merged="N" invoice-type-id="VSL IMPORT AMOUNT COLLECTED TO OTHERS(DPA)" currency="EGP" payee-customer-id="OCEAN NETWORK EXPRESS(EGYPT) FOR SHIPPING AGENCIES (EGP)" payee-customer-role="AGENT" contract-customer-id="ONE" contract-customer-role="LINEOP" total-charges="3636.05" total-discounts="0.0" total-taxes="0.0" total-total="3636.05" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="3636.05" total-un-rounded="3636.05" key-word1="JOHANNES MAERSK" key-word2="3G9A634S" key-word3="ONE" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="90" flex-string-04="JOHANNES MAERSK" flex-string-05="aelhalwagy" flex-string-06="N/A" flex-string-10="3636.05" flex-date-02="2026-11-12T00:00:00" flex-date-03="2026-11-20T10:00:00" flex-long-03="90" created="2026-11-18T11:33:38" creator="hebahkamal" changed="2026-11-18T12:49:35" changer="aelhalwagy">
-  <charges>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="ONEU5399800" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T17:33:24" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25218553" created="2026-11-18T11:33:45" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="ONEU5798395" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T16:00:28" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25217286" created="2026-11-18T11:33:45" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="ONEU4763199" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T16:53:16" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25218053" created="2026-11-18T11:33:45" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="ONEU7389360" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T17:18:53" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25218364" created="2026-11-18T11:33:45" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="CAIU9147123" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T13:45:07" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25215902" created="2026-11-18T11:33:45" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="TIIU7478911" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T14:08:47" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25216319" created="2026-11-18T11:33:45" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="BMOU1545080" tariff-id="DPAAMIMPO20FIVAT26 " description="dpaammountimport20Fullinclude(vat)2026 " event-performed-from="2026-11-12T16:42:06" extract-class="INV" rate-billed="94.33" quantity-billed="1.0" amount="94.33" is-flat-rate="Y" flat-rate-amount="94.33" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25217887" created="2026-11-18T11:33:45" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="ONEU5933828" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T16:54:10" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25218080" created="2026-11-18T11:33:45" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="TCLU4547817" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T17:48:14" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25218707" created="2026-11-18T11:33:45" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="TLLU5506981" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T14:07:26" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25216291" created="2026-11-18T11:33:45" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="KKFU7975613" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T17:30:41" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25218517" created="2026-11-18T11:33:45" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="TLLU6136916" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T17:34:27" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25218576" created="2026-11-18T11:33:45" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="KKFU7836460" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T13:21:10" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25215517" created="2026-11-18T11:33:45" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="TCLU4965000" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T16:38:34" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25217816" created="2026-11-18T11:33:45" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="ONEU4961614" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T13:34:37" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25215744" created="2026-11-18T11:33:45" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="ONEU1413793" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T13:30:49" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25215675" created="2026-11-18T11:33:44" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="FDCU0595275" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T16:15:58" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25217497" created="2026-11-18T11:33:44" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="ONEU1739500" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T16:18:57" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25217533" created="2026-11-18T11:33:44" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="TCKU6475431" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T17:28:43" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25218483" created="2026-11-18T11:33:44" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="DRYU6060313" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T16:03:09" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25217322" created="2026-11-18T11:33:44" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="TEMU8823844" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T17:07:21" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25218224" created="2026-11-18T11:33:44" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="TGBU4266904" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T13:12:02" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25215361" created="2026-11-18T11:33:44" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="TRHU5860874" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T13:09:14" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25215333" created="2026-11-18T11:33:44" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="TLLU5596687" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T12:49:56" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25215077" created="2026-11-18T11:33:44" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="TRHU6482491" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T13:12:37" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25215370" created="2026-11-18T11:33:44" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="CAJU6305379" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T16:13:01" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25217460" created="2026-11-18T11:33:45" creator="hebahkamal">
-      <taxes />
-    </charge>
-    <charge event-type-id="OTHERS_AMOUNT" entity-id="ONEU7375670" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T16:51:32" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25218021" created="2026-11-18T11:33:45" creator="hebahkamal">
-      <taxes />
-    </charge>
-  </charges>
-  <parameters>
-    <parameter metafield-id="bexuLineOperatorId" reportable-field="الخط الملاحي" value="ONE" />
-    <parameter metafield-id="bexuIbId" reportable-field="كود الرحله" value="3G9A634S" />
-    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" />
-    <parameter metafield-id="bexuIbId" reportable-field="IbId" value="3G9A634S" />
-    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="JOHANNES MAERSK" />
-    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-11-12T09:00:00 +0200" />
-    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="ONE" />
-  </parameters>
-</invoice>
 <invoice draft-number="304757" final-number="P26-5073" finalized-date="2026-11-18T00:00:00" status="FINAL" is-merged="N" invoice-type-id="VSL TRANSIT CONTAINER HANDLING" currency="USAD" payee-customer-id="MAERSK EGYPT SHIPPING AGENCY(USAD)" payee-customer-role="AGENT" contract-customer-id="MSK" contract-customer-role="LINEOP" total-charges="132642.16" total-discounts="0.0" total-taxes="0.0" total-total="132642.16" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="132642.16" total-un-rounded="132642.16" key-word1="SAFEEN PROSPER" key-word2="52NK24" key-word3="MSK" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="26" flex-string-04="SAFEEN PROSPER" flex-string-05="eslamyousri" flex-string-06="55.732" flex-string-07="2380.0" flex-string-08="2380.0" flex-string-09="0.0" flex-string-10="2380.0" flex-date-01="2026-11-18T16:22:59" flex-date-02="2026-11-11T00:00:00" flex-date-03="2026-11-19T00:00:00" flex-long-03="26" created="2026-11-18T11:33:41" creator="MMOWAFI" changed="2026-11-18T12:42:46" changer="eslamyousri">
   <charges>
     <charge event-type-id="UNIT_DISCH" entity-id="MRKU9393176" tariff-id="DT20ED " description="DischargeTransshipment20EmptyDry " event-performed-from="2026-11-11T21:31:59" extract-class="INV" rate-billed="70.0" quantity-billed="1.0" amount="3901.24" is-flat-rate="Y" flat-rate-amount="70.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="55.732" extract-gkey="25203785" created="2026-11-18T11:33:55" creator="MMOWAFI">
@@ -116547,6 +116251,156 @@
     <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ تفريغ المشمول" />
     <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="ONE" />
     <parameter metafield-id="bexuEqId" reportable-field="ارقام الحاويات" />
+  </parameters>
+</invoice>
+<invoice draft-number="305815" final-number="C26-14431" finalized-date="2026-11-25T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="ELNAGAH FOR TRANSPORT (ADEL NAGAH HEZA )" payee-customer-role="AGENT" contract-customer-id="257095136" contract-customer-role="SHIPPER" total-charges="10753.2612" total-discounts="0.0" total-taxes="1505.4566" total-total="12258.7178" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="12258.7178" total-un-rounded="12258.7178" key-word1="EGY FUTURE" key-word2="QGD3498092" key-word3="CMA" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*5/12*" flex-string-04="EGY FUTURE" flex-string-05="mmosaad" flex-string-06="54.3094" flex-string-10="198.0" flex-date-02="2026-11-20T00:00:00" flex-date-03="2026-11-25T14:32:03" created="2026-11-25T14:27:18" creator="hebahkamal" changed="2026-11-25T14:32:02" changer="mmosaad">
+  <charges>
+    <charge event-type-id="STORAGE" entity-id="TRHU3101190" tariff-id="STORI20FD " description="تخزين وارد مازاد عن 5 أيام" paid-thru-day="2026-11-25T00:00:00" event-performed-from="2026-11-25T00:00:00" event-performed-to="2026-11-25T00:00:00" extract-class="INV" rate-billed="8.0" quantity-billed="1.0" amount="434.4752" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="1.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="54.3094" extract-gkey="25281992" changer="hebahkamal" changed="2026-11-25T14:27:39" created="2026-11-25T14:27:38" creator="hebahkamal">
+      <taxes>
+        <tax amount="60.826528" created="2026-11-25T14:27:38" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="TRHU3101190" tariff-id="OTSI20FD " description="خدمات اخري مؤداه للحاويه 20 " event-performed-from="2026-11-20T17:23:29" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1357.735" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="54.3094" extract-gkey="25281999" created="2026-11-25T14:27:39" creator="hebahkamal">
+      <taxes>
+        <tax amount="190.0829" created="2026-11-25T14:27:39" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="CAIU3801068" tariff-id="STORI20FD " description="تخزين وارد مازاد عن 5 أيام" paid-thru-day="2026-11-25T00:00:00" event-performed-from="2026-11-25T00:00:00" event-performed-to="2026-11-25T00:00:00" extract-class="INV" rate-billed="8.0" quantity-billed="1.0" amount="434.4752" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="1.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="54.3094" extract-gkey="25281519" changer="hebahkamal" changed="2026-11-25T14:27:39" created="2026-11-25T14:27:38" creator="hebahkamal">
+      <taxes>
+        <tax amount="60.826528" created="2026-11-25T14:27:38" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="CAIU3801068" tariff-id="OTSI20FD " description="خدمات اخري مؤداه للحاويه 20 " event-performed-from="2026-11-20T16:24:52" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1357.735" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="54.3094" extract-gkey="25281521" created="2026-11-25T14:27:38" creator="hebahkamal">
+      <taxes>
+        <tax amount="190.0829" created="2026-11-25T14:27:38" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="CMAU1059610" tariff-id="STORI20FD " description="تخزين وارد مازاد عن 5 أيام" paid-thru-day="2026-11-25T00:00:00" event-performed-from="2026-11-25T00:00:00" event-performed-to="2026-11-25T00:00:00" extract-class="INV" rate-billed="8.0" quantity-billed="1.0" amount="434.4752" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="1.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="54.3094" extract-gkey="25281531" changer="hebahkamal" changed="2026-11-25T14:27:39" created="2026-11-25T14:27:38" creator="hebahkamal">
+      <taxes>
+        <tax amount="60.826528" created="2026-11-25T14:27:38" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="CMAU1059610" tariff-id="OTSI20FD " description="خدمات اخري مؤداه للحاويه 20 " event-performed-from="2026-11-20T16:27:46" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1357.735" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="54.3094" extract-gkey="25281535" created="2026-11-25T14:27:38" creator="hebahkamal">
+      <taxes>
+        <tax amount="190.0829" created="2026-11-25T14:27:38" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="TLLU2097555" tariff-id="STORI20FD " description="تخزين وارد مازاد عن 5 أيام" paid-thru-day="2026-11-25T00:00:00" event-performed-from="2026-11-25T00:00:00" event-performed-to="2026-11-25T00:00:00" extract-class="INV" rate-billed="8.0" quantity-billed="1.0" amount="434.4752" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="1.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="54.3094" extract-gkey="25281931" changer="hebahkamal" changed="2026-11-25T14:27:39" created="2026-11-25T14:27:38" creator="hebahkamal">
+      <taxes>
+        <tax amount="60.826528" created="2026-11-25T14:27:38" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="TLLU2097555" tariff-id="OTSI20FD " description="خدمات اخري مؤداه للحاويه 20 " event-performed-from="2026-11-20T17:14:54" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1357.735" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="54.3094" extract-gkey="25281935" created="2026-11-25T14:27:38" creator="hebahkamal">
+      <taxes>
+        <tax amount="190.0829" created="2026-11-25T14:27:38" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="TEMU2927728" tariff-id="STORI20FD " description="تخزين وارد مازاد عن 5 أيام" paid-thru-day="2026-11-25T00:00:00" event-performed-from="2026-11-25T00:00:00" event-performed-to="2026-11-25T00:00:00" extract-class="INV" rate-billed="8.0" quantity-billed="1.0" amount="434.4752" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="1.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="54.3094" extract-gkey="25281939" changer="hebahkamal" changed="2026-11-25T14:27:39" created="2026-11-25T14:27:38" creator="hebahkamal">
+      <taxes>
+        <tax amount="60.826528" created="2026-11-25T14:27:38" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="TEMU2927728" tariff-id="OTSI20FD " description="خدمات اخري مؤداه للحاويه 20 " event-performed-from="2026-11-20T17:15:44" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1357.735" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="54.3094" extract-gkey="25281941" created="2026-11-25T14:27:38" creator="hebahkamal">
+      <taxes>
+        <tax amount="190.0829" created="2026-11-25T14:27:38" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="TTNU1125504" tariff-id="STORI20FD " description="تخزين وارد مازاد عن 5 أيام" paid-thru-day="2026-11-25T00:00:00" event-performed-from="2026-11-25T00:00:00" event-performed-to="2026-11-25T00:00:00" extract-class="INV" rate-billed="8.0" quantity-billed="1.0" amount="434.4752" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="1.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="54.3094" extract-gkey="25281950" changer="hebahkamal" changed="2026-11-25T14:27:39" created="2026-11-25T14:27:38" creator="hebahkamal">
+      <taxes>
+        <tax amount="60.826528" created="2026-11-25T14:27:38" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="TTNU1125504" tariff-id="OTSI20FD " description="خدمات اخري مؤداه للحاويه 20 " event-performed-from="2026-11-20T17:17:50" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1357.735" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="54.3094" extract-gkey="25281954" created="2026-11-25T14:27:38" creator="hebahkamal">
+      <taxes>
+        <tax amount="190.0829" created="2026-11-25T14:27:38" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="QGD3498092" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[qgd3498092]" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-11-20T14:15:00 +0200" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-11-25T00:00:00 +0200" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="EGY FUTURE" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="361" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="QGD3498092" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="EGY FUTURE" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="CMA" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+  </parameters>
+</invoice>
+<invoice draft-number="305816" final-number="C26-14432" finalized-date="2026-11-25T00:00:00" status="FINAL" is-merged="N" invoice-type-id="CUSTMER-CASH تحصيل نقدى عملاء بالجنيه" currency="EGP" payee-customer-id="SAB3 FOR TRANSPORT AND CUSTOMS CLEARANS" payee-customer-role="AGENT" contract-customer-id="250099217" contract-customer-role="SHIPPER" total-charges="15749.726" total-discounts="0.0" total-taxes="2204.9616" total-total="17954.6876" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="17954.6876" total-un-rounded="17954.6876" key-word1="VAYENGA MAERSK" key-word2="279438717" key-word3="MSK" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="*26/11*" flex-string-04="VAYENGA MAERSK" flex-string-05="mmosaad" flex-string-06="54.3094" flex-string-10="290.0" flex-date-02="2026-11-04T00:00:00" flex-date-03="2026-11-25T14:33:21" created="2026-11-25T14:31:48" creator="zinabsamir" changed="2026-11-25T14:33:20" changer="mmosaad">
+  <charges>
+    <charge event-type-id="STORAGE" entity-id="MRSU3412559" tariff-id="STORI40FD " description="تخزين مازاد عن 5 أيام 40 قدم" paid-thru-day="2026-11-25T00:00:00" event-performed-from="2026-11-09T00:00:00" event-performed-to="2026-11-23T00:00:00" extract-class="INV" rate-billed="14.0" quantity-billed="15.0" amount="11404.974" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="15.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="54.3094" extract-gkey="25142424" changer="zinabsamir" changed="2026-11-25T14:32:06" created="2026-11-25T14:32:05" creator="zinabsamir">
+      <taxes>
+        <tax amount="1596.6963600000001" created="2026-11-25T14:32:06" creator="zinabsamir">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="STORAGE" entity-id="MRSU3412559" tariff-id="STORI40FD " description="تخزين مازاد عن 20 يوم 40 قدم" paid-thru-day="2026-11-25T00:00:00" event-performed-from="2026-11-24T00:00:00" event-performed-to="2026-11-25T00:00:00" extract-class="INV" rate-billed="21.0" quantity-billed="2.0" amount="2280.9948" is-flat-rate="N" flat-rate-amount="0.0" rate-min-amount="0.0" rate-max-amount="0.0" quantity="2.0" quantity-unit="ITEMS" qty-divisor="1.0" exchange-rate="54.3094" extract-gkey="25142424" changer="zinabsamir" changed="2026-11-25T14:32:06" created="2026-11-25T14:32:06" creator="zinabsamir">
+      <taxes>
+        <tax amount="319.339272" created="2026-11-25T14:32:06" creator="zinabsamir">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="OTHERS_SERVICES" entity-id="MRSU3412559" tariff-id="OTSI40FD " description="خدمات اخري مؤداه للحاويه40 " event-performed-from="2026-11-04T08:39:02" extract-class="INV" rate-billed="25.0" quantity-billed="1.0" amount="1357.735" is-flat-rate="Y" flat-rate-amount="25.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="54.3094" extract-gkey="25142430" created="2026-11-25T14:32:06" creator="zinabsamir">
+      <taxes>
+        <tax amount="190.0829" created="2026-11-25T14:32:06" creator="zinabsamir">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="RENT_3_TON" entity-id="MRSU3412559" tariff-id="RENT3TON" description="كشف ومعاينه ونش 3 طن" event-performed-from="2026-11-12T11:05:08" extract-class="INV" rate-billed="13.0" quantity-billed="1.0" amount="706.0222" is-flat-rate="Y" flat-rate-amount="13.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="54.3094" extract-gkey="25213206" created="2026-11-25T14:32:06" creator="zinabsamir">
+      <taxes>
+        <tax amount="98.84310800000002" created="2026-11-25T14:32:06" creator="zinabsamir">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuFlexString03" reportable-field="بوالص مجمعه" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" value="[279438717]" />
+    <parameter metafield-id="bexuPaidThruDay" reportable-field="تاريخ التسليم" value="2026-11-25T00:00:00 +0200" />
+    <parameter metafield-id="bexuEqId" reportable-field="Container Nbr:" />
+    <parameter metafield-id="bexuIbVisitId" reportable-field="I/B Visit ID" value="642S" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-11-04T04:45:00 +0200" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="I/B Carrier Name" value="VAYENGA MAERSK" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="VAYENGA MAERSK" />
+    <parameter metafield-id="bexuServiceOrder" reportable-field="Service Order" value="" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BLNbr" value="279438717" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="BL Number" value="279438717" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="MSK" />
+    <parameter metafield-id="bexuFlexString01" reportable-field="FlexString01" />
   </parameters>
 </invoice>
 <invoice draft-number="303719" final-number="P26-4879" finalized-date="2026-11-16T00:00:00" status="FINAL" is-merged="N" invoice-type-id="VSL TRANSIT RESTOW INVOICE (LINE OP)" currency="USAD" payee-customer-id="MAERSK EGYPT SHIPPING AGENCY(USAD)" payee-customer-role="AGENT" contract-customer-id="MSK" contract-customer-role="LINEOP" total-charges="19227.54" total-discounts="0.0" total-taxes="0.0" total-total="19227.54" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="19227.54" total-un-rounded="19227.54" key-word1="ATHENA" key-word2="6JAY96" key-word3="MSK" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="18" flex-string-04="ATHENA" flex-string-05="ESLAMYOUSRI" flex-string-06="55.732" flex-string-07="345.0" flex-string-08="345.0" flex-string-09="0.0" flex-string-10="345.0" flex-date-02="2026-11-05T00:00:00" flex-date-03="2026-11-16T10:57:32" flex-long-03="18" created="2026-11-12T10:53:23" creator="MMOWAFI" changed="2026-11-17T13:14:40" changer="asaad">
@@ -269822,6 +269676,302 @@
     <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="ONE" />
     <parameter metafield-id="bexuObCarrierName" reportable-field="ObCarrierName" value="JOHANNES MAERSK" />
     <parameter metafield-id="bexuObCarrierATA" reportable-field="ObCarrierATA" value="2026-11-12T10:00:00 +0200" />
+  </parameters>
+</invoice>
+<invoice draft-number="304755" final-number="P26-5081" finalized-date="2026-11-18T00:00:00" status="FINAL" is-merged="N" invoice-type-id="VSL IMPORT HANDLING EGP" currency="EGP" payee-customer-id="OCEAN NETWORK EXPRESS(EGYPT) FOR SHIPPING AGENCIES (EGP)" payee-customer-role="AGENT" contract-customer-id="ONE" contract-customer-role="LINEOP" total-charges="280739.1609" total-discounts="0.0" total-taxes="39303.4825" total-total="320042.6434" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="320042.6434" total-un-rounded="320042.6434" key-word1="JOHANNES MAERSK" key-word2="3G9A634S" key-word3="ONE" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="89" flex-string-04="JOHANNES MAERSK" flex-string-05="aelhalwagy" flex-string-06="53.5047" flex-string-10="5247.0" flex-date-02="2026-11-12T00:00:00" flex-date-03="2026-11-20T10:00:00" flex-long-03="89" created="2026-11-18T11:32:44" creator="hebahkamal" changed="2026-11-18T12:49:35" changer="aelhalwagy">
+  <charges>
+    <charge event-type-id="UNIT_DISCH" entity-id="CAIU9147123" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T13:45:05" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25215900" created="2026-11-18T11:32:51" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="TLLU6136916" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T17:34:32" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25218574" created="2026-11-18T11:32:51" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="KKFU7836460" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T13:21:16" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25215515" created="2026-11-18T11:32:51" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="DRYU6060313" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T16:03:10" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25217320" created="2026-11-18T11:32:51" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="TGBU4266904" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T13:12:08" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25215359" created="2026-11-18T11:32:51" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="ONEU4961614" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T13:34:35" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25215742" created="2026-11-18T11:32:51" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="TRHU5860874" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T13:09:20" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25215331" created="2026-11-18T11:32:51" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="ONEU5798395" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T16:00:34" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25217285" created="2026-11-18T11:32:51" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="TCLU4965000" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T16:38:38" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25217814" created="2026-11-18T11:32:51" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="ONEU4763199" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T16:53:13" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25218051" created="2026-11-18T11:32:51" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="ONEU5399800" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T17:33:23" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25218551" created="2026-11-18T11:32:51" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="BMOU1545080" tariff-id="DI20FD" description="DischargeImport20FullDry" event-performed-from="2026-11-12T16:42:12" extract-class="INV" rate-billed="99.0" quantity-billed="1.0" amount="5296.9653" is-flat-rate="Y" flat-rate-amount="99.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25217885" created="2026-11-18T11:32:51" creator="hebahkamal">
+      <taxes>
+        <tax amount="741.575142" created="2026-11-18T11:32:51" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="FDCU0595275" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T16:16:04" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25217495" created="2026-11-18T11:32:51" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="ONEU7375670" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T16:51:31" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25218019" created="2026-11-18T11:32:51" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="ONEU7389360" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T17:18:52" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25218362" created="2026-11-18T11:32:51" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="TLLU5596687" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T12:49:51" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25215075" created="2026-11-18T11:32:51" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="TIIU7478911" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T14:08:53" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25216317" created="2026-11-18T11:32:50" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:50" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="ONEU5933828" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T16:54:12" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25218078" created="2026-11-18T11:32:50" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:50" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="ONEU1413793" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T13:30:10" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25215673" created="2026-11-18T11:32:50" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:50" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="TEMU8823844" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T17:07:19" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25218222" created="2026-11-18T11:32:50" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:50" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="TCKU6475431" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T17:28:41" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25218481" created="2026-11-18T11:32:50" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:50" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="KKFU7975613" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T17:30:45" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25218515" created="2026-11-18T11:32:51" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="TRHU6482491" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T13:12:35" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25215368" created="2026-11-18T11:32:51" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="CAJU6305379" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T16:12:59" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25217458" created="2026-11-18T11:32:51" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="TCLU4547817" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T17:48:11" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25218705" created="2026-11-18T11:32:51" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:51" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="TLLU5506981" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T14:07:32" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25216289" created="2026-11-18T11:32:52" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:52" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+    <charge event-type-id="UNIT_DISCH" entity-id="ONEU1739500" tariff-id="DI40FD" description="DischargeImport40FullDry" event-performed-from="2026-11-12T16:18:36" extract-class="INV" rate-billed="198.0" quantity-billed="1.0" amount="10593.9306" is-flat-rate="Y" flat-rate-amount="198.0" quantity="1.0" quantity-unit="ITEMS" exchange-rate="53.5047" extract-gkey="25217531" created="2026-11-18T11:32:52" creator="hebahkamal">
+      <taxes>
+        <tax amount="1483.150284" created="2026-11-18T11:32:52" creator="hebahkamal">
+          <tax-rate effective-date="2015-01-01T00:00:00" rate="0.14" tax-id="SALES TAX" facility-id="DPA" facility-name="DPA" created="2016-04-12T14:35:47" creator="admin" changer="admin" changed="2018-05-23T10:38:13" />
+        </tax>
+      </taxes>
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuIbId" reportable-field="كود الرحله" value="3G9A634S" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="الخط الملاحي" value="ONE" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="JOHANNES MAERSK" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="ONE" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-11-12T09:00:00 +0200" />
+    <parameter metafield-id="bexuIbId" reportable-field="IbId" value="3G9A634S" />
+  </parameters>
+</invoice>
+<invoice draft-number="304756" final-number="P26-5082" finalized-date="2026-11-18T00:00:00" status="FINAL" is-merged="N" invoice-type-id="VSL IMPORT AMOUNT COLLECTED TO OTHERS(DPA)" currency="EGP" payee-customer-id="OCEAN NETWORK EXPRESS(EGYPT) FOR SHIPPING AGENCIES (EGP)" payee-customer-role="AGENT" contract-customer-id="ONE" contract-customer-role="LINEOP" total-charges="3636.05" total-discounts="0.0" total-taxes="0.0" total-total="3636.05" total-credits="0.0" total-credit-taxes="0.0" total-paid="0.0" total-owed="3636.05" total-un-rounded="3636.05" key-word1="JOHANNES MAERSK" key-word2="3G9A634S" key-word3="ONE" facility-id="DPA" facility-name="DPA" flex-string-02="t" flex-string-03="90" flex-string-04="JOHANNES MAERSK" flex-string-05="aelhalwagy" flex-string-06="N/A" flex-string-10="3636.05" flex-date-02="2026-11-12T00:00:00" flex-date-03="2026-11-20T10:00:00" flex-long-03="90" created="2026-11-18T11:33:38" creator="hebahkamal" changed="2026-11-18T12:49:35" changer="aelhalwagy">
+  <charges>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="ONEU5399800" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T17:33:24" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25218553" created="2026-11-18T11:33:45" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="ONEU5798395" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T16:00:28" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25217286" created="2026-11-18T11:33:45" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="ONEU4763199" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T16:53:16" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25218053" created="2026-11-18T11:33:45" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="ONEU7389360" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T17:18:53" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25218364" created="2026-11-18T11:33:45" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="CAIU9147123" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T13:45:07" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25215902" created="2026-11-18T11:33:45" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="TIIU7478911" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T14:08:47" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25216319" created="2026-11-18T11:33:45" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="BMOU1545080" tariff-id="DPAAMIMPO20FIVAT26 " description="dpaammountimport20Fullinclude(vat)2026 " event-performed-from="2026-11-12T16:42:06" extract-class="INV" rate-billed="94.33" quantity-billed="1.0" amount="94.33" is-flat-rate="Y" flat-rate-amount="94.33" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25217887" created="2026-11-18T11:33:45" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="ONEU5933828" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T16:54:10" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25218080" created="2026-11-18T11:33:45" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="TCLU4547817" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T17:48:14" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25218707" created="2026-11-18T11:33:45" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="TLLU5506981" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T14:07:26" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25216291" created="2026-11-18T11:33:45" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="KKFU7975613" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T17:30:41" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25218517" created="2026-11-18T11:33:45" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="TLLU6136916" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T17:34:27" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25218576" created="2026-11-18T11:33:45" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="KKFU7836460" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T13:21:10" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25215517" created="2026-11-18T11:33:45" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="TCLU4965000" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T16:38:34" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25217816" created="2026-11-18T11:33:45" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="ONEU4961614" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T13:34:37" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25215744" created="2026-11-18T11:33:45" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="ONEU1413793" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T13:30:49" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25215675" created="2026-11-18T11:33:44" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="FDCU0595275" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T16:15:58" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25217497" created="2026-11-18T11:33:44" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="ONEU1739500" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T16:18:57" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25217533" created="2026-11-18T11:33:44" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="TCKU6475431" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T17:28:43" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25218483" created="2026-11-18T11:33:44" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="DRYU6060313" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T16:03:09" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25217322" created="2026-11-18T11:33:44" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="TEMU8823844" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T17:07:21" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25218224" created="2026-11-18T11:33:44" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="TGBU4266904" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T13:12:02" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25215361" created="2026-11-18T11:33:44" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="TRHU5860874" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T13:09:14" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25215333" created="2026-11-18T11:33:44" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="TLLU5596687" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T12:49:56" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25215077" created="2026-11-18T11:33:44" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="TRHU6482491" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T13:12:37" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25215370" created="2026-11-18T11:33:44" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="CAJU6305379" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T16:13:01" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25217460" created="2026-11-18T11:33:45" creator="hebahkamal">
+      <taxes />
+    </charge>
+    <charge event-type-id="OTHERS_AMOUNT" entity-id="ONEU7375670" tariff-id="DPAAMIMPO40FIVAT26 " description="dpaammountimport40Fullinclude(vat)2026 " event-performed-from="2026-11-12T16:51:32" extract-class="INV" rate-billed="136.22" quantity-billed="1.0" amount="136.22" is-flat-rate="Y" flat-rate-amount="136.22" quantity="1.0" quantity-unit="ITEMS" extract-gkey="25218021" created="2026-11-18T11:33:45" creator="hebahkamal">
+      <taxes />
+    </charge>
+  </charges>
+  <parameters>
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="الخط الملاحي" value="ONE" />
+    <parameter metafield-id="bexuIbId" reportable-field="كود الرحله" value="3G9A634S" />
+    <parameter metafield-id="bexuBlNbr" reportable-field="رقم البوليصه" />
+    <parameter metafield-id="bexuIbId" reportable-field="IbId" value="3G9A634S" />
+    <parameter metafield-id="bexuIbCarrierName" reportable-field="IbCarrierName" value="JOHANNES MAERSK" />
+    <parameter metafield-id="bexuIbCarrierATA" reportable-field="IbCarrierATA" value="2026-11-12T09:00:00 +0200" />
+    <parameter metafield-id="bexuLineOperatorId" reportable-field="LineOperatorId" value="ONE" />
   </parameters>
 </invoice>
 </argo:snx>
